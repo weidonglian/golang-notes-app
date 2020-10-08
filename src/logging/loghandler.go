@@ -21,8 +21,9 @@ func newStructuredLogger() func(next http.Handler) http.Handler {
 	// configure the backend at github.com/sirupsen/logrus
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
-		DisableColors: true,
-		FullTimestamp: true,
+		DisableColors: false,
+		//FullTimestamp: true,
+		DisableTimestamp: true,
 	})
 	/* logger.Formatter = &logrus.JSONFormatter{
 		// disable, as we set our own
