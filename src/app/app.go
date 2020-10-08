@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/weidonglian/golang-notes-app/src/handlers"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/weidonglian/golang-notes-app/src/logging"
@@ -31,17 +33,9 @@ func (a *App) Serve() {
 		w.Write([]byte("welcome"))
 	})
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
-	r.Get("/wait", func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(1 * time.Second)
-		logging.LogEntrySetField(r, "wait", true)
-		w.Write([]byte("hi"))
-	})
-	r.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
-		panic("oops")
-	})
+	r.Mount("/todos", handlers.NewTodos().Routes())
+	r.Mount("/users", handlers.NewUsers().Routes())
+	r.Mount("/notes", handlers.NewNotes().Routes())
 
 	http.ListenAndServe(":3000", r)
 }
