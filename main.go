@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/weidonglian/golang-notes-app/src/app"
+	"github.com/weidonglian/golang-notes-app/app"
 )
 
 func main() {

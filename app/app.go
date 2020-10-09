@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/weidonglian/golang-notes-app/src/handlers"
+	"github.com/weidonglian/golang-notes-app/handlers"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/weidonglian/golang-notes-app/src/logging"
+	"github.com/weidonglian/golang-notes-app/logging"
 )
 
 // App is the main application.
