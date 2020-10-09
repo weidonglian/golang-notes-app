@@ -1,15 +1,18 @@
 package main
 
 import (
-	"log"
-
 	"github.com/weidonglian/golang-notes-app/app"
+	"github.com/weidonglian/golang-notes-app/logging"
 )
 
 func main() {
-	app, err := app.NewApp()
+
+	logger := logging.NewLogger()
+
+	app, err := app.NewApp(logger)
+
 	if err != nil {
-		log.Print("Failed to create App")
+		logger.Error("Failed to create the main app")
 		return
 	}
 

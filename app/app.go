@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/containerd/containerd/services/server/config"
-
 	"github.com/sirupsen/logrus"
 
 	"github.com/weidonglian/golang-notes-app/config"
@@ -22,7 +20,7 @@ import (
 type App struct {
 	logger *logrus.Logger
 	config config.Config
-	store  *store.Store
+	store  store.Store
 }
 
 // Serve is the core serve http
@@ -47,13 +45,25 @@ func (a *App) Serve() {
 	r.Mount("/users", handlers.NewUsers().Routes())
 	r.Mount("/notes", handlers.NewNotes().Routes())
 
-	port := a.config.ServicePort
-	addr := fmt.Sprintf(":%v", port)
+	addr := fmt.Sprintf(":%v", a.config.ServerPort)
 	a.logger.Infof("Listening on addr %v", addr)
 	http.ListenAndServe(addr, r)
 }
 
 // NewApp create the main application
-func NewApp() (*App, error) {
-	return &App{logging.NewLogger(), config.NewConfig(), store.NewStore()}, nil
+func NewApp(logger *logrus.Logger) (*App, error) {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	store, err := store.NewStore(cfg, logger)
+	if err != nil {
+		return nil, err
+	}
+	return &App{
+		logger: logger,
+		config: cfg,
+		store:  store,
+	}, nil
 }

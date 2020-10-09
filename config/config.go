@@ -11,8 +11,8 @@ type PostgresConfig struct {
 	Port           int    `default:"5432" envconfig:"POSTGRES_PORT"`
 	Username       string `default:"postgres" envconfig:"POSTGRES_USERNAME"`
 	Password       string `default:"postgres" envconfig:"POSTGRES_PASSWORD"`
-	DBName         string `default:"notes_app_dev" envconfig:"POSTGRES_DBNAME"`
-	MigrationsPath string `default:"./migrations" envconfig:"POSTGRES_MIGRATIONS_PATH"`
+	DBName         string `default:"postgres" envconfig:"POSTGRES_DBNAME"`
+	MigrationsPath string `default:"./db/migrations" envconfig:"POSTGRES_MIGRATIONS_PATH"`
 }
 
 func (c PostgresConfig) GetDataSourceName() string {
