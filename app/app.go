@@ -5,9 +5,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/containerd/containerd/services/server/config"
+
 	"github.com/sirupsen/logrus"
 
+	"github.com/weidonglian/golang-notes-app/config"
 	"github.com/weidonglian/golang-notes-app/handlers"
+	"github.com/weidonglian/golang-notes-app/store"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -17,6 +21,8 @@ import (
 // App is the main application.
 type App struct {
 	logger *logrus.Logger
+	config config.Config
+	store  *store.Store
 }
 
 // Serve is the core serve http
@@ -41,7 +47,7 @@ func (a *App) Serve() {
 	r.Mount("/users", handlers.NewUsers().Routes())
 	r.Mount("/notes", handlers.NewNotes().Routes())
 
-	port := 3000
+	port := a.config.ServicePort
 	addr := fmt.Sprintf(":%v", port)
 	a.logger.Infof("Listening on addr %v", addr)
 	http.ListenAndServe(addr, r)
@@ -49,18 +55,5 @@ func (a *App) Serve() {
 
 // NewApp create the main application
 func NewApp() (*App, error) {
-	// Setup the logger backend using sirupsen/logrus and configure
-	// it to use a custom JSONFormatter. See the logrus docs for how to
-	// configure the backend at github.com/sirupsen/logrus
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{
-		DisableColors: false,
-		//FullTimestamp: true,
-		DisableTimestamp: true,
-	})
-	/* logger.Formatter = &logrus.JSONFormatter{
-		// disable, as we set our own
-		DisableTimestamp: true,
-	}*/
-	return &App{logger}, nil
+	return &App{logging.NewLogger(), config.NewConfig(), store.NewStore()}, nil
 }
