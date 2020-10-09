@@ -1,8 +1,11 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/weidonglian/golang-notes-app/handlers"
 
@@ -13,6 +16,7 @@ import (
 
 // App is the main application.
 type App struct {
+	logger *logrus.Logger
 }
 
 // Serve is the core serve http
@@ -22,7 +26,7 @@ func (a *App) Serve() {
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(logging.LogHandler)
+	r.Use(logging.NewStructuredLogger(a.logger))
 	r.Use(middleware.Recoverer)
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
@@ -37,10 +41,26 @@ func (a *App) Serve() {
 	r.Mount("/users", handlers.NewUsers().Routes())
 	r.Mount("/notes", handlers.NewNotes().Routes())
 
-	http.ListenAndServe(":3000", r)
+	port := 3000
+	addr := fmt.Sprintf(":%v", port)
+	a.logger.Infof("Listening on addr %v", addr)
+	http.ListenAndServe(addr, r)
 }
 
 // NewApp create the main application
 func NewApp() (*App, error) {
-	return &App{}, nil
+	// Setup the logger backend using sirupsen/logrus and configure
+	// it to use a custom JSONFormatter. See the logrus docs for how to
+	// configure the backend at github.com/sirupsen/logrus
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableColors: false,
+		//FullTimestamp: true,
+		DisableTimestamp: true,
+	})
+	/* logger.Formatter = &logrus.JSONFormatter{
+		// disable, as we set our own
+		DisableTimestamp: true,
+	}*/
+	return &App{logger}, nil
 }

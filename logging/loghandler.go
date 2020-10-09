@@ -9,26 +9,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var LogHandler = newStructuredLogger()
-
 // StructuredLogger is a simple, but powerful implementation of a custom structured
 // logger backed on logrus. I encourage users to copy it, adapt it and make it their
 // own. Also take a look at https://github.com/pressly/lg for a dedicated pkg based
 // on this work, designed for context-based http routers.
-func newStructuredLogger() func(next http.Handler) http.Handler {
-	// Setup the logger backend using sirupsen/logrus and configure
-	// it to use a custom JSONFormatter. See the logrus docs for how to
-	// configure the backend at github.com/sirupsen/logrus
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{
-		DisableColors: false,
-		//FullTimestamp: true,
-		DisableTimestamp: true,
-	})
-	/* logger.Formatter = &logrus.JSONFormatter{
-		// disable, as we set our own
-		DisableTimestamp: true,
-	}*/
+func NewStructuredLogger(logger *logrus.Logger) func(next http.Handler) http.Handler {
+
 	return middleware.RequestLogger(&StructuredLogger{logger})
 }
 
