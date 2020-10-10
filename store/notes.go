@@ -5,28 +5,28 @@ import (
 )
 
 type Notes interface {
-	Get(id int) (model.Note, error)
+	Get(id int) (*model.Note, error)
 	Create(note model.Note) (string, error)
 	Update(note model.Note) error
 }
 
-type Impl struct {
+type implNotes struct {
 }
 
-func (impl *Impl) Get(id int) (model.Note, error) {
-
+func (impl *implNotes) Get(id int) (*model.Note, error) {
+	return nil, nil
 }
 
-func (impl *Impl) Create(note model.Note) (string, error) {
-
+func (impl *implNotes) Create(note model.Note) (string, error) {
+	return "", nil
 }
 
-func (impl *Impl) Update(note model.Note) error {
-
+func (impl *implNotes) Update(note model.Note) error {
+	return nil
 }
 
-var _ Notes = (*Impl)(nil)
+var _ Notes = (*implNotes)(nil)
 
 func NewNotes(ctx *StoreContext) Notes {
-	return &Impl{}
+	return &implNotes{}
 }

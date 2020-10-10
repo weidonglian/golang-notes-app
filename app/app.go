@@ -7,12 +7,14 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/weidonglian/golang-notes-app/auth"
 	"github.com/weidonglian/golang-notes-app/config"
 	"github.com/weidonglian/golang-notes-app/handlers"
 	"github.com/weidonglian/golang-notes-app/store"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 	"github.com/weidonglian/golang-notes-app/logging"
 )
 
@@ -20,7 +22,8 @@ import (
 type App struct {
 	logger *logrus.Logger
 	config config.Config
-	store  store.Store
+	store  *store.Store
+	auth   auth.Auth
 }
 
 // Serve is the core serve http
@@ -32,19 +35,32 @@ func (a *App) Serve() {
 	r.Use(middleware.RealIP)
 	r.Use(logging.NewStructuredLogger(a.logger))
 	r.Use(middleware.Recoverer)
-	//r.Use(render.SetContentType(render.ContentTypeJSON)) // force response type with json
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hi, hello!"))
-	})
-	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("pong"))
+	sessionHandler := handlers.NewSessionHandler()
+	// public routes and no auth required
+	r.Group(func(r chi.Router) {
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("hi, hello!"))
+		})
+		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("pong"))
+		})
+		r.Post("/session", sessionHandler.NewSession) // i.e. login
 	})
 
-	r.Mount("/todos", handlers.NewTodos().Routes())
-	r.Mount("/users", handlers.NewUsers().Routes())
-	r.Mount("/notes", handlers.NewNotes().Routes())
+	// Protected routes and auth required
+	r.Group(func(r chi.Router) {
+		// middlewares for protected routes
+		r.Use(a.auth.Verifier())
+		r.Use(a.auth.Authenticator())
+		r.Use(render.SetContentType(render.ContentTypeJSON)) // force response type with json
+
+		r.Delete("/session", sessionHandler.DeleteSession) // i.e. logout
+		r.Mount("/todos", handlers.NewTodosHandler().Routes())
+		r.Mount("/users", handlers.NewUsersHandler().Routes())
+		r.Mount("/notes", handlers.NewNotesHandler().Routes())
+	})
 
 	addr := fmt.Sprintf(":%v", a.config.ServerPort)
 	a.logger.Infof("Listening on addr %v", addr)
@@ -60,13 +76,14 @@ func NewApp(logger *logrus.Logger) (*App, error) {
 		return nil, err
 	}
 
-	store, err := store.NewStore(cfg, logger)
+	//store, err := store.NewStore(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
 	return &App{
 		logger: logger,
 		config: cfg,
-		store:  store,
+		store:  nil,
+		auth:   auth.NewAuth(cfg),
 	}, nil
 }

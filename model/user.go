@@ -7,8 +7,8 @@ type User struct {
 	Username  string    `db:"user_name" json:"username"`
 	Password  string    `db:"user_password" json:"password"`
 	Role      string    `db:"user_role" json:"role"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
+	CreatedAt time.Time `db:"user_created_at" json:"createdAt"`
+	UpdatedAt time.Time `db:"user_updated_at" json:"updatedAt"`
 }
 
 func NewUser() User {

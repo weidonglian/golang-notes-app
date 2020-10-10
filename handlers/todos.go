@@ -8,7 +8,7 @@ import (
 
 type TodosHandler struct{}
 
-func NewTodos() TodosHandler {
+func NewTodosHandler() TodosHandler {
 	return TodosHandler{}
 }
 

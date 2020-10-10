@@ -8,7 +8,7 @@ import (
 
 type NotesHandler struct{}
 
-func NewNotes() NotesHandler {
+func NewNotesHandler() NotesHandler {
 	return NotesHandler{}
 }
 

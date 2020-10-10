@@ -27,6 +27,7 @@ type Config struct {
 	Postgres   PostgresConfig
 	ServerPort string `default:"4000" envconfig:"SERVER_PORT"`
 	RunEnv     string `default:"" envconfig:"RUN_ENV"`
+	JWTSecret  string `default:"MaPoDouFu" envconfig:"JWT_SECRET"`
 }
 
 var current *Config

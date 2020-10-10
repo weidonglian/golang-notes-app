@@ -8,7 +8,7 @@ import (
 
 type UsersHandler struct{}
 
-func NewUsers() UsersHandler {
+func NewUsersHandler() UsersHandler {
 	return UsersHandler{}
 }
 
@@ -20,6 +20,8 @@ func (h UsersHandler) Routes() chi.Router {
 	r.Get("/", h.List)    // GET /users - read a list of users
 	r.Post("/", h.Create) // POST /users - create a new user and pehist it
 	r.Put("/", h.Delete)
+	r.Post("/password", h.ChangePassword)
+	r.Post("/new", h.NewUser) // /users/new - signup
 
 	r.Route("/{id}", func(r chi.Router) {
 		// r.Use(h.UserCtx) // lets have a users map, and lets actually load/manipulate
@@ -49,4 +51,12 @@ func (h UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("user delete"))
+}
+
+func (h UsersHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("change password"))
+}
+
+func (h UsersHandler) NewUser(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("NewUser"))
 }
