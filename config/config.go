@@ -15,7 +15,7 @@ type PostgresConfig struct {
 	MigrationsPath string `default:"./db/migrations" envconfig:"POSTGRES_MIGRATIONS_PATH"`
 }
 
-func (c PostgresConfig) GetDataSourceName() string {
+func (c PostgresConfig) GetDBDataSource() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.Username, c.Password, c.DBName)
 }
 

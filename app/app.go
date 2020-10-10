@@ -32,13 +32,14 @@ func (a *App) Serve() {
 	r.Use(middleware.RealIP)
 	r.Use(logging.NewStructuredLogger(a.logger))
 	r.Use(middleware.Recoverer)
-	// Set a timeout value on the request context (ctx), that will signal
-	// through ctx.Done() that the request has timed out and further
-	// processing should be stopped.
+	//r.Use(render.SetContentType(render.ContentTypeJSON)) // force response type with json
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
+		w.Write([]byte("hi, hello!"))
+	})
+	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("pong"))
 	})
 
 	r.Mount("/todos", handlers.NewTodos().Routes())
@@ -47,7 +48,9 @@ func (a *App) Serve() {
 
 	addr := fmt.Sprintf(":%v", a.config.ServerPort)
 	a.logger.Infof("Listening on addr %v", addr)
-	http.ListenAndServe(addr, r)
+	if err := http.ListenAndServe(addr, r); err != nil {
+		a.logger.Fatal(err)
+	}
 }
 
 // NewApp create the main application

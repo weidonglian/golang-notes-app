@@ -23,9 +23,9 @@ func (h NotesHandler) Routes() chi.Router {
 
 	r.Route("/{id}", func(r chi.Router) {
 		// r.Use(h.NoteCtx) // lets have a notes map, and lets actually load/manipulate
-		r.Get("/", h.Get)       // GET /notes/{id} - read a single note by :id
-		r.Put("/", h.Update)    // PUT /notes/{id} - update a single note by :id
-		r.Delete("/", h.Delete) // DELETE /notes/{id} - delete a single note by :id
+		r.Get("/", h.GetByID)       // GET /notes/{id} - read a single note by :id
+		r.Put("/", h.Update)        // PUT /notes/{id} - update a single note by :id
+		r.Delete("/", h.DeleteByID) // DELETE /notes/{id} - delete a single note by :id
 	})
 
 	return r
@@ -39,7 +39,7 @@ func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("notes create"))
 }
 
-func (h NotesHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (h NotesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("note get"))
 }
 
@@ -48,5 +48,9 @@ func (h NotesHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h NotesHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("note delete"))
+}
+
+func (h NotesHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("note delete"))
 }

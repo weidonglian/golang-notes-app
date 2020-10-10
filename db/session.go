@@ -15,7 +15,7 @@ type Session struct {
 
 func NewSession(logger *logrus.Logger, cfg config.Config) (*Session, error) {
 	logger.Info("Connecting to database")
-	conn, err := sqlx.Connect("postgres", cfg.Postgres.GetDataSourceName())
+	conn, err := sqlx.Connect("postgres", cfg.Postgres.GetDBDataSource())
 	if err != nil {
 		return nil, err
 	}
