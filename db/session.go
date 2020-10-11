@@ -9,8 +9,17 @@ import (
 )
 
 type Session struct {
-	conn   *sqlx.DB
-	logger *logrus.Logger
+	db     *sqlx.DB
+	Logger *logrus.Logger
+}
+
+func (sess Session) GetDB() *sqlx.DB {
+	return sess.db
+}
+
+// Close closes the database, freeing up any resources.
+func (sess Session) Close() {
+	sess.db.Close()
 }
 
 func NewSession(logger *logrus.Logger, cfg config.Config) (*Session, error) {
@@ -25,12 +34,7 @@ func NewSession(logger *logrus.Logger, cfg config.Config) (*Session, error) {
 	}
 
 	return &Session{
-		conn:   conn,
-		logger: logger,
+		db:     conn,
+		Logger: logger,
 	}, nil
-}
-
-// Close closes the database, freeing up any resources.
-func (sess Session) Close() {
-	sess.conn.Close()
 }

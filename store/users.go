@@ -1,14 +1,132 @@
 package store
 
-type Users interface {
-	//Get(id int) (model.Todo, error)
-	//Create(note model.Todo) (string, error)
-	//Update(note model.Todo) error
+import (
+	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
+	"github.com/weidonglian/golang-notes-app/model"
+	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	USER_ROLE_USER  = "USER"
+	USER_ROLE_ADMIN = "ADMIN"
+)
+
+type UsersStore interface {
 }
 
-type implUsers struct {
+type implUsersStore struct {
+	db     *sqlx.DB
+	logger *logrus.Logger
 }
 
-func NewUsers(ctx *StoreContext) Users {
-	return &implUsers{}
+var _ UsersStore = (*implUsersStore)(nil)
+
+func NewUsersStore(ctx *StoreContext) UsersStore {
+	return &implUsersStore{
+		db:     ctx.Session.GetDB(),
+		logger: ctx.Session.Logger,
+	}
+}
+
+func (i implUsersStore) Create(user model.User) (int, error) {
+	var id int
+	if hashedPassword, err := hashPassword(user.Password); err != nil {
+		return id, err
+	} else {
+		user.Password = hashedPassword
+	}
+
+	if user.Role == "" {
+		user.Role = USER_ROLE_USER
+	}
+	stmt, err := i.db.PrepareNamed(`
+		INSERT INTO users (user_name, user_password, user_role)
+		VALUES(:user_name, :user_password, :user_role)
+		RETURNING user_id
+	`)
+	if err != nil {
+		return id, err
+	}
+	err = stmt.Get(&id, user)
+	return id, err
+}
+
+// Removes all records from the table;
+func (i implUsersStore) Clear() error {
+	_, err := i.db.Exec("TRUNCATE TABLE users CASCADE")
+	return err
+}
+
+func (i implUsersStore) UpdatePassword(user model.User) (int, error) {
+	var id int
+	if hashedPassword, err := hashPassword(user.Password); err != nil {
+		return id, err
+	} else {
+		user.Password = hashedPassword
+	}
+
+	stmt, err := i.db.PrepareNamed(`
+		UPDATE users
+		SET user_password = :user_password
+		WHERE user_id = :user_id
+		RETURNING user_id
+	`)
+	if err != nil {
+		return id, err
+	}
+	err = stmt.Get(&id, user)
+	return id, err
+}
+
+// Tries to delete a user by id, and returns the number of records deleted;
+func (i implUsersStore) Remove(id int) error {
+	_, err := i.db.Exec("DELETE FROM users WHERE user_id = $1", id)
+	return err
+}
+
+// Tries to find a user from id;
+func (i implUsersStore) FindByID(id int) *model.User {
+	user := model.User{}
+	err := i.db.Get(&user, "SELECT * FROM users WHERE user_id = $1", id)
+	if err != nil {
+		return nil
+	}
+	return &user
+}
+
+// Tries to find a user from name;
+func (i implUsersStore) FindByName(name string) *model.User {
+	user := model.User{}
+	err := i.db.Get(&user, "SELECT * FROM users WHERE user_name = $1 LIMIT 1", name)
+	if err != nil {
+		return nil
+	}
+	return &user
+}
+
+func hashPassword(pwd string) (string, error) {
+
+	// Use GenerateFromPassword to hash & salt pwd
+	// MinCost is just an integer constant provided by the bcrypt
+	// package along with DefaultCost & MaxCost.
+	// The cost can be any value you want provided it isn't lower
+	// than the MinCost (4)
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.MinCost)
+	if err != nil {
+		return "", err
+	}
+	// GenerateFromPassword returns a byte slice so we need to
+	// convert the bytes to a string and return it
+	return string(hash), nil
+}
+
+func checkPassword(hashedPwd string, plainPwd string) bool {
+	// Since we'll be getting the hashed password from the DB it
+	// will be a string so we'll need to convert it to a byte slice
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(plainPwd))
+	if err != nil {
+		return false
+	}
+	return true
 }

@@ -1,16 +1,16 @@
 package store
 
-type Todos interface {
+type TodosStore interface {
 	//Get(id int) (model.Todo, error)
 	//Create(note model.Todo) (string, error)
 	//Update(note model.Todo) error
 }
 
-type implTodos struct {
+type implTodosStore struct {
 }
 
-var _ Todos = (*implTodos)(nil)
+var _ TodosStore = (*implTodosStore)(nil)
 
-func NewTodos(ctx *StoreContext) Todos {
-	return &implTodos{}
+func NewTodosStore(ctx *StoreContext) TodosStore {
+	return &implTodosStore{}
 }

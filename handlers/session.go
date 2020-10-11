@@ -9,7 +9,8 @@ import (
 )
 
 // SessionHandler keeps the dependency for handle session.
-type SessionHandler struct{}
+type SessionHandler struct {
+}
 
 type reqSession struct {
 	Username string `db:"user_name" json:"username" `
@@ -20,11 +21,6 @@ func (req *reqSession) Bind(r *http.Request) error {
 	if req.Username == "" || req.Password == "" {
 		return fmt.Errorf("missing required session fields")
 	}
-	return nil
-}
-
-func (req *reqSession) Render(w http.ResponseWriter, r *http.Request) error {
-	render.Status(r, http.StatusOK)
 	return nil
 }
 

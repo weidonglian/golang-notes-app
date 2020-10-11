@@ -7,14 +7,14 @@ import (
 )
 
 type StoreContext struct {
-	db *db.Session
+	Session *db.Session
 }
 
 type Store struct {
 	ctx   *StoreContext
-	Users Users
-	Notes Notes
-	Todos Todos
+	Users UsersStore
+	Notes NotesStore
+	Todos TodosStore
 }
 
 func NewStore(cfg config.Config, logger *logrus.Logger) (*Store, error) {
@@ -27,8 +27,8 @@ func NewStore(cfg config.Config, logger *logrus.Logger) (*Store, error) {
 
 	return &Store{
 		ctx:   &ctx,
-		Users: NewUsers(&ctx),
-		Notes: NewNotes(&ctx),
-		Todos: NewTodos(&ctx),
+		Users: NewUsersStore(&ctx),
+		Notes: NewNotesStore(&ctx),
+		Todos: NewTodosStore(&ctx),
 	}, nil
 }
