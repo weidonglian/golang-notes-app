@@ -52,7 +52,7 @@ func (h SessionHandler) NewSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.Render(w, r, data)
+	render.JSON(w, r, data)
 }
 
 func (h SessionHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
