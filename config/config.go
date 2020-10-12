@@ -5,6 +5,8 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"log"
 	"os"
+	"path"
+	"path/filepath"
 )
 
 type appMode string
@@ -80,30 +82,49 @@ type Config struct {
 	Postgres       PostgresConfig
 	Sqlite3        Sqlite3Config
 	DatabaseDriver string `default:"" envconfig:"DB_DRIVER""`
-	ServerPort     string `default:"4000" envconfig:"SERVER_PORT"`
+	ServerPort     int `default:"4000" envconfig:"SERVER_PORT"`
 	JWTSecret      string `default:"MaPoDouFu" envconfig:"JWT_SECRET"`
 	MigrationsPath string `default:"./db/migrations" envconfig:"MIGRATIONS_PATH"`
 }
 
 var (
-	defaultTestConfig = Config{
+	defaultTestConfigWithSqlite3 = Config{
 		Postgres: PostgresConfig{},
 		Sqlite3: Sqlite3Config{
 			SourceName: ":memory:",
 		},
 		DatabaseDriver: DatabaseDriverSqlite3,
-		ServerPort:     "3000",
+		ServerPort:     3000,
+		JWTSecret:      "@Test@NoteApp",
+		MigrationsPath: "./db/migrations",
+	}
+
+	defaultTestConfig = Config{
+		Postgres: PostgresConfig{
+			Host: "localhost",
+			Port: 5432,
+			Username: "postgres",
+			Password: "postgres",
+			DBName: "notes_app_test",
+		},
+		Sqlite3: Sqlite3Config{},
+		DatabaseDriver: DatabaseDriverPostgres,
+		ServerPort:     3000,
 		JWTSecret:      "@Test@NoteApp",
 		MigrationsPath: "./db/migrations",
 	}
 
 	defaultDevConfig = Config{
-		Postgres: PostgresConfig{},
-		Sqlite3: Sqlite3Config{
-			SourceName: "notes_app_dev.db",
+		Postgres: PostgresConfig{
+			Host: "localhost",
+			Port: 5432,
+			Username: "postgres",
+			Password: "postgres",
+			DBName: "notes_app_dev",
 		},
-		DatabaseDriver: DatabaseDriverSqlite3,
-		ServerPort:     "4000",
+		Sqlite3: Sqlite3Config{},
+		DatabaseDriver: DatabaseDriverPostgres,
+		ServerPort:     4000,
 		JWTSecret:      "@Dev@NoteApp",
 		MigrationsPath: "./db/migrations",
 	}
@@ -118,7 +139,14 @@ func GetConfig() Config {
 
 	switch currentAppMode {
 	case appModeTest:
+		// go test and ginkgo change the current directory to the test package directory
+		// it will fail all the folder related handler. we need to figure out the root directory.
+		rootDir := getRootProjectFolder()
+		if rootDir == "" {
+			panic("Failed to get the project root dir")
+		}
 		currentConfig = &defaultTestConfig
+		currentConfig.MigrationsPath = path.Join(rootDir, currentConfig.MigrationsPath)
 	case appModeDEV:
 		currentConfig = &defaultDevConfig
 	case appModeProd:
@@ -127,6 +155,24 @@ func GetConfig() Config {
 			log.Fatal("AppMode: can not process the envconfig with error:", err)
 			panic(err)
 		}
+	default:
+		panic("unknown app mod")
 	}
 	return *currentConfig
+}
+
+func getRootProjectFolder() string {
+	workDir, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+
+	for i := 0; i < 10; {
+		if _, err := os.Stat(path.Join(workDir, "go.mod")); err == nil {
+			return workDir
+		} else {
+			workDir = filepath.Dir(workDir)
+		}
+	}
+	return ""
 }
