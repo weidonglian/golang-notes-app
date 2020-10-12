@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"github.com/weidonglian/golang-notes-app/config"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -19,22 +20,36 @@ func (sess Session) GetDB() *sqlx.DB {
 
 // Close closes the database, freeing up any resources.
 func (sess Session) Close() {
-	sess.db.Close()
+	if err := sess.db.Close(); err != nil {
+		sess.Logger.Fatalf("Failed to close the db session: '%v'", err)
+	}
 }
 
 func NewSession(logger *logrus.Logger, cfg config.Config) (*Session, error) {
-	logger.Info("Connecting to database")
-	conn, err := sqlx.Connect("postgres", cfg.Postgres.GetDBDataSource())
-	if err != nil {
-		return nil, err
+	logger.Infof("Connecting to database '%s'", cfg.DatabaseDriver)
+
+	var dataSourceName string
+	if cfg.DatabaseDriver == config.DatabaseDriverSqlite3 {
+		dataSourceName = cfg.Sqlite3.SourceName
+	} else if cfg.DatabaseDriver == config.DatabaseDriverPostgres {
+		dataSourceName = cfg.Postgres.GetDataSourceName()
+	} else {
+		panic(fmt.Sprintf("Unknown required DatabaseDriver:%s", cfg.DatabaseDriver))
 	}
 
-	if err := RunMigrations(conn, cfg, logger); err != nil {
+	var db *sqlx.DB
+	if conn, err := sqlx.Connect(cfg.DatabaseDriver, dataSourceName); err != nil {
+		return nil, err
+	} else {
+		db = conn
+	}
+
+	if err := RunMigrations(db, cfg, logger); err != nil {
 		return nil, err
 	}
 
 	return &Session{
-		db:     conn,
+		db:     db,
 		Logger: logger,
 	}, nil
 }

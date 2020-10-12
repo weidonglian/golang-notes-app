@@ -12,7 +12,8 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.8.0 // indirect
-	github.com/pkg/errors v0.9.1
+	github.com/onsi/ginkgo v1.12.0
+	github.com/onsi/gomega v1.9.0
 	github.com/sirupsen/logrus v1.7.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	gopkg.in/yaml.v2 v2.3.0 // indirect
