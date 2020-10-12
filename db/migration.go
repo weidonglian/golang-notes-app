@@ -14,7 +14,7 @@ import (
 )
 
 func RunMigrations(conn *sqlx.DB, cfg config.Config, logger *logrus.Logger) error {
-	migrationsDir := cfg.Postgres.MigrationsPath
+	migrationsDir := cfg.MigrationsPath
 	if _, err := os.Stat(migrationsDir); os.IsNotExist(err) {
 		logger.Errorf("Skipping migration, could not find migration path:%s", migrationsDir)
 		return err

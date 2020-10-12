@@ -111,9 +111,9 @@ var (
 
 var currentConfig *Config
 
-func GetConfig() (Config, error) {
+func GetConfig() Config {
 	if currentConfig != nil {
-		return *currentConfig, nil
+		return *currentConfig
 	}
 
 	switch currentAppMode {
@@ -128,5 +128,5 @@ func GetConfig() (Config, error) {
 			panic(err)
 		}
 	}
-	return *currentConfig, nil
+	return *currentConfig
 }
