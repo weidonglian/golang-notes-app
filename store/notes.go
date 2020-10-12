@@ -4,29 +4,21 @@ import (
 	"github.com/weidonglian/golang-notes-app/model"
 )
 
-type NotesStore interface {
-	Get(id int) (*model.Note, error)
-	Create(note model.Note) (string, error)
-	Update(note model.Note) error
+type NotesStore struct {
 }
 
-type implNotesStore struct {
-}
-
-func (impl *implNotesStore) Get(id int) (*model.Note, error) {
+func (impl *NotesStore) Get(id int) (*model.Note, error) {
 	return nil, nil
 }
 
-func (impl *implNotesStore) Create(note model.Note) (string, error) {
+func (impl *NotesStore) Create(note model.Note) (string, error) {
 	return "", nil
 }
 
-func (impl *implNotesStore) Update(note model.Note) error {
+func (impl *NotesStore) Update(note model.Note) error {
 	return nil
 }
 
-var _ NotesStore = (*implNotesStore)(nil)
-
 func NewNotesStore(ctx *StoreContext) NotesStore {
-	return &implNotesStore{}
+	return NotesStore{}
 }

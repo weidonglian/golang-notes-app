@@ -6,6 +6,7 @@ import (
 	"github.com/weidonglian/golang-notes-app/config"
 	"github.com/weidonglian/golang-notes-app/db"
 	"github.com/weidonglian/golang-notes-app/logging"
+	"github.com/weidonglian/golang-notes-app/model"
 	"github.com/weidonglian/golang-notes-app/store"
 )
 
@@ -26,7 +27,7 @@ var _ = Describe("Users", func() {
 		}
 
 		storeContext = &store.StoreContext{
-			sess,
+			Session: sess,
 		}
 
 		usersStore = store.NewUsersStore(storeContext)
@@ -39,6 +40,19 @@ var _ = Describe("Users", func() {
 	})
 
 	Describe("USERS Create", func() {
-		Expect(usersStore).To(Equal(nil))
+		It("Create user", func() {
+			user := model.User{
+				Username: "u1",
+				Password: "p1",
+				Role:     store.UserRoleUser,
+			}
+			userId, err := usersStore.Create(user)
+			Expect(err).NotTo(HaveOccurred())
+
+			foundUser := usersStore.FindByID(userId)
+			Expect(foundUser.Username).To(Equal(user.Username))
+			Expect(store.CheckPassword(foundUser.Password, user.Password)).To(BeTrue())
+			Expect(foundUser.Role).To(Equal(user.Role))
+		})
 	})
 })

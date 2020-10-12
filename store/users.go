@@ -8,37 +8,32 @@ import (
 )
 
 const (
-	USER_ROLE_USER  = "USER"
-	USER_ROLE_ADMIN = "ADMIN"
+	UserRoleUser  = "USER"
+	UserRoleAdmin = "ADMIN"
 )
 
-type UsersStore interface {
-}
-
-type implUsersStore struct {
+type UsersStore struct {
 	db     *sqlx.DB
 	logger *logrus.Logger
 }
 
-var _ UsersStore = (*implUsersStore)(nil)
-
 func NewUsersStore(ctx *StoreContext) UsersStore {
-	return &implUsersStore{
+	return UsersStore{
 		db:     ctx.Session.GetDB(),
 		logger: ctx.Session.Logger,
 	}
 }
 
-func (i implUsersStore) Create(user model.User) (int, error) {
+func (i UsersStore) Create(user model.User) (int, error) {
 	var id int
-	if hashedPassword, err := hashPassword(user.Password); err != nil {
+	if hashedPassword, err := HashPassword(user.Password); err != nil {
 		return id, err
 	} else {
 		user.Password = hashedPassword
 	}
 
 	if user.Role == "" {
-		user.Role = USER_ROLE_USER
+		user.Role = UserRoleUser
 	}
 	stmt, err := i.db.PrepareNamed(`
 		INSERT INTO users (user_name, user_password, user_role)
@@ -53,14 +48,14 @@ func (i implUsersStore) Create(user model.User) (int, error) {
 }
 
 // Removes all records from the table;
-func (i implUsersStore) Clear() error {
+func (i UsersStore) Clear() error {
 	_, err := i.db.Exec("TRUNCATE TABLE users CASCADE")
 	return err
 }
 
-func (i implUsersStore) UpdatePassword(user model.User) (int, error) {
+func (i UsersStore) UpdatePassword(user model.User) (int, error) {
 	var id int
-	if hashedPassword, err := hashPassword(user.Password); err != nil {
+	if hashedPassword, err := HashPassword(user.Password); err != nil {
 		return id, err
 	} else {
 		user.Password = hashedPassword
@@ -80,13 +75,13 @@ func (i implUsersStore) UpdatePassword(user model.User) (int, error) {
 }
 
 // Tries to delete a user by id, and returns the number of records deleted;
-func (i implUsersStore) Remove(id int) error {
+func (i UsersStore) Remove(id int) error {
 	_, err := i.db.Exec("DELETE FROM users WHERE user_id = $1", id)
 	return err
 }
 
 // Tries to find a user from id;
-func (i implUsersStore) FindByID(id int) *model.User {
+func (i UsersStore) FindByID(id int) *model.User {
 	user := model.User{}
 	err := i.db.Get(&user, "SELECT * FROM users WHERE user_id = $1", id)
 	if err != nil {
@@ -96,7 +91,7 @@ func (i implUsersStore) FindByID(id int) *model.User {
 }
 
 // Tries to find a user from name;
-func (i implUsersStore) FindByName(name string) *model.User {
+func (i UsersStore) FindByName(name string) *model.User {
 	user := model.User{}
 	err := i.db.Get(&user, "SELECT * FROM users WHERE user_name = $1 LIMIT 1", name)
 	if err != nil {
@@ -105,7 +100,7 @@ func (i implUsersStore) FindByName(name string) *model.User {
 	return &user
 }
 
-func hashPassword(pwd string) (string, error) {
+func HashPassword(pwd string) (string, error) {
 
 	// Use GenerateFromPassword to hash & salt pwd
 	// MinCost is just an integer constant provided by the bcrypt
@@ -121,7 +116,7 @@ func hashPassword(pwd string) (string, error) {
 	return string(hash), nil
 }
 
-func checkPassword(hashedPwd string, plainPwd string) bool {
+func CheckPassword(hashedPwd string, plainPwd string) bool {
 	// Since we'll be getting the hashed password from the DB it
 	// will be a string so we'll need to convert it to a byte slice
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(plainPwd))
