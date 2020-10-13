@@ -29,6 +29,24 @@ func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func NewErrorResponse(httpStatusCode int, err error) *ErrResponse {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: httpStatusCode,
+		StatusText:     http.StatusText(httpStatusCode),
+		AppMessage:     err.Error(),
+	}
+}
+
+func ErrStatusUnauthorized(err error) *ErrResponse {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: http.StatusUnauthorized,
+		StatusText:     http.StatusText(http.StatusUnauthorized),
+		AppMessage:     err.Error(),
+	}
+}
+
 func ErrBadRequest(err error) *ErrResponse {
 	return &ErrResponse{
 		Err:            err,

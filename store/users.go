@@ -7,11 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	UserRoleUser  = "USER"
-	UserRoleAdmin = "ADMIN"
-)
-
 type UsersStore struct {
 	db     *sqlx.DB
 	logger *logrus.Logger
@@ -33,7 +28,7 @@ func (i UsersStore) Create(user model.User) (int, error) {
 	}
 
 	if user.Role == "" {
-		user.Role = UserRoleUser
+		user.Role = model.UserRoleUser
 	}
 	stmt, err := i.db.PrepareNamed(`
 		INSERT INTO users (user_name, user_password, user_role)

@@ -23,7 +23,7 @@ type App struct {
 	logger *logrus.Logger
 	config config.Config
 	store  *store.Store
-	auth   auth.Auth
+	auth   *auth.Auth
 }
 
 // Serve is the core serve http
@@ -37,7 +37,7 @@ func (a *App) Serve() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	sessionHandler := handlers.NewSessionHandler()
+	sessionHandler := handlers.NewSessionHandler(a.store, a.auth)
 	// public routes and no auth required
 	r.Group(func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -69,21 +69,24 @@ func (a *App) Serve() {
 	}
 }
 
+func (a *App) initialize() {
+	DataInit(a)
+}
+
 // NewApp create the main application
 func NewApp(logger *logrus.Logger) (*App, error) {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		return nil, err
-	}
+	cfg := config.GetConfig()
 
-	//store, err := store.NewStore(cfg, logger)
+	s, err := store.NewStore(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
-	return &App{
+	a := &App{
 		logger: logger,
 		config: cfg,
-		store:  nil,
+		store:  s,
 		auth:   auth.NewAuth(cfg),
-	}, nil
+	}
+	a.initialize()
+	return a, nil
 }

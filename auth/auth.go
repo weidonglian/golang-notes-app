@@ -47,7 +47,7 @@ func GetUserIDFromRequest(r *http.Request) int {
 	return userID.(int)
 }
 
-func NewAuth(cfg config.Config) Auth {
+func NewAuth(cfg config.Config) *Auth {
 	tokenAuth := jwtauth.New("HS256", []byte(cfg.JWTSecret), nil)
-	return Auth{tokenAuth}
+	return &Auth{tokenAuth}
 }

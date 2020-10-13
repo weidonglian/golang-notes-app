@@ -1,5 +1,10 @@
 package model
 
+const (
+	UserRoleUser  = "USER"
+	UserRoleAdmin = "ADMIN"
+)
+
 type User struct {
 	ID       int    `db:"user_id" json:"id"`
 	Username string `db:"user_name" json:"username"`
