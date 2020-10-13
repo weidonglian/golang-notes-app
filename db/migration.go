@@ -8,13 +8,11 @@ import (
 
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
-	"github.com/golang-migrate/migrate/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/golang-notes-app/config"
-	_ "github.com/golang-migrate/migrate/source/file"
-	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func RunMigrations(conn *sqlx.DB, cfg config.Config, logger *logrus.Logger) error {
@@ -31,39 +29,18 @@ func RunMigrations(conn *sqlx.DB, cfg config.Config, logger *logrus.Logger) erro
 
 	logger.Info("Running migrations")
 
-	var newMigrate *migrate.Migrate
-
-	if cfg.DatabaseDriver == config.DatabaseDriverPostgres {
-		driver, err := postgres.WithInstance(conn.DB, &postgres.Config{})
-		if err != nil {
-			return err
-		}
-		m, err := migrate.NewWithDatabaseInstance(
-			fmt.Sprintf("file://%s", absMigrationDir),
-			cfg.Postgres.DBName, driver)
-		if err != nil {
-			return err
-		} else {
-			newMigrate = m
-		}
-	} else if cfg.DatabaseDriver == config.DatabaseDriverSqlite3 {
-		driver, err := sqlite3.WithInstance(conn.DB, &sqlite3.Config{})
-		if err != nil {
-			return err
-		}
-		m, err := migrate.NewWithDatabaseInstance(
-			fmt.Sprintf("file://%s", absMigrationDir),
-			cfg.Sqlite3.SourceName, driver)
-		if err != nil {
-			return err
-		} else {
-			newMigrate = m
-		}
-	} else {
-		panic("Unknown config.DatabaseDriver"+cfg.DatabaseDriver)
+	driver, err := postgres.WithInstance(conn.DB, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		fmt.Sprintf("file://%s", absMigrationDir),
+		cfg.Postgres.DBName, driver)
+	if err != nil {
+		return err
 	}
 
-	if err := newMigrate.Up(); err != nil {
+	if err := m.Up(); err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
 			logger.Info("No change when running migrations.")
 			return nil

@@ -1,14 +1,12 @@
 package db
 
 import (
-	"fmt"
 	"github.com/weidonglian/golang-notes-app/config"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type Session struct {
@@ -28,19 +26,10 @@ func (sess Session) Close() {
 }
 
 func NewSession(logger *logrus.Logger, cfg config.Config) (*Session, error) {
-	logger.Infof("Connecting to database '%s'", cfg.DatabaseDriver)
-
-	var dataSourceName string
-	if cfg.DatabaseDriver == config.DatabaseDriverSqlite3 {
-		dataSourceName = cfg.Sqlite3.SourceName
-	} else if cfg.DatabaseDriver == config.DatabaseDriverPostgres {
-		dataSourceName = cfg.Postgres.GetDataSourceName()
-	} else {
-		panic(fmt.Sprintf("Unknown required DatabaseDriver:%s", cfg.DatabaseDriver))
-	}
+	logger.Infof("Connecting to database...")
 
 	var db *sqlx.DB
-	if conn, err := sqlx.Connect(cfg.DatabaseDriver, dataSourceName); err != nil {
+	if conn, err := sqlx.Connect("postgres", cfg.Postgres.GetDataSourceName()); err != nil {
 		return nil, err
 	} else {
 		db = conn
