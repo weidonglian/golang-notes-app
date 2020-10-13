@@ -42,12 +42,6 @@ func (i UsersStore) Create(user model.User) (int, error) {
 	return id, err
 }
 
-// Removes all records from the table;
-func (i UsersStore) Clear() error {
-	_, err := i.db.Exec("TRUNCATE TABLE users CASCADE")
-	return err
-}
-
 func (i UsersStore) UpdatePassword(user model.User) (int, error) {
 	var id int
 	if hashedPassword, err := HashPassword(user.Password); err != nil {
@@ -70,8 +64,14 @@ func (i UsersStore) UpdatePassword(user model.User) (int, error) {
 }
 
 // Tries to delete a user by id, and returns the number of records deleted;
-func (i UsersStore) Remove(id int) error {
+func (i UsersStore) Delete(id int) error {
 	_, err := i.db.Exec("DELETE FROM users WHERE user_id = $1", id)
+	return err
+}
+
+// Removes all records from the table;
+func (i UsersStore) DeleteAll() error {
+	_, err := i.db.Exec("TRUNCATE TABLE users CASCADE")
 	return err
 }
 

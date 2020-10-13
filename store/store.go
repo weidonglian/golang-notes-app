@@ -1,9 +1,9 @@
 package store
 
 import (
-	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/golang-notes-app/config"
 	"github.com/weidonglian/golang-notes-app/db"
+	"github.com/weidonglian/golang-notes-app/model"
 )
 
 type StoreContext struct {
@@ -17,18 +17,49 @@ type Store struct {
 	Todos TodosStore
 }
 
-func NewStore(cfg config.Config, logger *logrus.Logger) (*Store, error) {
-	sess, err := db.NewSession(logger, cfg)
-	if err != nil {
-		return nil, err
+func NewStore(sess *db.Session) (*Store, error) {
+	ctx := StoreContext{
+		Session: sess,
 	}
 
-	ctx := StoreContext{sess}
-
-	return &Store{
+	s := Store{
 		ctx:   &ctx,
 		Users: NewUsersStore(&ctx),
 		Notes: NewNotesStore(&ctx),
 		Todos: NewTodosStore(&ctx),
-	}, nil
+	}
+	if !config.IsProdMode() {
+		s.addTestUsers()
+	}
+	return &s, nil
+}
+
+func (s Store) addTestUsers() {
+	if config.IsProdMode() {
+		panic("TestUsers should never be used in production mode")
+	}
+
+	testUsers := []model.User{
+		{
+			Username: "dev",
+			Password: "dev",
+			Role:     model.UserRoleUser,
+		},
+		{
+			Username: "admin",
+			Password: "admin",
+			Role:     model.UserRoleAdmin,
+		},
+		{
+			Username: "test",
+			Password: "test",
+			Role:     model.UserRoleUser,
+		},
+	}
+
+	for _, user := range testUsers {
+		if s.Users.FindByName(user.Username) == nil {
+			s.Users.Create(user)
+		}
+	}
 }

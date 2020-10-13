@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/weidonglian/golang-notes-app/db"
 	"net/http"
 	"time"
 
@@ -22,6 +23,7 @@ import (
 type App struct {
 	logger *logrus.Logger
 	config config.Config
+	db     *db.Session
 	store  *store.Store
 	auth   *auth.Auth
 }
@@ -69,24 +71,36 @@ func (a *App) Serve() {
 	}
 }
 
-func (a *App) initialize() {
-	DataInit(a)
+func (a *App) Shutdown() {
+	a.db.Close()
 }
 
 // NewApp create the main application
 func NewApp(logger *logrus.Logger) (*App, error) {
 	cfg := config.GetConfig()
 
-	s, err := store.NewStore(cfg, logger)
-	if err != nil {
+	var (
+		dbSess *db.Session
+		s      *store.Store
+	)
+	if sess, err := db.NewSession(logger, cfg); err != nil {
 		return nil, err
+	} else {
+		dbSess = sess
 	}
+
+	if sto, err := store.NewStore(dbSess); err != nil {
+		return nil, err
+	} else {
+		s = sto
+	}
+
 	a := &App{
 		logger: logger,
 		config: cfg,
-		store:  s,
+		db:     dbSess,
 		auth:   auth.NewAuth(cfg),
+		store:  s,
 	}
-	a.initialize()
 	return a, nil
 }

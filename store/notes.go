@@ -1,24 +1,80 @@
 package store
 
 import (
+	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/golang-notes-app/model"
 )
 
 type NotesStore struct {
-}
-
-func (impl *NotesStore) Get(id int) (*model.Note, error) {
-	return nil, nil
-}
-
-func (impl *NotesStore) Create(note model.Note) (string, error) {
-	return "", nil
-}
-
-func (impl *NotesStore) Update(note model.Note) error {
-	return nil
+	db     *sqlx.DB
+	logger *logrus.Logger
 }
 
 func NewNotesStore(ctx *StoreContext) NotesStore {
-	return NotesStore{}
+	return NotesStore{
+		db:     ctx.Session.GetDB(),
+		logger: ctx.Session.Logger,
+	}
+}
+
+func (i NotesStore) Create(note model.Note) (int, error) {
+	var id int
+	stmt, err := i.db.PrepareNamed(`
+		INSERT INTO notes (note_name, user_id)
+		VALUES(:note_name, :user_id)
+		RETURNING note_id
+	`)
+	if err != nil {
+		return id, err
+	}
+	err = stmt.Get(&id, note)
+	return id, err
+}
+
+func (i NotesStore) Update(id int, name string) (*model.Note, error) {
+	stmt, err := i.db.Preparex(`
+		UPDATE notes
+		SET note_name = $1
+		WHERE note_id = $2
+		RETURNING *
+	`)
+	if err != nil {
+		return nil, err
+	}
+	note := model.Note{}
+	err = stmt.Get(&note, name, id)
+	return &note, err
+}
+
+// Tries to delete a user by id, and returns the number of records deleted;
+func (i NotesStore) Delete(id int) error {
+	_, err := i.db.Exec("DELETE FROM notes WHERE note_id = $1", id)
+	return err
+}
+
+// Removes all records from the table;
+func (i NotesStore) DeleteAll() error {
+	_, err := i.db.Exec("TRUNCATE TABLE notes CASCADE")
+	return err
+}
+
+// Tries to find a user from id;
+func (i NotesStore) FindByID(id int) *model.Note {
+	note := model.Note{}
+	err := i.db.Get(&note, "SELECT * FROM notes WHERE note_id = $1", id)
+	if err != nil {
+		return nil
+	}
+	return &note
+}
+
+// Tries to find a user from name;
+func (i NotesStore) FindByName(name string) []model.Note {
+	var notes []model.Note
+	err := i.db.Select(&notes, "SELECT * FROM notes WHERE note_name = $1", name)
+	if err != nil {
+		return nil
+	}
+	return notes
 }
