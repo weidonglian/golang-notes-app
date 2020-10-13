@@ -5,7 +5,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/weidonglian/golang-notes-app/config"
 	"github.com/weidonglian/golang-notes-app/db"
-	"github.com/weidonglian/golang-notes-app/logging"
 	"github.com/weidonglian/golang-notes-app/model"
 	"github.com/weidonglian/golang-notes-app/store"
 )
@@ -16,27 +15,19 @@ func init() {
 
 var _ = Describe("Users", func() {
 	var (
-		usersStore   store.UsersStore
-		storeContext *store.StoreContext
+		usersStore store.UsersStore
+		dbSession  *db.Session
 	)
 
 	BeforeEach(func() {
-		sess, err := db.NewSession(logging.NewLogger(), config.GetConfig())
-		if err != nil {
-			panic(err)
-		}
-
-		storeContext = &store.StoreContext{
-			Session: sess,
-		}
-
-		usersStore = store.NewUsersStore(storeContext)
+		dbSession = dbSessionPool.ForkNewSession()
+		usersStore = store.NewUsersStore(&store.StoreContext{
+			Session: dbSession,
+		})
 	})
 
 	AfterEach(func() {
-		if storeContext != nil {
-			storeContext.Session.Close()
-		}
+		dbSession.Close()
 	})
 
 	Describe("USERS Create", func() {
