@@ -14,6 +14,7 @@ var _ = Describe("Store", func() {
 		sto       *store.Store
 	)
 
+	// we need to set up a new db session for different stores
 	BeforeEach(func() {
 		dbSession = dbSessionPool.ForkNewSession()
 		if s, err := store.NewStore(dbSession); err != nil {
@@ -29,6 +30,7 @@ var _ = Describe("Store", func() {
 		}
 	})
 
+	// UsesStore tests
 	Describe("UsersStore", func() {
 		var (
 			users = []model.User{
@@ -103,6 +105,7 @@ var _ = Describe("Store", func() {
 		})
 	})
 
+	// NotesStore
 	Describe("NotesStore", func() {
 		var (
 			testUserId int
@@ -169,6 +172,128 @@ var _ = Describe("Store", func() {
 			for _, note := range notes {
 				foundNotes := notesStore.FindByName(note.Name)
 				Expect(len(foundNotes) > 0).To(BeTrue())
+			}
+		})
+	})
+
+	// TodosStore
+	Describe("TodosStore", func() {
+		var (
+			testUserId int
+			notes      []model.Note
+			todos      []model.Todo
+		)
+
+		BeforeEach(func() {
+			// create notes for current test user
+			testUserId = sto.Users.FindByName("test").ID
+			notes = []model.Note{
+				{
+					Name:   "n1",
+					UserID: testUserId,
+				},
+				{
+					Name:   "n2",
+					UserID: testUserId,
+				},
+				{
+					Name:   "n3",
+					UserID: testUserId,
+				},
+			}
+			// add notes to db
+			notesStore := sto.Notes
+			for i := range notes {
+				n := &notes[i]
+				if notedId, err := notesStore.Create(*n); err != nil {
+					panic(err)
+				} else {
+					n.ID = notedId
+				}
+			}
+			// init todo list
+			todos = []model.Todo{
+				{
+					Name: "t1",
+					Done: false,
+				},
+				{
+					Name: "t1",
+					Done: true,
+				},
+				{
+					Name: "t3",
+					Done: false,
+				},
+				{
+					Name: "t4",
+					Done: true,
+				},
+			}
+		})
+
+		It("Create, Find and DeleteAll", func() {
+			todosStore := sto.Todos
+			By("Creat todoNames in an existing note should always be pleasant")
+			for _, note := range notes {
+				for _, todo := range todos {
+					By("Create a todo into given note should always work")
+					todo.NoteID = note.ID
+					todoId, err := todosStore.Create(todo)
+					Expect(err).NotTo(HaveOccurred())
+
+					By("Found by todo id should always work")
+					foundTodo := todosStore.FindByID(todoId)
+					Expect(foundTodo.Name).To(Equal(todo.Name)) // should be exact since search by unique id
+					Expect(foundTodo.ID).To(Equal(todoId))
+					Expect(foundTodo.Done).To(Equal(todo.Done))
+				}
+			}
+
+			By("Should be possible to clear all the todos")
+			err := todosStore.DeleteAll()
+			Expect(err).ToNot(HaveOccurred())
+			for _, todo := range todos {
+				foundTodos := todosStore.FindByName(todo.Name)
+				Expect(len(foundTodos)).To(BeZero())
+			}
+		})
+
+		It("Find and Delete", func() {
+			todosStore := sto.Todos
+			// clear all the todos
+			err := todosStore.DeleteAll()
+			Expect(err).ToNot(HaveOccurred())
+
+			By("Creat todoNames in an existing note should always be pleasant")
+			for _, note := range notes {
+				for _, todo := range todos {
+					todo.NoteID = note.ID
+					_, err := todosStore.Create(todo)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}
+
+			By("Find by name 't1' should have 6 todos")
+			Expect(len(todosStore.FindByName("t1"))).To(BeEquivalentTo(6))
+
+			By("Find by name 't2, t3' should have 3 todos")
+			Expect(len(todosStore.FindByName("t3"))).To(BeEquivalentTo(3))
+			Expect(len(todosStore.FindByName("t4"))).To(BeEquivalentTo(3))
+
+			By("Find by name 'non-existent' should have 0 todos")
+			Expect(len(todosStore.FindByName("t2"))).To(BeZero())
+			Expect(len(todosStore.FindByName("invalid_xxx"))).To(BeZero())
+
+			By("Find by note id should have 4 todos per id")
+			for _, note := range notes {
+				foundTodos := todosStore.FindByNoteID(note.ID)
+				Expect(len(foundTodos)).To(BeIdenticalTo(4))
+				By("Remove all those one by one and should drop to zero")
+				for _, todo := range foundTodos {
+					Expect(todosStore.Delete(todo.ID)).NotTo(HaveOccurred())
+				}
+				Expect(len(todosStore.FindByNoteID(note.ID))).To(BeZero())
 			}
 		})
 	})

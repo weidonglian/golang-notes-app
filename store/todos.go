@@ -21,8 +21,8 @@ func NewTodosStore(ctx *StoreContext) TodosStore {
 func (i TodosStore) Create(todo model.Todo) (int, error) {
 	var id int
 	stmt, err := i.db.PrepareNamed(`
-		INSERT INTO todos (todo_name, user_id)
-		VALUES(:todo_name, :user_id)
+		INSERT INTO todos (todo_name, todo_done, note_id)
+		VALUES(:todo_name, :todo_done, :note_id)
 		RETURNING todo_id
 	`)
 	if err != nil {
@@ -32,7 +32,7 @@ func (i TodosStore) Create(todo model.Todo) (int, error) {
 	return id, err
 }
 
-func (i TodosStore) Update(id int, name string) (*model.Todo, error) {
+func (i TodosStore) UpdateName(id int, name string) (*model.Todo, error) {
 	stmt, err := i.db.Preparex(`
 		UPDATE todos
 		SET todo_name = $1
@@ -59,22 +59,29 @@ func (i TodosStore) DeleteAll() error {
 	return err
 }
 
-// Tries to find a user from id;
+// Tries to find from id;
 func (i TodosStore) FindByID(id int) *model.Todo {
 	todo := model.Todo{}
-	err := i.db.Get(&todo, "SELECT * FROM todos WHERE todo_id = $1", id)
-	if err != nil {
+	if err := i.db.Get(&todo, "SELECT * FROM todos WHERE todo_id = $1", id); err != nil {
 		return nil
 	}
 	return &todo
 }
 
-// Tries to find a user from name;
+// Tries to find from name;
 func (i TodosStore) FindByName(name string) []model.Todo {
 	var todos []model.Todo
-	err := i.db.Select(&todos, "SELECT * FROM todos WHERE todo_name = $1", name)
-	if err != nil {
-		return nil
+	if err := i.db.Select(&todos, "SELECT * FROM todos WHERE todo_name = $1", name); err != nil {
+		return []model.Todo{}
+	}
+	return todos
+}
+
+// Tries to find from note_id;
+func (i TodosStore) FindByNoteID(noteId int) []model.Todo {
+	var todos []model.Todo
+	if err := i.db.Select(&todos, "SELECT * FROM todos WHERE note_id = $1", noteId); err != nil {
+		return []model.Todo{}
 	}
 	return todos
 }

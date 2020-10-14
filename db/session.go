@@ -3,7 +3,6 @@ package db
 import (
 	"github.com/weidonglian/golang-notes-app/config"
 
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
