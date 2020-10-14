@@ -76,8 +76,7 @@ func (a *App) Shutdown() {
 }
 
 // NewApp create the main application
-func NewApp(logger *logrus.Logger) (*App, error) {
-	cfg := config.GetConfig()
+func NewApp(logger *logrus.Logger, cfg config.Config) (*App, error) {
 
 	var (
 		dbSess *db.Session
