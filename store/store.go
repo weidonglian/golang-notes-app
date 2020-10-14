@@ -29,35 +29,17 @@ func NewStore(sess *db.Session) (*Store, error) {
 		Todos: NewTodosStore(&ctx),
 	}
 	if !config.IsProdMode() {
-		s.addTestUsers()
+		s.loadTestData()
 	}
 	return &s, nil
 }
 
-func (s Store) addTestUsers() {
+func (s Store) loadTestData() {
 	if config.IsProdMode() {
 		panic("TestUsers should never be used in production mode")
 	}
 
-	testUsers := []model.User{
-		{
-			Username: "dev",
-			Password: "dev",
-			Role:     model.UserRoleUser,
-		},
-		{
-			Username: "admin",
-			Password: "admin",
-			Role:     model.UserRoleAdmin,
-		},
-		{
-			Username: "test",
-			Password: "test",
-			Role:     model.UserRoleUser,
-		},
-	}
-
-	for _, user := range testUsers {
+	for _, user := range model.TestUsers {
 		if s.Users.FindByName(user.Username) == nil {
 			s.Users.Create(user)
 		}

@@ -36,24 +36,8 @@ func (req *reqSession) Bind(r *http.Request) error {
 	return nil
 }
 
+// NewSession POST /session
 func (h SessionHandler) NewSession(w http.ResponseWriter, r *http.Request) {
-	/*var u User
-	if err := c.ShouldBindJSON(&u); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
-		return
-	}
-	//compare the user from the request, with the one we defined:
-	if user.Username != u.Username || user.Password != u.Password {
-		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
-		return
-	}
-	token, err := CreateToken(user.ID)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
-		return
-	}
-	c.JSON(http.StatusOK, token)*/
-
 	data := &reqSession{}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, errors.ErrBadRequest(err))
@@ -80,6 +64,7 @@ func (h SessionHandler) NewSession(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteSession DELETE /session
 func (h SessionHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("DeleteSession"))
 }

@@ -28,9 +28,7 @@ type App struct {
 	auth   *auth.Auth
 }
 
-// Serve is the core serve http
-func (a *App) Serve() {
-
+func (a *App) Router() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -60,10 +58,15 @@ func (a *App) Serve() {
 
 		r.Delete("/session", sessionHandler.DeleteSession) // i.e. logout
 		r.Mount("/todos", handlers.NewTodosHandler().Routes())
-		r.Mount("/users", handlers.NewUsersHandler().Routes())
+		r.Mount("/users", handlers.NewUsersHandler(a.store).Routes())
 		r.Mount("/notes", handlers.NewNotesHandler().Routes())
 	})
+	return r
+}
 
+// Serve is the core serve http
+func (a *App) Serve() {
+	r := a.Router()
 	addr := fmt.Sprintf(":%v", a.config.ServerPort)
 	a.logger.Infof("Listening on addr %v", addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
@@ -71,7 +74,7 @@ func (a *App) Serve() {
 	}
 }
 
-func (a *App) Shutdown() {
+func (a *App) Close() {
 	a.db.Close()
 }
 
