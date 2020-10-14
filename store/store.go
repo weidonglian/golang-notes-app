@@ -6,19 +6,19 @@ import (
 	"github.com/weidonglian/golang-notes-app/model"
 )
 
-type StoreContext struct {
+type Context struct {
 	Session *db.Session
 }
 
 type Store struct {
-	ctx   *StoreContext
+	ctx   *Context
 	Users UsersStore
 	Notes NotesStore
 	Todos TodosStore
 }
 
 func NewStore(sess *db.Session) (*Store, error) {
-	ctx := StoreContext{
+	ctx := Context{
 		Session: sess,
 	}
 

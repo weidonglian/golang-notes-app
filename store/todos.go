@@ -11,7 +11,7 @@ type TodosStore struct {
 	logger *logrus.Logger
 }
 
-func NewTodosStore(ctx *StoreContext) TodosStore {
+func NewTodosStore(ctx *Context) TodosStore {
 	return TodosStore{
 		db:     ctx.Session.GetDB(),
 		logger: ctx.Session.Logger,

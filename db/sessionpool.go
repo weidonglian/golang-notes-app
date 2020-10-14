@@ -26,7 +26,7 @@ func NewSessionPool(logger *logrus.Logger, cfg config.Config) SessionPool {
 	}
 }
 
-func (i SessionPool) ForkNewSession() *Session {
+func (i *SessionPool) ForkNewSession() *Session {
 	tempName := fmt.Sprintf("%s_%s", i.cfg.Postgres.DBName, xid.New().String())
 	i.Logger.Infof("Fork child database: %s", tempName)
 	i.parent.GetDB().MustExec(fmt.Sprintf("CREATE DATABASE %s", tempName))
@@ -40,12 +40,15 @@ func (i SessionPool) ForkNewSession() *Session {
 	}
 }
 
-func (i SessionPool) Close() {
+func (i *SessionPool) Close() {
 	i.Logger.Info("Close session pool database")
 
+	db := i.parent.GetDB()
 	for _, dbName := range i.forkedDatabases {
 		i.Logger.Infof("Drop table: %s", dbName)
-		i.parent.GetDB().MustExec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", dbName))
+		db.MustExec(fmt.Sprintf(`REVOKE CONNECT ON DATABASE %s FROM public`, dbName))
+		db.MustExec(fmt.Sprintf(`SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '%s'`, dbName))
+		db.MustExec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", dbName))
 	}
 
 	if err := i.parent.Close(); err != nil {

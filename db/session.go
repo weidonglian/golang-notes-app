@@ -10,6 +10,7 @@ import (
 
 type Session struct {
 	db     *sqlx.DB
+	dbName string
 	Logger *logrus.Logger
 }
 
@@ -19,6 +20,7 @@ func (sess Session) GetDB() *sqlx.DB {
 
 // Close closes the database, freeing up any resources.
 func (sess Session) Close() error {
+	sess.Logger.Infof("close database session '%s'", sess.dbName)
 	return sess.db.Close()
 }
 
@@ -35,6 +37,7 @@ func NewSession(logger *logrus.Logger, cfg config.Config) (*Session, error) {
 
 	return &Session{
 		db:     db,
+		dbName: cfg.Postgres.DBName,
 		Logger: logger,
 	}, nil
 }

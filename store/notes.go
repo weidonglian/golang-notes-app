@@ -11,7 +11,7 @@ type NotesStore struct {
 	logger *logrus.Logger
 }
 
-func NewNotesStore(ctx *StoreContext) NotesStore {
+func NewNotesStore(ctx *Context) NotesStore {
 	return NotesStore{
 		db:     ctx.Session.GetDB(),
 		logger: ctx.Session.Logger,

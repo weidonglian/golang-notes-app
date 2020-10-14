@@ -12,7 +12,7 @@ type UsersStore struct {
 	logger *logrus.Logger
 }
 
-func NewUsersStore(ctx *StoreContext) UsersStore {
+func NewUsersStore(ctx *Context) UsersStore {
 	return UsersStore{
 		db:     ctx.Session.GetDB(),
 		logger: ctx.Session.Logger,
