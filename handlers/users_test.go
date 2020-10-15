@@ -7,8 +7,19 @@ import (
 )
 
 var _ = Describe("Users", func() {
+
+	var testApp HandlerTestApp
+
+	BeforeEach(func() {
+		testApp = NewTestAppAndServe()
+	})
+
+	AfterEach(func() {
+		testApp.Close()
+	})
+
 	It("POST /users/new", func() {
-		testApp := NewTestAppAndServe()
+		defer testApp.Close()
 		By("should not be able to create any existing users")
 		for _, user := range model.TestUsers {
 			testApp.API.POST("/users/new").WithJSON(map[string]string{"username": user.Username, "password": user.Password}).

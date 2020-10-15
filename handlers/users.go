@@ -62,17 +62,17 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h UsersHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("change password"))
+	w.Write([]byte("NotImplementedYet"))
 }
 
 func (h UsersHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("user update"))
+	w.Write([]byte("NotImplementedYet"))
 }
 
 func (h UsersHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("user delete"))
+	w.Write([]byte("NotImplementedYet"))
 }
 
 func (h UsersHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("user get"))
+	w.Write([]byte("NotImplementedYet"))
 }
