@@ -9,23 +9,23 @@ import (
 	"testing"
 )
 
-func init() {
-	config.SetTestMode()
-}
-
 func TestStore(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Store Suite")
 }
 
 var (
-	dbSessionPool db.SessionPool
+	dbSessionPool *db.SessionPool
 )
 
 var _ = BeforeSuite(func() {
-	dbSessionPool = db.NewSessionPool(logging.NewLogger(), config.GetConfig())
+	config.SetTestMode()
+	dbSessionPool = db.LoadSessionPool(logging.NewLogger(), config.GetConfig())
 })
 
 var _ = AfterSuite(func() {
-	dbSessionPool.Close()
+	if dbSessionPool != nil {
+		db.UnloadSessionPool()
+		dbSessionPool = nil
+	}
 })

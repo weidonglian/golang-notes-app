@@ -8,13 +8,11 @@ import (
 )
 
 type UsersHandler struct {
-	s          *store.Store
 	usersStore *store.UsersStore
 }
 
 func NewUsersHandler(s *store.Store) UsersHandler {
 	return UsersHandler{
-		s:          s,
 		usersStore: &s.Users,
 	}
 }

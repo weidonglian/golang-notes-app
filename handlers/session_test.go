@@ -8,6 +8,7 @@ import (
 
 var _ = Describe("Session", func() {
 	Describe("POST /session", func() {
+		testApp := NewTestAppAndServe()
 		It("Test users should be able to login", func() {
 			for _, user := range model.TestUsers {
 				testApp.API.POST("/session").

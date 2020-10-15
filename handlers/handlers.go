@@ -47,6 +47,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		// middlewares for protected routes
 		r.Use(auth.Verifier())
 		r.Use(auth.Authenticator())
+
 		// session handler
 		session := NewSessionHandler(store, auth)
 		r.Delete("/session", session.DeleteSession)

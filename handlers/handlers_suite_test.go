@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"github.com/weidonglian/golang-notes-app/app"
 	"github.com/weidonglian/golang-notes-app/config"
+	"github.com/weidonglian/golang-notes-app/db"
 	"github.com/weidonglian/golang-notes-app/logging"
 	"net/http/httptest"
 	"testing"
@@ -12,23 +13,13 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func init() {
-	config.SetTestMode()
-}
-
 func TestHandlers(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Handlers Suite")
 }
 
-var testApp HandlerTestApp
-
-var _ = BeforeSuite(func() {
-	testApp = NewTestAppAndServe(GinkgoT())
-})
-
 var _ = AfterSuite(func() {
-	testApp.Close()
+	db.UnloadSessionPool()
 })
 
 type HandlerTestApp struct {
@@ -37,24 +28,24 @@ type HandlerTestApp struct {
 	server *httptest.Server
 }
 
-func NewTestAppAndServe(t GinkgoTInterface) HandlerTestApp {
-	if !config.IsTestMode() {
-		panic("NewTestApp should only be allowed in test mode.")
-	}
+// Each new test app will fork a new db session and will be cleanup after suite test.
+func NewTestAppAndServe() HandlerTestApp {
+	// Mandatory
+	config.SetTestMode()
 
 	logger := logging.NewLogger()
 	cfg := config.GetConfig()
 
 	logger.Infof("Creating a new test app")
 
-	if app, err := app.NewApp(logger, cfg); err != nil {
+	if app, err := app.NewTestApp(logger, cfg); err != nil {
 		panic("Failed to create the test app")
 	} else {
 		// run server using httptest
 		server := httptest.NewServer(app.Router())
 
 		// create httpexpect instance
-		api := httpexpect.New(t, server.URL)
+		api := httpexpect.New(GinkgoT(), server.URL)
 
 		return HandlerTestApp{
 			App:    app,

@@ -14,16 +14,23 @@ type SessionPool struct {
 	forkedDatabases []string
 }
 
-func NewSessionPool(logger *logrus.Logger, cfg config.Config) SessionPool {
+var currentSessionPool *SessionPool
+
+func LoadSessionPool(logger *logrus.Logger, cfg config.Config) *SessionPool {
+	if currentSessionPool != nil {
+		return currentSessionPool
+	}
+
 	sess, err := NewSession(logger, cfg)
 	if err != nil {
 		panic(err)
 	}
-	return SessionPool{
+	currentSessionPool = &SessionPool{
 		parent: sess,
 		Logger: logger,
 		cfg:    cfg,
 	}
+	return currentSessionPool
 }
 
 func (i *SessionPool) ForkNewSession() *Session {
@@ -40,18 +47,25 @@ func (i *SessionPool) ForkNewSession() *Session {
 	}
 }
 
-func (i *SessionPool) Close() {
-	i.Logger.Info("Close session pool database")
+func UnloadSessionPool() {
+	if currentSessionPool == nil {
+		return
+	}
 
-	db := i.parent.GetDB()
-	for _, dbName := range i.forkedDatabases {
-		i.Logger.Infof("Drop table: %s", dbName)
+	p := currentSessionPool
+
+	p.Logger.Info("Close session pool database")
+
+	db := p.parent.GetDB()
+	for _, dbName := range p.forkedDatabases {
+		p.Logger.Infof("Drop table: %s", dbName)
 		db.MustExec(fmt.Sprintf(`REVOKE CONNECT ON DATABASE %s FROM public`, dbName))
 		db.MustExec(fmt.Sprintf(`SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '%s'`, dbName))
 		db.MustExec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", dbName))
 	}
 
-	if err := i.parent.Close(); err != nil {
+	if err := p.parent.Close(); err != nil {
 		panic(err)
 	}
+	currentSessionPool = nil
 }

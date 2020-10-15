@@ -8,6 +8,7 @@ import (
 
 var _ = Describe("Users", func() {
 	It("POST /users/new", func() {
+		testApp := NewTestAppAndServe()
 		By("should not be able to create any existing users")
 		for _, user := range model.TestUsers {
 			testApp.API.POST("/users/new").WithJSON(map[string]string{"username": user.Username, "password": user.Password}).

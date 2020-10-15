@@ -69,3 +69,27 @@ func NewApp(logger *logrus.Logger, cfg config.Config) (*App, error) {
 	}
 	return a, nil
 }
+
+func NewTestApp(logger *logrus.Logger, cfg config.Config) (*App, error) {
+	if !config.IsTestMode() {
+		panic("NewTestApp should only be used for test application")
+	}
+
+	dbSess := db.LoadSessionPool(logger, cfg).ForkNewSession()
+
+	var s *store.Store
+	if sto, err := store.NewStore(dbSess); err != nil {
+		return nil, err
+	} else {
+		s = sto
+	}
+
+	a := &App{
+		logger: logger,
+		config: cfg,
+		db:     dbSess,
+		auth:   auth.NewAuth(cfg),
+		store:  s,
+	}
+	return a, nil
+}
