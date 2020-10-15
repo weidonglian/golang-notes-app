@@ -36,17 +36,6 @@ func (auth Auth) Authenticator() func(http.Handler) http.Handler {
 	return jwtauth.Authenticator
 }
 
-func getClaimsFromRequest(r *http.Request) jwt.MapClaims {
-	_, claims, _ := jwtauth.FromContext(r.Context())
-	return claims
-}
-
-func GetUserIDFromRequest(r *http.Request) int {
-	claims := getClaimsFromRequest(r)
-	userID := claims["user_id"]
-	return userID.(int)
-}
-
 func NewAuth(cfg config.Config) *Auth {
 	tokenAuth := jwtauth.New("HS256", []byte(cfg.JWTSecret), nil)
 	return &Auth{tokenAuth}

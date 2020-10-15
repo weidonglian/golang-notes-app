@@ -55,15 +55,24 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		users := NewUsersHandler(store)
 		r.Put("/users/password", users.ChangePassword)
 		r.Route("/users/{id}", func(r chi.Router) {
-			r.Use(users.UserCtx)
+			r.Use(users.CtxID)
 			r.Put("/", users.UpdateByID)
 			r.Delete("/", users.DeleteByID)
 			r.Get("/", users.GetByID)
 		})
 		// notes handler
-		//notes := handlers.NewNotesHandler()
+		notes := NewNotesHandler(store)
+		r.Post("/notes", notes.Create)
+		r.Delete("/notes", notes.Delete)
+		r.Get("/notes", notes.List)
+		r.Route("/notes/{id}", func(r chi.Router) {
+			r.Use(notes.CtxID)
+			r.Put("/", notes.UpdateByID)
+			r.Delete("/", notes.DeleteByID)
+			r.Get("/", notes.GetByID)
+		})
 		// todos handler
-		//todos := handlers.NewTodosHandler()
+		//todos := NewTodosHandler()
 
 	})
 	return r

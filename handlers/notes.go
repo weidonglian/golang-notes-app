@@ -1,38 +1,24 @@
 package handlers
 
 import (
+	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
-
-	"github.com/go-chi/chi"
 )
 
-type NotesHandler struct{}
-
-func NewNotesHandler() NotesHandler {
-	return NotesHandler{}
+type NotesHandler struct {
+	notesStore store.NotesStore
 }
 
-// Routes creates a REST router for the notes resource
-func (h NotesHandler) Routes() chi.Router {
-	r := chi.NewRouter()
-	// r.Use() // some middleware..
+func NewNotesHandler(store *store.Store) NotesHandler {
+	return NotesHandler{store.Notes}
+}
 
-	r.Get("/", h.List)    // GET /notes - read a list of notes
-	r.Post("/", h.Create) // POST /notes - create a new note and pehist it
-	r.Put("/", h.Delete)
-
-	r.Route("/{id}", func(r chi.Router) {
-		// r.Use(h.NoteCtx) // lets have a notes map, and lets actually load/manipulate
-		r.Get("/", h.GetByID)       // GET /notes/{id} - read a single note by :id
-		r.Put("/", h.Update)        // PUT /notes/{id} - update a single note by :id
-		r.Delete("/", h.DeleteByID) // DELETE /notes/{id} - delete a single note by :id
-	})
-
-	return r
+func (h NotesHandler) CtxID(next http.Handler) http.Handler {
+	return next
 }
 
 func (h NotesHandler) List(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("notes list of stuff.."))
+
 }
 
 func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +29,7 @@ func (h NotesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("note get"))
 }
 
-func (h NotesHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h NotesHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("note update"))
 }
 

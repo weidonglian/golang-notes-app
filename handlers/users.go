@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/model"
 	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
@@ -17,7 +18,7 @@ func NewUsersHandler(s *store.Store) UsersHandler {
 	}
 }
 
-func (h UsersHandler) UserCtx(next http.Handler) http.Handler {
+func (h UsersHandler) CtxID(next http.Handler) http.Handler {
 	return next
 }
 
@@ -36,13 +37,13 @@ func (req reqNewUser) Bind(r *http.Request) error {
 func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	data := &reqNewUser{}
 
-	if err := ReceiveJson(r, data); err != nil {
-		SendError(w, r, http.StatusBadRequest, err)
+	if err := util.ReceiveJson(r, data); err != nil {
+		util.SendError(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if h.usersStore.FindByName(data.Username) != nil {
-		SendError(w, r, http.StatusBadRequest, fmt.Errorf("username '%s' already exists", data.Username))
+		util.SendError(w, r, http.StatusBadRequest, fmt.Errorf("username '%s' already exists", data.Username))
 		return
 	}
 
@@ -53,10 +54,10 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := h.usersStore.Create(newUser); err != nil {
-		SendError(w, r, http.StatusInternalServerError, err)
+		util.SendError(w, r, http.StatusInternalServerError, err)
 		return
 	} else {
-		SendStatus(w, r, http.StatusOK)
+		util.SendStatus(w, r, http.StatusOK)
 		return
 	}
 }
