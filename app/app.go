@@ -2,11 +2,9 @@ package app
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/golang-notes-app/db"
 	"net/http"
-	"time"
-
-	"github.com/sirupsen/logrus"
 
 	"github.com/weidonglian/golang-notes-app/auth"
 	"github.com/weidonglian/golang-notes-app/config"
@@ -14,9 +12,6 @@ import (
 	"github.com/weidonglian/golang-notes-app/store"
 
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
-	"github.com/weidonglian/golang-notes-app/logging"
 )
 
 // App is the main application.
@@ -29,39 +24,7 @@ type App struct {
 }
 
 func (a *App) Router() *chi.Mux {
-	r := chi.NewRouter()
-
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(logging.NewStructuredLogger(a.logger))
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
-
-	sessionHandler := handlers.NewSessionHandler(a.store, a.auth)
-	// public routes and no auth required
-	r.Group(func(r chi.Router) {
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("hi, hello!"))
-		})
-		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("pong"))
-		})
-		r.Post("/session", sessionHandler.NewSession) // i.e. login
-	})
-
-	// Protected routes and auth required
-	r.Group(func(r chi.Router) {
-		// middlewares for protected routes
-		r.Use(a.auth.Verifier())
-		r.Use(a.auth.Authenticator())
-		r.Use(render.SetContentType(render.ContentTypeJSON)) // force response type with json
-
-		r.Delete("/session", sessionHandler.DeleteSession) // i.e. logout
-		r.Mount("/todos", handlers.NewTodosHandler().Routes())
-		r.Mount("/users", handlers.NewUsersHandler(a.store).Routes())
-		r.Mount("/notes", handlers.NewNotesHandler().Routes())
-	})
-	return r
+	return handlers.NewRouter(a.logger, a.auth, a.store)
 }
 
 // Serve is the core serve http

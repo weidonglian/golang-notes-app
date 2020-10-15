@@ -1,46 +1,66 @@
 package handlers
 
 import (
+	"fmt"
+	"github.com/weidonglian/golang-notes-app/model"
 	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
-
-	"github.com/go-chi/chi"
 )
 
 type UsersHandler struct {
-	s *store.Store
+	s          *store.Store
+	usersStore *store.UsersStore
 }
 
 func NewUsersHandler(s *store.Store) UsersHandler {
 	return UsersHandler{
-		s: s,
+		s:          s,
+		usersStore: &s.Users,
 	}
-}
-
-func (h UsersHandler) Routes() chi.Router {
-	// Routes for /users
-	r := chi.NewRouter()
-
-	r.Post("/new", h.Create) // POST /users - create a new user
-	r.Put("/password", h.ChangePassword)
-	r.Get("/", h.List) // GET /users - read a list of users
-
-	r.Route("/{id}", func(r chi.Router) {
-		r.Use(h.UserCtx)            // lets have a users map, and lets actually load/manipulate
-		r.Put("/", h.UpdateByID)    // PUT /users/{id} - update a single user by :id
-		r.Delete("/", h.DeleteByID) // DELETE /users/{id} - delete a single user by :id
-		r.Get("/", h.GetByID)       // GET /users/{id} - read a single user by :id
-	})
-
-	return r
 }
 
 func (h UsersHandler) UserCtx(next http.Handler) http.Handler {
 	return next
 }
 
+type reqNewUser struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (req reqNewUser) Bind(r *http.Request) error {
+	if req.Username == "" || req.Password == "" {
+		return fmt.Errorf("missing required fields")
+	}
+	return nil
+}
+
 func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("users create"))
+	data := &reqNewUser{}
+
+	if err := ReceiveJson(r, data); err != nil {
+		SendError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	if h.usersStore.FindByName(data.Username) != nil {
+		SendError(w, r, http.StatusBadRequest, fmt.Errorf("username '%s' already exists", data.Username))
+		return
+	}
+
+	newUser := model.User{
+		Username: data.Username,
+		Password: data.Password,
+		Role:     model.UserRoleUser,
+	}
+
+	if _, err := h.usersStore.Create(newUser); err != nil {
+		SendError(w, r, http.StatusInternalServerError, err)
+		return
+	} else {
+		SendStatus(w, r, http.StatusOK)
+		return
+	}
 }
 
 func (h UsersHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
@@ -53,10 +73,6 @@ func (h UsersHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 
 func (h UsersHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("user delete"))
-}
-
-func (h UsersHandler) List(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func (h UsersHandler) GetByID(w http.ResponseWriter, r *http.Request) {

@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/go-chi/chi"
 	"github.com/weidonglian/golang-notes-app/auth"
 	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
-
-	"github.com/go-chi/render"
-	"github.com/weidonglian/golang-notes-app/errors"
 )
 
 // SessionHandler keeps the dependency for handle session.
@@ -21,6 +19,13 @@ func NewSessionHandler(s *store.Store, a *auth.Auth) SessionHandler {
 		s: s,
 		a: a,
 	}
+}
+
+func (h SessionHandler) Routes() chi.Router {
+	// Routes for /session
+	r := chi.NewRouter()
+
+	return r
 }
 
 // login and auth a new session
@@ -39,8 +44,7 @@ func (req *reqSession) Bind(r *http.Request) error {
 // NewSession POST /session
 func (h SessionHandler) NewSession(w http.ResponseWriter, r *http.Request) {
 	data := &reqSession{}
-	if err := render.Bind(r, data); err != nil {
-		render.Render(w, r, errors.ErrBadRequest(err))
+	if err := ReceiveJson(r, data); err != nil {
 		SendError(w, r, http.StatusBadRequest, err)
 		return
 	}
