@@ -27,6 +27,14 @@ func (a *App) Router() *chi.Mux {
 	return handlers.NewRouter(a.logger, a.auth, a.store)
 }
 
+func (a *App) GetStore() *store.Store {
+	return a.store
+}
+
+func (a *App) GetAuth() *auth.Auth {
+	return a.auth
+}
+
 // Serve is the core serve http
 func (a *App) Serve() {
 	r := a.Router()

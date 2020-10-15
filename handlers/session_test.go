@@ -20,7 +20,7 @@ var _ = Describe("Session", func() {
 
 		It("Test users should be able to login", func() {
 			for _, user := range model.TestUsers {
-				testApp.API.POST("/session").
+				testApp.RawAPI.POST("/session").
 					WithJSON(map[string]string{"username": user.Username, "password": user.Password}).
 					Expect().
 					Status(http.StatusOK).JSON().Object().ContainsKey("token")
@@ -28,7 +28,7 @@ var _ = Describe("Session", func() {
 		})
 
 		It("Nonexistent user should not be able to login", func() {
-			testApp.API.POST("/session").
+			testApp.RawAPI.POST("/session").
 				WithJSON(map[string]string{"username": "xxx", "password": "yyy"}).
 				Expect().
 				Status(http.StatusUnauthorized).JSON().Object().NotContainsKey("token")
@@ -36,19 +36,19 @@ var _ = Describe("Session", func() {
 
 		It("Without username and password should be bad", func() {
 			By("only username should not be OK")
-			testApp.API.POST("/session").
+			testApp.RawAPI.POST("/session").
 				WithJSON(map[string]string{"username": "xxx"}).
 				Expect().
 				Status(http.StatusBadRequest)
 
 			By("only password should not be OK")
-			testApp.API.POST("/session").
+			testApp.RawAPI.POST("/session").
 				WithJSON(map[string]string{"password": "xxx"}).
 				Expect().
 				Status(http.StatusBadRequest)
 
 			By("no username and password should not be OK")
-			testApp.API.POST("/session").
+			testApp.RawAPI.POST("/session").
 				Expect().
 				Status(http.StatusBadRequest)
 		})

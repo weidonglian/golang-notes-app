@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
 )
@@ -18,7 +19,8 @@ func (h NotesHandler) CtxID(next http.Handler) http.Handler {
 }
 
 func (h NotesHandler) List(w http.ResponseWriter, r *http.Request) {
-
+	userId := util.GetUserIDFromRequest(r)
+	util.SendJson(w, r, h.notesStore.FindByUserID(userId))
 }
 
 func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {

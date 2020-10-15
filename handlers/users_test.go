@@ -22,16 +22,16 @@ var _ = Describe("Users", func() {
 		defer testApp.Close()
 		By("should not be able to create any existing users")
 		for _, user := range model.TestUsers {
-			testApp.API.POST("/users/new").WithJSON(map[string]string{"username": user.Username, "password": user.Password}).
+			testApp.RawAPI.POST("/users/new").WithJSON(map[string]string{"username": user.Username, "password": user.Password}).
 				Expect().
 				Status(http.StatusBadRequest).Body().Contains("already exists")
 		}
 
 		By("should be able to create users")
-		testApp.API.POST("/users/new").WithJSON(map[string]string{"username": "u1", "password": "p1"}).
+		testApp.RawAPI.POST("/users/new").WithJSON(map[string]string{"username": "u1", "password": "p1"}).
 			Expect().
 			Status(http.StatusOK)
-		testApp.API.POST("/users/new").WithJSON(map[string]string{"username": "u2", "password": "p2"}).
+		testApp.RawAPI.POST("/users/new").WithJSON(map[string]string{"username": "u2", "password": "p2"}).
 			Expect().
 			Status(http.StatusOK)
 	})

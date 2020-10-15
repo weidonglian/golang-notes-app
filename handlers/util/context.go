@@ -16,6 +16,6 @@ func getClaimsFromRequest(r *http.Request) jwt.MapClaims {
 
 func GetUserIDFromRequest(r *http.Request) int {
 	claims := getClaimsFromRequest(r)
-	userID := claims["user_id"]
-	return userID.(int)
+	userID := int(claims["user_id"].(float64))
+	return userID
 }

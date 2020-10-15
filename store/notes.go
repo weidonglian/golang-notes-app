@@ -47,19 +47,25 @@ func (i NotesStore) Update(id int, name string) (*model.Note, error) {
 	return &note, err
 }
 
-// Tries to delete a user by id, and returns the number of records deleted;
 func (i NotesStore) Delete(id int) error {
 	_, err := i.db.Exec("DELETE FROM notes WHERE note_id = $1", id)
 	return err
 }
 
-// Removes all records from the table;
 func (i NotesStore) DeleteAll() error {
 	_, err := i.db.Exec("TRUNCATE TABLE notes CASCADE")
 	return err
 }
 
-// Tries to find a user from id;
+func (i NotesStore) FindByUserID(userId int) []model.Note {
+	var notes []model.Note
+	err := i.db.Select(&notes, "SELECT * FROM notes WHERE user_id = $1", userId)
+	if err != nil {
+		return nil
+	}
+	return notes
+}
+
 func (i NotesStore) FindByID(id int) *model.Note {
 	note := model.Note{}
 	err := i.db.Get(&note, "SELECT * FROM notes WHERE note_id = $1", id)
@@ -69,7 +75,6 @@ func (i NotesStore) FindByID(id int) *model.Note {
 	return &note
 }
 
-// Tries to find a user from name;
 func (i NotesStore) FindByName(name string) []model.Note {
 	var notes []model.Note
 	err := i.db.Select(&notes, "SELECT * FROM notes WHERE note_name = $1", name)

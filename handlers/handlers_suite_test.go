@@ -24,6 +24,7 @@ var _ = AfterSuite(func() {
 
 type HandlerTestApp struct {
 	App    *app.App
+	RawAPI *httpexpect.Expect
 	API    *httpexpect.Expect
 	server *httptest.Server
 }
@@ -45,10 +46,24 @@ func NewTestAppAndServe() HandlerTestApp {
 		server := httptest.NewServer(app.Router())
 
 		// create httpexpect instance
-		api := httpexpect.New(GinkgoT(), server.URL)
+		rawapi := httpexpect.New(GinkgoT(), server.URL)
+		testUser := app.GetStore().Users.FindByName("test")
+		if testUser == nil {
+			panic("'test' user has not been injected into the database")
+		}
+		var testUserToken string
+		if token, err := app.GetAuth().CreateToken(testUser.ID); err != nil {
+			panic("failed to create test user token")
+		} else {
+			testUserToken = token
+		}
+		api := rawapi.Builder(func(req *httpexpect.Request) {
+			req.WithHeader("Authorization", "Bearer "+testUserToken)
+		})
 
 		return HandlerTestApp{
 			App:    app,
+			RawAPI: rawapi,
 			API:    api,
 			server: server,
 		}

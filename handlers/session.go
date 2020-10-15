@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/go-chi/chi"
 	"github.com/weidonglian/golang-notes-app/auth"
 	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/store"
@@ -20,13 +19,6 @@ func NewSessionHandler(s *store.Store, a *auth.Auth) SessionHandler {
 		s: s,
 		a: a,
 	}
-}
-
-func (h SessionHandler) Routes() chi.Router {
-	// Routes for /session
-	r := chi.NewRouter()
-
-	return r
 }
 
 // login and auth a new session
