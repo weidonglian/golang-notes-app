@@ -18,21 +18,21 @@ func NewNotesStore(ctx *Context) NotesStore {
 	}
 }
 
-func (i NotesStore) Create(note model.Note) (int, error) {
-	var id int
+func (i NotesStore) Create(note model.Note) (*model.Note, error) {
 	stmt, err := i.db.PrepareNamed(`
 		INSERT INTO notes (note_name, user_id)
 		VALUES(:note_name, :user_id)
-		RETURNING note_id
+		RETURNING *
 	`)
 	if err != nil {
-		return id, err
+		return nil, err
 	}
-	err = stmt.Get(&id, note)
-	return id, err
+	var retNote model.Note
+	err = stmt.Get(&retNote, note)
+	return &retNote, err
 }
 
-func (i NotesStore) Update(id int, name string) (*model.Note, error) {
+func (i NotesStore) Update(id int, name string, userId int) (*model.Note, error) {
 	stmt, err := i.db.Preparex(`
 		UPDATE notes
 		SET note_name = $1
@@ -47,13 +47,18 @@ func (i NotesStore) Update(id int, name string) (*model.Note, error) {
 	return &note, err
 }
 
-func (i NotesStore) Delete(id int) error {
-	_, err := i.db.Exec("DELETE FROM notes WHERE note_id = $1", id)
+func (i NotesStore) Delete(id int, userId int) error {
+	_, err := i.db.Exec("DELETE FROM notes WHERE note_id = $1 AND user_id = $2", id, userId)
 	return err
 }
 
-func (i NotesStore) DeleteAll() error {
+func (i NotesStore) DropAll(userId int) error {
 	_, err := i.db.Exec("TRUNCATE TABLE notes CASCADE")
+	return err
+}
+
+func (i NotesStore) DeleteAll(userId int) error {
+	_, err := i.db.Exec("DELETE FROM notes WHERE user_id = $1", userId)
 	return err
 }
 
@@ -66,18 +71,18 @@ func (i NotesStore) FindByUserID(userId int) []model.Note {
 	return notes
 }
 
-func (i NotesStore) FindByID(id int) *model.Note {
+func (i NotesStore) FindByID(id int, userId int) *model.Note {
 	note := model.Note{}
-	err := i.db.Get(&note, "SELECT * FROM notes WHERE note_id = $1", id)
+	err := i.db.Get(&note, "SELECT * FROM notes WHERE note_id = $1 AND user_id = $2", id, userId)
 	if err != nil {
 		return nil
 	}
 	return &note
 }
 
-func (i NotesStore) FindByName(name string) []model.Note {
+func (i NotesStore) FindByName(name string, userId int) []model.Note {
 	var notes []model.Note
-	err := i.db.Select(&notes, "SELECT * FROM notes WHERE note_name = $1", name)
+	err := i.db.Select(&notes, "SELECT * FROM notes WHERE note_name = $1 AND user_id = $2", name, userId)
 	if err != nil {
 		return nil
 	}

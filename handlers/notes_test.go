@@ -38,10 +38,10 @@ var _ = Describe("Notes", func() {
 			},
 		}
 		for i := range notes {
-			if id, err := notesStore.Create(notes[i]); err != nil {
-				panic(fmt.Sprintf("failed to create note: %v", notes[i]))
+			if createdNote, err := notesStore.Create(notes[i]); err != nil {
+				panic(fmt.Sprintf("failed to create note: %v with error:%v", notes[i], err))
 			} else {
-				notes[i].ID = id
+				notes[i].ID = createdNote.ID
 			}
 		}
 	})

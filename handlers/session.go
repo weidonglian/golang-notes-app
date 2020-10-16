@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/weidonglian/golang-notes-app/auth"
+	"github.com/weidonglian/golang-notes-app/handlers/payload"
 	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
@@ -21,22 +21,9 @@ func NewSessionHandler(s *store.Store, a *auth.Auth) SessionHandler {
 	}
 }
 
-// login and auth a new session
-type reqSession struct {
-	Username string `db:"user_name" json:"username" `
-	Password string `db:"user_password" json:"password"`
-}
-
-func (req *reqSession) Bind(r *http.Request) error {
-	if req.Username == "" || req.Password == "" {
-		return fmt.Errorf("missing required session fields")
-	}
-	return nil
-}
-
 // NewSession POST /session
 func (h SessionHandler) NewSession(w http.ResponseWriter, r *http.Request) {
-	data := &reqSession{}
+	data := &payload.ReqSession{}
 	if err := util.ReceiveJson(r, data); err != nil {
 		util.SendErrorBadRequest(w, r, err)
 		return

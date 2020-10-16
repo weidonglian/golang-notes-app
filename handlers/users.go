@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/weidonglian/golang-notes-app/handlers/payload"
 	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/model"
 	"github.com/weidonglian/golang-notes-app/store"
@@ -22,20 +23,8 @@ func (h UsersHandler) CtxID(next http.Handler) http.Handler {
 	return next
 }
 
-type reqNewUser struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-func (req reqNewUser) Bind(r *http.Request) error {
-	if req.Username == "" || req.Password == "" {
-		return fmt.Errorf("missing required fields")
-	}
-	return nil
-}
-
 func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
-	data := &reqNewUser{}
+	data := &payload.ReqUser{}
 
 	if err := util.ReceiveJson(r, data); err != nil {
 		util.SendErrorBadRequest(w, r, err)

@@ -9,6 +9,7 @@ import (
 // List of the error messages.
 var (
 	ErrorMissingRequiredFields = errors.New("missing required fields")
+	ErrorMissingRequiredParams = errors.New("missing required params")
 	ErrorUnauthorized          = errors.New("missing required credentials")
 )
 
