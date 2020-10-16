@@ -1,13 +1,16 @@
 package util
 
 import (
+	"errors"
 	"github.com/go-chi/render"
 	"net/http"
 )
 
-//--
-// Error response payloads & renderers
-//--
+// List of the error messages.
+var (
+	ErrorMissingRequiredFields = errors.New("missing required fields")
+	ErrorUnauthorized          = errors.New("missing required credentials")
+)
 
 // ErrResponse renderer type for handling all sorts of errors.
 //
@@ -34,39 +37,5 @@ func NewErrorResponse(httpStatusCode int, err error) *ErrResponse {
 		HTTPStatusCode: httpStatusCode,
 		StatusText:     http.StatusText(httpStatusCode),
 		AppMessage:     err.Error(),
-	}
-}
-
-func ErrStatusUnauthorized(err error) *ErrResponse {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: http.StatusUnauthorized,
-		StatusText:     http.StatusText(http.StatusUnauthorized),
-		AppMessage:     err.Error(),
-	}
-}
-
-func ErrBadRequest(err error) *ErrResponse {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: http.StatusBadRequest,
-		StatusText:     http.StatusText(http.StatusBadRequest),
-		AppMessage:     err.Error(),
-	}
-}
-
-func ErrUnprocessableEntity(err error) *ErrResponse {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: http.StatusUnprocessableEntity,
-		StatusText:     http.StatusText(http.StatusUnprocessableEntity),
-		AppMessage:     err.Error(),
-	}
-}
-
-func ErrNotFound() *ErrResponse {
-	return &ErrResponse{
-		HTTPStatusCode: http.StatusNotFound,
-		StatusText:     http.StatusText(http.StatusNotFound),
 	}
 }

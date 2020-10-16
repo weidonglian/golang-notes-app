@@ -25,3 +25,23 @@ func SendStatus(w http.ResponseWriter, r *http.Request, httpStatusCode int) {
 func SendError(w http.ResponseWriter, r *http.Request, httpStatusCode int, err error) {
 	render.Render(w, r, NewErrorResponse(httpStatusCode, err))
 }
+
+// SendErrorBadRequest sends the bad request with given error
+func SendErrorBadRequest(w http.ResponseWriter, r *http.Request, err error) {
+	render.Render(w, r, NewErrorResponse(http.StatusBadRequest, err))
+}
+
+// SendErrorInternalServer sends the bad request with given error
+func SendErrorInternalServer(w http.ResponseWriter, r *http.Request, err error) {
+	render.Render(w, r, NewErrorResponse(http.StatusInternalServerError, err))
+}
+
+// SendErrorUnauthorized sends the bad request with given error
+func SendErrorUnauthorized(w http.ResponseWriter, r *http.Request) {
+	render.Render(w, r, NewErrorResponse(http.StatusUnauthorized, ErrorUnauthorized))
+}
+
+// SendErrorUnprocessableEntity sends the unprocessable entity error
+func SendErrorUnprocessableEntity(w http.ResponseWriter, r *http.Request, err error) {
+	render.Render(w, r, NewErrorResponse(http.StatusUnprocessableEntity, err))
+}

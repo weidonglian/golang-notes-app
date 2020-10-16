@@ -38,26 +38,24 @@ func (req *reqSession) Bind(r *http.Request) error {
 func (h SessionHandler) NewSession(w http.ResponseWriter, r *http.Request) {
 	data := &reqSession{}
 	if err := util.ReceiveJson(r, data); err != nil {
-		util.SendError(w, r, http.StatusBadRequest, err)
+		util.SendErrorBadRequest(w, r, err)
 		return
 	}
 
 	user := h.s.Users.FindByName(data.Username)
 	if user == nil {
-		util.SendError(w, r, http.StatusUnauthorized, fmt.Errorf("invalid login details"))
+		util.SendErrorUnauthorized(w, r)
 		return
 	}
 
 	if token, err := h.a.CreateToken(user.ID); err != nil {
-		util.SendError(w, r, http.StatusUnprocessableEntity, err)
-		return
+		util.SendErrorUnprocessableEntity(w, r, err)
 	} else {
 		util.SendJson(w, r, struct {
 			Token string `json:"token"`
 		}{
 			Token: token,
 		})
-		return
 	}
 }
 

@@ -28,7 +28,8 @@ func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h NotesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("note get"))
+	userId := util.GetUserIDFromRequest(r)
+	util.SendJson(w, r, h.notesStore.FindByID(userId))
 }
 
 func (h NotesHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {

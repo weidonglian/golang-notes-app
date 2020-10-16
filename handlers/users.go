@@ -38,12 +38,12 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	data := &reqNewUser{}
 
 	if err := util.ReceiveJson(r, data); err != nil {
-		util.SendError(w, r, http.StatusBadRequest, err)
+		util.SendErrorBadRequest(w, r, err)
 		return
 	}
 
 	if h.usersStore.FindByName(data.Username) != nil {
-		util.SendError(w, r, http.StatusBadRequest, fmt.Errorf("username '%s' already exists", data.Username))
+		util.SendErrorBadRequest(w, r, fmt.Errorf("username '%s' already exists", data.Username))
 		return
 	}
 
@@ -54,7 +54,7 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := h.usersStore.Create(newUser); err != nil {
-		util.SendError(w, r, http.StatusInternalServerError, err)
+		util.SendErrorInternalServer(w, r, err)
 		return
 	} else {
 		util.SendStatus(w, r, http.StatusOK)
