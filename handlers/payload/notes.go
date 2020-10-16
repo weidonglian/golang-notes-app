@@ -9,7 +9,7 @@ import (
 // Payload of Response Note
 type RespNote struct {
 	*model.Note
-	UseId util.OmitField `json:"userId,omitempty"`
+	UserId util.OmitField `json:"userId,omitempty"`
 }
 
 func NewRespNote(note *model.Note) RespNote {

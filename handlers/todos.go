@@ -1,52 +1,121 @@
 package handlers
 
 import (
-	"net/http"
-
+	"context"
+	"errors"
+	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/weidonglian/golang-notes-app/handlers/payload"
+	"github.com/weidonglian/golang-notes-app/handlers/util"
+	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/golang-notes-app/store"
+	"net/http"
+	"strconv"
 )
 
-type TodosHandler struct{}
-
-func NewTodosHandler() TodosHandler {
-	return TodosHandler{}
+type TodosHandler struct {
+	todosStore store.TodosStore
+	notesStore store.NotesStore
 }
 
-// Routes creates a REST router for the todos resource
-func (h TodosHandler) Routes() chi.Router {
-	r := chi.NewRouter()
-	// r.Use() // some middleware..
+func NewTodosHandler(store *store.Store) TodosHandler {
+	return TodosHandler{
+		todosStore: store.Todos,
+		notesStore: store.Notes,
+	}
+}
 
-	r.Get("/", h.List)    // GET /todos - read a list of todos
-	r.Post("/", h.Create) // POST /todos - create a new todo and pehist it
-	r.Put("/", h.Delete)
+func (h TodosHandler) CtxID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var todo *model.Todo
+		var todoId int
 
-	r.Route("/{id}", func(r chi.Router) {
-		// r.Use(h.TodoCtx) // lets have a todos map, and lets actually load/manipulate
-		r.Get("/", h.Get)       // GET /todos/{id} - read a single todo by :id
-		r.Put("/", h.Update)    // PUT /todos/{id} - update a single todo by :id
-		r.Delete("/", h.Delete) // DELETE /todos/{id} - delete a single todo by :id
+		// extract noteId from the URLParam
+		if idValue := chi.URLParam(r, "id"); idValue == "" {
+			util.SendErrorBadRequest(w, r, util.ErrorMissingRequiredParams)
+			return
+		} else {
+			if id, err := strconv.Atoi(idValue); err != nil {
+				util.SendErrorBadRequest(w, r, err)
+				return
+			} else {
+				todoId = id
+			}
+		}
+
+		userId := util.GetUserIDFromRequest(r)
+		if todo = h.todosStore.FindByID(todoId); todo == nil {
+			util.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find todo"))
+			return
+		}
+
+		// restrict access for current user only.
+		if h.notesStore.FindByID(todo.NoteID, userId) == nil {
+			util.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find todo for current user"))
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "CtxID", todo)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
-
-	return r
 }
 
 func (h TodosHandler) List(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("todos list of stuff.."))
+
 }
 
 func (h TodosHandler) Create(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("todos create"))
+	data := &payload.ReqTodo{}
+	if err := util.ReceiveJson(r, data); err != nil {
+		util.SendErrorBadRequest(w, r, err)
+		return
+	}
+
+	if h.notesStore.FindByID(*data.NoteID, util.GetUserIDFromRequest(r)) == nil {
+		util.SendErrorUnprocessableEntity(w, r, errors.New("provide note with id does not exist for current user"))
+		return
+	}
+
+	if todo, err := h.todosStore.Create(payload.NewTodoFromReq(data)); err != nil {
+		util.SendErrorUnprocessableEntity(w, r, err)
+	} else {
+		util.SendJson(w, r, todo)
+	}
 }
 
-func (h TodosHandler) Get(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("todo get"))
+func (h TodosHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
+	data := &payload.ReqTodo{}
+	if err := util.ReceiveJson(r, data); err != nil {
+		util.SendErrorBadRequest(w, r, err)
+		return
+	}
+	ctxTodo := r.Context().Value("CtxID").(*model.Todo)
+	if ctxTodo.NoteID != *data.NoteID {
+		util.SendErrorUnprocessableEntity(w, r, errors.New("todo and note id mismatch"))
+		return
+	}
+
+	if updatedTodo, err := h.todosStore.Update(ctxTodo.ID, data.Name, data.Done); err != nil {
+		util.SendErrorUnprocessableEntity(w, r, err)
+	} else {
+		util.SendJson(w, r, updatedTodo)
+	}
 }
 
-func (h TodosHandler) Update(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("todo update"))
+func (h TodosHandler) ToggleByID(w http.ResponseWriter, r *http.Request) {
+	ctxTodo := r.Context().Value("CtxID").(*model.Todo)
+	if todo, err := h.todosStore.Toggle(ctxTodo.ID); err != nil {
+		util.SendErrorUnprocessableEntity(w, r, err)
+	} else {
+		util.SendJson(w, r, todo)
+	}
 }
 
-func (h TodosHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("todo delete"))
+func (h TodosHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
+	todo := r.Context().Value("CtxID").(*model.Todo)
+	if err := h.todosStore.Delete(todo.ID); err != nil {
+		util.SendErrorUnprocessableEntity(w, r, err)
+	} else {
+		util.SendStatus(w, r, http.StatusOK)
+	}
 }

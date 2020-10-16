@@ -134,11 +134,12 @@ var _ = Describe("Store", func() {
 			notesStore := sto.Notes
 			By("Creat non-existent notes should be pleasant")
 			for _, note := range notes {
-				noteId, err := notesStore.Create(note)
+				createdNote, err := notesStore.Create(note)
 				Expect(err).NotTo(HaveOccurred())
-				foundNote := notesStore.FindByID(noteId)
+				foundNote := notesStore.FindByID(createdNote.ID, testUserId)
+				Expect(foundNote).NotTo(BeNil())
 				Expect(foundNote.Name).To(Equal(note.Name))
-				Expect(foundNote.ID).To(Equal(noteId))
+				Expect(foundNote.ID).To(Equal(createdNote.ID))
 				Expect(foundNote.UserID).To(Equal(note.UserID))
 			}
 
@@ -149,10 +150,10 @@ var _ = Describe("Store", func() {
 			}
 
 			By("Should be possible to clear all the notes")
-			err := notesStore.DeleteAll()
+			err := notesStore.DeleteAll(testUserId)
 			Expect(err).ToNot(HaveOccurred())
 			for _, note := range notes {
-				foundNote := notesStore.FindByName(note.Name)
+				foundNote := notesStore.FindByName(note.Name, testUserId)
 				Expect(foundNote).To(BeNil())
 			}
 		})
@@ -161,16 +162,16 @@ var _ = Describe("Store", func() {
 			notesStore := sto.Notes
 			By("Creat notes should be found correctly by id")
 			for _, note := range notes {
-				noteId, err := notesStore.Create(note)
+				createdNote, err := notesStore.Create(note)
 				Expect(err).NotTo(HaveOccurred())
-				foundNote := notesStore.FindByID(noteId)
+				foundNote := notesStore.FindByID(createdNote.ID, testUserId)
 				Expect(foundNote).NotTo(BeNil())
 				Expect(foundNote.Name).To(Equal(note.Name))
 			}
 
 			By("Find by name and remove by id")
 			for _, note := range notes {
-				foundNotes := notesStore.FindByName(note.Name)
+				foundNotes := notesStore.FindByName(note.Name, testUserId)
 				Expect(len(foundNotes) > 0).To(BeTrue())
 			}
 		})
@@ -205,10 +206,10 @@ var _ = Describe("Store", func() {
 			notesStore := sto.Notes
 			for i := range notes {
 				n := &notes[i]
-				if notedId, err := notesStore.Create(*n); err != nil {
+				if createdNote, err := notesStore.Create(*n); err != nil {
 					panic(err)
 				} else {
-					n.ID = notedId
+					n.ID = createdNote.ID
 				}
 			}
 			// init todo list
@@ -239,32 +240,20 @@ var _ = Describe("Store", func() {
 				for _, todo := range todos {
 					By("Create a todo into given note should always work")
 					todo.NoteID = note.ID
-					todoId, err := todosStore.Create(todo)
+					createdTodo, err := todosStore.Create(todo)
 					Expect(err).NotTo(HaveOccurred())
 
 					By("Found by todo id should always work")
-					foundTodo := todosStore.FindByID(todoId)
+					foundTodo := todosStore.FindByID(createdTodo.ID)
 					Expect(foundTodo.Name).To(Equal(todo.Name)) // should be exact since search by unique id
-					Expect(foundTodo.ID).To(Equal(todoId))
+					Expect(foundTodo.ID).To(Equal(createdTodo.ID))
 					Expect(foundTodo.Done).To(Equal(todo.Done))
 				}
-			}
-
-			By("Should be possible to clear all the todos")
-			err := todosStore.DeleteAll()
-			Expect(err).ToNot(HaveOccurred())
-			for _, todo := range todos {
-				foundTodos := todosStore.FindByName(todo.Name)
-				Expect(len(foundTodos)).To(BeZero())
 			}
 		})
 
 		It("Find and Delete", func() {
 			todosStore := sto.Todos
-			// clear all the todos
-			err := todosStore.DeleteAll()
-			Expect(err).ToNot(HaveOccurred())
-
 			By("Creat todoNames in an existing note should always be pleasant")
 			for _, note := range notes {
 				for _, todo := range todos {

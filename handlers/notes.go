@@ -43,7 +43,7 @@ func (h NotesHandler) CtxID(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "CtxIdNote", note)
+		ctx := context.WithValue(r.Context(), "CtxID", note)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -67,7 +67,7 @@ func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h NotesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	ctxNote := r.Context().Value("CtxIdNote").(*model.Note)
+	ctxNote := r.Context().Value("CtxID").(*model.Note)
 	util.SendJson(w, r, payload.NewRespNote(ctxNote))
 }
 
@@ -77,7 +77,7 @@ func (h NotesHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 		util.SendErrorBadRequest(w, r, err)
 		return
 	}
-	ctxNote := r.Context().Value("CtxIdNote").(*model.Note)
+	ctxNote := r.Context().Value("CtxID").(*model.Note)
 	userId := util.GetUserIDFromRequest(r)
 	if updatedNote, err := h.notesStore.Update(ctxNote.ID, data.Name, userId); err != nil {
 		util.SendErrorUnprocessableEntity(w, r, err)
@@ -96,7 +96,7 @@ func (h NotesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h NotesHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
-	note := r.Context().Value("CtxIdNote").(*model.Note)
+	note := r.Context().Value("CtxID").(*model.Note)
 	if err := h.notesStore.Delete(note.ID, util.GetUserIDFromRequest(r)); err != nil {
 		util.SendErrorUnprocessableEntity(w, r, err)
 		return

@@ -18,44 +18,53 @@ func NewTodosStore(ctx *Context) TodosStore {
 	}
 }
 
-func (i TodosStore) Create(todo model.Todo) (int, error) {
-	var id int
+func (i TodosStore) Create(todo model.Todo) (*model.Todo, error) {
 	stmt, err := i.db.PrepareNamed(`
 		INSERT INTO todos (todo_name, todo_done, note_id)
 		VALUES(:todo_name, :todo_done, :note_id)
-		RETURNING todo_id
-	`)
-	if err != nil {
-		return id, err
-	}
-	err = stmt.Get(&id, todo)
-	return id, err
-}
-
-func (i TodosStore) UpdateName(id int, name string) (*model.Todo, error) {
-	stmt, err := i.db.Preparex(`
-		UPDATE todos
-		SET todo_name = $1
-		WHERE todo_id = $2
 		RETURNING *
 	`)
 	if err != nil {
 		return nil, err
 	}
-	todo := model.Todo{}
-	err = stmt.Get(&todo, name, id)
-	return &todo, err
+	var retTodo model.Todo
+	err = stmt.Get(&retTodo, todo)
+	return &retTodo, err
+}
+
+func (i TodosStore) Update(id int, name string, done *bool) (*model.Todo, error) {
+	if done != nil {
+		if stmt, err := i.db.Preparex(`UPDATE todos SET todo_name = $2, todo_done = $3 WHERE todo_id = $1 RETURNING *`); err != nil {
+			return nil, err
+		} else {
+			todo := model.Todo{}
+			err = stmt.Get(&todo, id, name, *done)
+			return &todo, err
+		}
+	} else {
+		if stmt, err := i.db.Preparex(`UPDATE todos SET todo_name = $2 WHERE todo_id = $1 RETURNING *`); err != nil {
+			return nil, err
+		} else {
+			todo := model.Todo{}
+			err = stmt.Get(&todo, id, name)
+			return &todo, err
+		}
+	}
+}
+
+func (i TodosStore) Toggle(id int) (*model.Todo, error) {
+	if stmt, err := i.db.Preparex(`UPDATE todos SET todo_done = NOT todo_done WHERE todo_id = $1 RETURNING *`); err != nil {
+		return nil, err
+	} else {
+		todo := model.Todo{}
+		err = stmt.Get(&todo, id)
+		return &todo, err
+	}
 }
 
 // Tries to delete a user by id, and returns the number of records deleted;
 func (i TodosStore) Delete(id int) error {
 	_, err := i.db.Exec("DELETE FROM todos WHERE todo_id = $1", id)
-	return err
-}
-
-// Removes all records from the table;
-func (i TodosStore) DeleteAll() error {
-	_, err := i.db.Exec("TRUNCATE TABLE todos CASCADE")
 	return err
 }
 
