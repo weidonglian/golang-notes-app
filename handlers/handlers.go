@@ -77,6 +77,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		r.Post("/todos", todos.Create)
 		r.Route("/todos/{id}", func(r chi.Router) {
 			r.Use(todos.CtxID)
+			r.Get("/", todos.GetByID)
 			r.Put("/", todos.UpdateByID)
 			r.Put("/toggle", todos.ToggleByID)
 			r.Delete("/", todos.DeleteByID)

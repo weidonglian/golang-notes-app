@@ -76,6 +76,11 @@ func (h TodosHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if data.NoteID == nil {
+		util.SendErrorBadRequest(w, r, util.ErrorMissingRequiredFields)
+		return
+	}
+
 	if h.notesStore.FindByID(*data.NoteID, util.GetUserIDFromRequest(r)) == nil {
 		util.SendErrorUnprocessableEntity(w, r, errors.New("provide note with id does not exist for current user"))
 		return
@@ -88,6 +93,11 @@ func (h TodosHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h TodosHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+	ctxTodo := r.Context().Value("CtxID").(*model.Todo)
+	util.SendJson(w, r, ctxTodo)
+}
+
 func (h TodosHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	data := &payload.ReqTodo{}
 	if err := util.ReceiveJson(r, data); err != nil {
@@ -95,10 +105,6 @@ func (h TodosHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctxTodo := r.Context().Value("CtxID").(*model.Todo)
-	if ctxTodo.NoteID != *data.NoteID {
-		util.SendErrorUnprocessableEntity(w, r, errors.New("todo and note id mismatch"))
-		return
-	}
 
 	if updatedTodo, err := h.todosStore.Update(ctxTodo.ID, data.Name, data.Done); err != nil {
 		util.SendErrorUnprocessableEntity(w, r, err)

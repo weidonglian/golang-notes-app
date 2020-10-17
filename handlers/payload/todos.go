@@ -14,7 +14,7 @@ type ReqTodo struct {
 }
 
 func (req *ReqTodo) Bind(r *http.Request) error {
-	if req.Name == "" || req.NoteID == nil {
+	if req.Name == "" {
 		return util.ErrorMissingRequiredFields
 	}
 	return nil
