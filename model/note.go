@@ -9,3 +9,8 @@ type Note struct {
 func NewNote() Note {
 	return Note{}
 }
+
+type NoteWithTodos struct {
+	*Note
+	Todos []Todo
+}

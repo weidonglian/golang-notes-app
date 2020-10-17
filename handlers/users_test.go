@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	. "github.com/onsi/ginkgo"
+	. "github.com/weidonglian/golang-notes-app/handlers/test"
 	"github.com/weidonglian/golang-notes-app/model"
 	"net/http"
 )

@@ -32,3 +32,16 @@ func NewTodoFromReq(req *ReqTodo) model.Todo {
 		NoteID: *req.NoteID,
 	}
 }
+
+// Payload of Request List Todo
+type RespTodos struct {
+	RespNote
+	Todos []model.Todo `json:"todos"`
+}
+
+func NewRespTodos(note *model.Note, todos []model.Todo) RespTodos {
+	return RespTodos{
+		RespNote: NewRespNote(note),
+		Todos:    todos,
+	}
+}

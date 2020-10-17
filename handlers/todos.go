@@ -61,7 +61,12 @@ func (h TodosHandler) CtxID(next http.Handler) http.Handler {
 }
 
 func (h TodosHandler) List(w http.ResponseWriter, r *http.Request) {
-
+	notes := h.notesStore.FindByUserID(util.GetUserIDFromRequest(r))
+	respItems := make([]payload.RespTodos, len(notes))
+	for i := 0; i < len(respItems); i++ {
+		respItems[i] = payload.NewRespTodos(&notes[i], h.todosStore.FindByNoteID(notes[i].ID))
+	}
+	util.SendJson(w, r, respItems)
 }
 
 func (h TodosHandler) Create(w http.ResponseWriter, r *http.Request) {

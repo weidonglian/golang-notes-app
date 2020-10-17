@@ -87,9 +87,9 @@ func (i TodosStore) FindByName(name string) []model.Todo {
 }
 
 // Tries to find from note_id;
-func (i TodosStore) FindByNoteID(noteId int) []model.Todo {
+func (i TodosStore) FindByNoteID(noteID int) []model.Todo {
 	var todos []model.Todo
-	if err := i.db.Select(&todos, "SELECT * FROM todos WHERE note_id = $1", noteId); err != nil {
+	if err := i.db.Select(&todos, "SELECT * FROM todos WHERE note_id = $1", noteID); err != nil {
 		return []model.Todo{}
 	}
 	return todos
