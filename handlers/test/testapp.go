@@ -15,8 +15,8 @@ import (
 
 type HandlerTestApp struct {
 	App    *app.App
-	RawAPI *httpexpect.Expect
-	API    *httpexpect.Expect
+	RawAPI *httpexpect.Expect // Raw vanilla request with any header pre-injection
+	API    *httpexpect.Expect // With test user's auth header bearer token
 	server *httptest.Server
 }
 
@@ -30,20 +30,20 @@ func NewTestAppAndServe() HandlerTestApp {
 
 	logger.Infof("Creating a new test app")
 
-	if app, err := app.NewTestApp(logger, cfg); err != nil {
+	if tapp, err := app.NewTestApp(logger, cfg); err != nil {
 		panic("Failed to create the test app")
 	} else {
 		// run server using httptest
-		server := httptest.NewServer(app.Router())
+		server := httptest.NewServer(tapp.Router())
 
 		// create httpexpect instance
 		rawapi := httpexpect.New(ginkgo.GinkgoT(), server.URL)
-		testUser := app.GetStore().Users.FindByName("test")
+		testUser := tapp.GetStore().Users.FindByName("test")
 		if testUser == nil {
 			panic("'test' user has not been injected into the database")
 		}
 		var testUserToken string
-		if token, err := app.GetAuth().CreateToken(testUser.ID); err != nil {
+		if token, err := tapp.GetAuth().CreateToken(testUser.ID); err != nil {
 			panic("failed to create test user token")
 		} else {
 			testUserToken = token
@@ -53,7 +53,7 @@ func NewTestAppAndServe() HandlerTestApp {
 		})
 
 		return HandlerTestApp{
-			App:    app,
+			App:    tapp,
 			RawAPI: rawapi,
 			API:    api,
 			server: server,
