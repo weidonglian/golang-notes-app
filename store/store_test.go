@@ -154,7 +154,7 @@ var _ = Describe("Store", func() {
 			Expect(err).ToNot(HaveOccurred())
 			for _, note := range notes {
 				foundNote := notesStore.FindByName(note.Name, testUserId)
-				Expect(foundNote).To(BeNil())
+				Expect(foundNote).To(BeEmpty())
 			}
 		})
 
