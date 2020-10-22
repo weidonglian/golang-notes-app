@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS notes
 	note_id SERIAL PRIMARY KEY,
 	note_name VARCHAR NOT NULL,
 	user_id INTEGER NOT NULL,
-	FOREIGN KEY (user_id) REFERENCES users(user_id)
+	FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS todos
@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS todos
     todo_name VARCHAR NOT NULL,
     todo_done BOOLEAN NOT NULL,
     note_id INTEGER NOT NULL,
-    FOREIGN KEY (note_id) REFERENCES notes(note_id)
+    FOREIGN KEY (note_id) REFERENCES notes(note_id) ON DELETE  CASCADE
 );
