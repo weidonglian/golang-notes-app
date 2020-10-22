@@ -63,10 +63,10 @@ func (i NotesStore) DeleteAll(userId int) error {
 }
 
 func (i NotesStore) FindByUserID(userId int) []model.Note {
-	var notes []model.Note
+	notes := make([]model.Note, 0)
 	err := i.db.Select(&notes, "SELECT * FROM notes WHERE user_id = $1", userId)
 	if err != nil {
-		return nil
+		return notes
 	}
 	return notes
 }
@@ -81,10 +81,10 @@ func (i NotesStore) FindByID(id int, userId int) *model.Note {
 }
 
 func (i NotesStore) FindByName(name string, userId int) []model.Note {
-	var notes []model.Note
+	notes := make([]model.Note, 0)
 	err := i.db.Select(&notes, "SELECT * FROM notes WHERE note_name = $1 AND user_id = $2", name, userId)
 	if err != nil {
-		return nil
+		return notes
 	}
 	return notes
 }

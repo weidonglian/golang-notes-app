@@ -3,6 +3,7 @@ package payload
 import (
 	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
 )
 
@@ -10,16 +11,17 @@ import (
 type RespNote struct {
 	*model.Note
 	UserId util.OmitField `json:"userId,omitempty"`
+	Todos  []model.Todo   `json:"todos"`
 }
 
-func NewRespNote(note *model.Note) RespNote {
-	return RespNote{Note: note}
+func NewRespNote(note *model.Note, todosStore store.TodosStore) RespNote {
+	return RespNote{Note: note, Todos: todosStore.FindByNoteID(note.ID)}
 }
 
-func NewRespNoteArray(notes []model.Note) []RespNote {
+func NewRespNoteArray(notes []model.Note, todosStore store.TodosStore) []RespNote {
 	respNotes := make([]RespNote, len(notes))
 	for i := 0; i < len(notes); i++ {
-		respNotes[i] = RespNote{Note: &notes[i]}
+		respNotes[i] = NewRespNote(&notes[i], todosStore)
 	}
 	return respNotes
 }

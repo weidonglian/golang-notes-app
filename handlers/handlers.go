@@ -3,8 +3,10 @@ package handlers
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/golang-notes-app/auth"
+	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/logging"
 	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
@@ -22,6 +24,7 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.Mux {
 	r := chi.NewRouter()
 
+	r.Use(cors.Handler(util.CorsOptions))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(logging.NewStructuredLogger(logger))
@@ -73,7 +76,6 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		})
 		// todos handler
 		todos := NewTodosHandler(store)
-		r.Get("/todos", todos.List)
 		r.Post("/todos", todos.Create)
 		r.Route("/todos/{id}", func(r chi.Router) {
 			r.Use(todos.CtxID)

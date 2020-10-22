@@ -1,10 +1,10 @@
 package handlers_test
 
 import (
-	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/weidonglian/golang-notes-app/handlers/test"
+	"github.com/rs/xid"
+	"github.com/weidonglian/golang-notes-app/handlers/test"
 	"github.com/weidonglian/golang-notes-app/model"
 	"github.com/weidonglian/golang-notes-app/store"
 	"net/http"
@@ -13,65 +13,21 @@ import (
 var _ = Describe("Notes", func() {
 
 	var (
-		testApp       HandlerTestApp
-		usersStore    store.UsersStore
+		testApp       test.HandlerTestApp
 		notesStore    store.NotesStore
 		testUserId    int
-		testUserNotes []model.Note
 		devUserId     int
-		devUserNotes  []model.Note
+		testUserNotes []model.NoteWithTodos
+		devUserNotes  []model.NoteWithTodos
 	)
 
 	BeforeEach(func() {
-		testApp = NewTestAppAndServe()
-		usersStore = testApp.App.GetStore().Users
+		testApp = test.NewTestAppAndServe()
 		notesStore = testApp.App.GetStore().Notes
-
-		testUserId = usersStore.FindByName("test").ID
-		testUserNotes = []model.Note{
-			{
-				Name:   "n1",
-				UserID: testUserId,
-			},
-			{
-				Name:   "n2",
-				UserID: testUserId,
-			},
-			{
-				Name:   "n3",
-				UserID: testUserId,
-			},
-		}
-		for i := range testUserNotes {
-			if createdNote, err := notesStore.Create(testUserNotes[i]); err != nil {
-				panic(fmt.Sprintf("failed to create note: %v with error:%v", testUserNotes[i], err))
-			} else {
-				testUserNotes[i].ID = createdNote.ID
-			}
-		}
-
-		devUserId = usersStore.FindByName("dev").ID
-		devUserNotes = []model.Note{
-			{
-				Name:   "n4",
-				UserID: devUserId,
-			},
-			{
-				Name:   "n5",
-				UserID: devUserId,
-			},
-			{
-				Name:   "n6",
-				UserID: devUserId,
-			},
-		}
-		for i := range devUserNotes {
-			if createdNote, err := notesStore.Create(devUserNotes[i]); err != nil {
-				panic(fmt.Sprintf("failed to create note: %v with error:%v", devUserNotes[i], err))
-			} else {
-				devUserNotes[i].ID = createdNote.ID
-			}
-		}
+		testUserId = testApp.App.GetStore().Users.FindByName("test").ID
+		devUserId = testApp.App.GetStore().Users.FindByName("dev").ID
+		testUserNotes = test.NewTestUserNotesData(&testApp)
+		devUserNotes = test.NewDevUserNotesData(&testApp)
 	})
 
 	AfterEach(func() {
@@ -83,11 +39,20 @@ var _ = Describe("Notes", func() {
 			fetchedNotes := testApp.API.GET("/notes").
 				Expect().
 				Status(http.StatusOK).JSON().Array()
-			fetchedNotes.Length().Equal(3)
+			fetchedNotes.Length().Equal(len(testUserNotes))
 			for i := range testUserNotes {
-				fetchedNotes.Element(i).Object().Keys().Contains("id", "name").NotContains("userId")
-				fetchedNotes.Element(i).Object().Values().Contains(testUserNotes[i].ID, testUserNotes[i].Name)
-				fetchedNotes.Element(i).Object().Values().NotContains(devUserNotes[i].ID, devUserNotes[i].Name)
+				fetchedNote := fetchedNotes.Element(i).Object()
+				fetchedNote.Keys().Contains("id", "name", "todos").NotContains("userId")
+				fetchedNote.Values().Contains(testUserNotes[i].ID, testUserNotes[i].Name)
+				for _, devNote := range devUserNotes {
+					fetchedNote.Values().NotContains(devNote.ID, devNote.Name)
+				}
+				fetchedTodos := fetchedNote.Value("todos").Array()
+				fetchedTodos.Length().Equal(len(testUserNotes[i].Todos))
+				for j := range testUserNotes[i].Todos {
+					fetchedTodos.Element(j).Object().Keys().Contains("id", "name", "done", "noteId")
+					fetchedTodos.Element(j).Object().Equal(testUserNotes[i].Todos[j])
+				}
 			}
 		})
 
@@ -101,6 +66,7 @@ var _ = Describe("Notes", func() {
 					Status(http.StatusOK).JSON().Object()
 				fetchedNote.Value("id").Equal(testUserNotes[i].ID)
 				fetchedNote.Value("name").Equal(testUserNotes[i].Name)
+				fetchedNote.Value("todos").Equal(testUserNotes[i].Todos)
 				fetchedNote.NotContainsKey("userId")
 			}
 		})
@@ -119,11 +85,12 @@ var _ = Describe("Notes", func() {
 		Context("we should be able to create name with any non-empty string", func() {
 			noteNames := []string{"pn1", "pn2", "pn3"}
 			for _, noteName := range noteNames {
-				testApp.API.POST("/notes").WithJSON(map[string]string{"name": noteName}).
+				newNote := testApp.API.POST("/notes").WithJSON(map[string]string{"name": noteName}).
 					Expect().
-					Status(http.StatusOK).JSON().Object().
-					ContainsKey("id").NotContainsKey("userId").
-					Value("name").Equal(noteName)
+					Status(http.StatusOK).JSON().Object()
+				newNote.Keys().Contains("id", "name", "todos").NotContains("userId")
+				newNote.Value("name").Equal(noteName)
+				newNote.Value("todos").Array().Length().Equal(0)
 			}
 		})
 
@@ -139,32 +106,30 @@ var _ = Describe("Notes", func() {
 
 	It("PUT /notes/{id}", func() {
 		Context("we should be able to update note name", func() {
-			newNames := []string{"xy1", "xy2", "xy3"}
-			if len(newNames) != len(testUserNotes) {
-				panic("new notes name count should match that of testUserNotes")
-			}
-			for i := range newNames {
-				testApp.API.PUT("/notes/{id}", testUserNotes[i].ID).WithJSON(map[string]string{"name": newNames[i]}).
+			for _, note := range testUserNotes {
+				randomName := xid.New().String()
+				updatedNote := testApp.API.PUT("/notes/{id}", note.ID).WithJSON(map[string]string{"name": randomName}).
 					Expect().
-					Status(http.StatusOK).JSON().Object().
-					ContainsKey("id").NotContainsKey("userId").
-					Value("name").Equal(newNames[i])
+					Status(http.StatusOK).JSON().Object()
+				updatedNote.Keys().Contains("id", "name", "todos").NotContains("userId")
+				updatedNote.Value("name").Equal(randomName)
+				updatedNote.Value("todos").Equal(note.Todos)
 			}
 		})
 	})
 
 	It("DELETE /notes/{id}", func() {
 		Context("we should be able to delete the test user's notes by id", func() {
-			for i := range testUserNotes {
-				testApp.API.DELETE("/notes/{id}", testUserNotes[i].ID).
+			for _, note := range testUserNotes {
+				testApp.API.DELETE("/notes/{id}", note.ID).
 					Expect().
 					Status(http.StatusOK).Body().Empty()
 			}
 		})
 
 		Context("we should not be able to delete valid id of another user", func() {
-			for i := range devUserNotes {
-				testApp.API.DELETE("/notes/{id}", devUserNotes[i].ID).
+			for _, note := range devUserNotes {
+				testApp.API.DELETE("/notes/{id}", note.ID).
 					Expect().
 					Status(http.StatusUnprocessableEntity).Body().Contains("unable to find note")
 			}

@@ -17,7 +17,7 @@ func (auth Auth) CreateToken(userID int) (string, error) {
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["user_id"] = userID
-	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	atClaims["exp"] = time.Now().Add(time.Hour * 120).Unix()
 	return auth.generateToken(atClaims)
 }
 

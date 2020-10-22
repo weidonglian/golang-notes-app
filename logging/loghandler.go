@@ -1,7 +1,10 @@
 package logging
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/weidonglian/golang-notes-app/config"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -14,7 +17,6 @@ import (
 // own. Also take a look at https://github.com/pressly/lg for a dedicated pkg based
 // on this work, designed for context-based http routers.
 func NewStructuredLogger(logger *logrus.Logger) func(next http.Handler) http.Handler {
-
 	return middleware.RequestLogger(&StructuredLogger{logger})
 }
 
@@ -44,10 +46,18 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	logFields["user_agent"] = r.UserAgent()
 
 	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
-
+	if config.IsDevMode() && (r.Method == "POST" || r.Method == "PUT") {
+		buf, bodyErr := ioutil.ReadAll(r.Body)
+		if bodyErr != nil {
+			logFields["body"] = bodyErr.Error()
+		} else {
+			logFields["body"] = string(buf)
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
+		}
+	}
 	entry.Logger = entry.Logger.WithFields(logFields)
 
-	entry.Logger.Infoln("request started")
+	entry.Logger.Infoln("request started <<<===")
 
 	return entry
 }
@@ -62,7 +72,7 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, ela
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0,
 	})
 
-	l.Logger.Infoln("request complete")
+	l.Logger.Infoln("request complete ===>>>")
 }
 
 func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {

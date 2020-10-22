@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	. "github.com/onsi/ginkgo"
+	"github.com/rs/xid"
 	"github.com/weidonglian/golang-notes-app/handlers/test"
 	"github.com/weidonglian/golang-notes-app/model"
 	"net/http"
@@ -17,155 +18,12 @@ var _ = Describe("Todos", func() {
 
 	BeforeEach(func() {
 		testApp = test.NewTestAppAndServe()
-
-		// test user test data
-		testUserNotes = []model.NoteWithTodos{
-			{
-				Note: &model.Note{
-					Name: "n1",
-				},
-				Todos: []model.Todo{
-					{
-						Name: "todo_1",
-						Done: true,
-					},
-					{
-						Name: "todo_2",
-						Done: false,
-					},
-					{
-						Name: "todo3",
-						Done: false,
-					},
-				},
-			},
-			{
-				Note: &model.Note{
-					Name: "n2",
-				},
-				Todos: []model.Todo{
-					{
-						Name: "todo_1",
-						Done: true,
-					},
-					{
-						Name: "todo_2",
-						Done: false,
-					},
-					{
-						Name: "todo3",
-						Done: false,
-					},
-				},
-			},
-			{
-				Note: &model.Note{
-					Name: "n3",
-				},
-				Todos: []model.Todo{
-					{
-						Name: "todo_1",
-						Done: true,
-					},
-					{
-						Name: "todo_2",
-						Done: false,
-					},
-					{
-						Name: "todo3",
-						Done: false,
-					},
-				},
-			},
-		}
-
-		test.FillDataToStore(testApp.App.GetStore(), "test", testUserNotes)
-
-		// dev user test data
-		devUserNotes = []model.NoteWithTodos{
-			{
-				Note: &model.Note{
-					Name: "n4",
-				},
-				Todos: []model.Todo{
-					{
-						Name: "todo_dev_1",
-						Done: true,
-					},
-					{
-						Name: "todo_dev_2",
-						Done: false,
-					},
-					{
-						Name: "todo_dev_3",
-						Done: false,
-					},
-				},
-			},
-			{
-				Note: &model.Note{
-					Name: "n5",
-				},
-				Todos: []model.Todo{
-					{
-						Name: "todo_dev_1",
-						Done: true,
-					},
-					{
-						Name: "todo_dev_2",
-						Done: false,
-					},
-					{
-						Name: "todo_dev_3",
-						Done: false,
-					},
-				},
-			},
-			{
-				Note: &model.Note{
-					Name: "n6",
-				},
-				Todos: []model.Todo{
-					{
-						Name: "todo_dev_1",
-						Done: true,
-					},
-					{
-						Name: "todo_dev_2",
-						Done: false,
-					},
-					{
-						Name: "todo_dev_3",
-						Done: false,
-					},
-				},
-			},
-		}
-
-		test.FillDataToStore(testApp.App.GetStore(), "dev", devUserNotes)
+		testUserNotes = test.NewTestUserNotesData(&testApp)
+		devUserNotes = test.NewDevUserNotesData(&testApp)
 	})
 
 	AfterEach(func() {
 		testApp.Close()
-	})
-
-	It("GET /todos", func() {
-		Context("should fetch all todos of test user", func() {
-			fetchedNotes := testApp.API.GET("/todos").
-				Expect().
-				Status(http.StatusOK).JSON().Array()
-			fetchedNotes.Length().Equal(3)
-			for i := range testUserNotes {
-				fetchedNotes.Element(i).Object().Keys().Contains("id", "name", "todos").NotContains("userId")
-				fetchedNotes.Element(i).Object().Values().Contains(testUserNotes[i].ID, testUserNotes[i].Name)
-				fetchedTodos := fetchedNotes.Element(i).Object().Value("todos").Array()
-				fetchedTodos.Length().Equal(3)
-				for j := range testUserNotes[i].Todos {
-					fetchedTodos.Element(j).Object().Keys().Contains("id", "name", "done", "noteId")
-					fetchedTodos.Element(j).Object().Equal(testUserNotes[i].Todos[j])
-				}
-			}
-		})
 	})
 
 	It("GET /todos/{id}", func() {
@@ -242,16 +100,16 @@ var _ = Describe("Todos", func() {
 
 	It("PUT /todos/{id}", func() {
 		Context("we should be able to update todo", func() {
-			newNames := []string{"xy1", "xy2", "xy3"}
 			for i := range testUserNotes {
-				for j := range newNames {
+				for j := range testUserNotes[i].Todos {
+					randomName := xid.New().String()
 					obj := testApp.API.PUT("/todos/{id}", testUserNotes[i].Todos[j].ID).WithJSON(map[string]interface{}{
-						"name": newNames[j],
+						"name": randomName,
 						"done": true,
 					}).Expect().
 						Status(http.StatusOK).JSON().Object()
 					obj.Keys().Contains("id", "name", "done", "noteId")
-					obj.Values().Contains(testUserNotes[i].Todos[j].ID, newNames[j], true, testUserNotes[i].ID)
+					obj.Values().Contains(testUserNotes[i].Todos[j].ID, randomName, true, testUserNotes[i].ID)
 				}
 			}
 		})

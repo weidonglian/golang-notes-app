@@ -79,18 +79,18 @@ func (i TodosStore) FindByID(id int) *model.Todo {
 
 // Tries to find from name;
 func (i TodosStore) FindByName(name string) []model.Todo {
-	var todos []model.Todo
+	todos := make([]model.Todo, 0)
 	if err := i.db.Select(&todos, "SELECT * FROM todos WHERE todo_name = $1", name); err != nil {
-		return []model.Todo{}
+		return todos
 	}
 	return todos
 }
 
 // Tries to find from note_id;
 func (i TodosStore) FindByNoteID(noteID int) []model.Todo {
-	var todos []model.Todo
+	todos := make([]model.Todo, 0)
 	if err := i.db.Select(&todos, "SELECT * FROM todos WHERE note_id = $1", noteID); err != nil {
-		return []model.Todo{}
+		return todos
 	}
 	return todos
 }

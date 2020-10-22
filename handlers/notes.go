@@ -14,10 +14,11 @@ import (
 
 type NotesHandler struct {
 	notesStore store.NotesStore
+	todosStore store.TodosStore
 }
 
 func NewNotesHandler(store *store.Store) NotesHandler {
-	return NotesHandler{store.Notes}
+	return NotesHandler{store.Notes, store.Todos}
 }
 
 func (h NotesHandler) CtxID(next http.Handler) http.Handler {
@@ -50,7 +51,7 @@ func (h NotesHandler) CtxID(next http.Handler) http.Handler {
 
 func (h NotesHandler) List(w http.ResponseWriter, r *http.Request) {
 	notes := h.notesStore.FindByUserID(util.GetUserIDFromRequest(r))
-	util.SendJson(w, r, payload.NewRespNoteArray(notes))
+	util.SendJson(w, r, payload.NewRespNoteArray(notes, h.todosStore))
 }
 
 func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -62,13 +63,13 @@ func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if note, err := h.notesStore.Create(model.Note{Name: data.Name, UserID: util.GetUserIDFromRequest(r)}); err != nil {
 		util.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendJson(w, r, payload.NewRespNote(note))
+		util.SendJson(w, r, payload.NewRespNote(note, h.todosStore))
 	}
 }
 
 func (h NotesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	ctxNote := r.Context().Value("CtxID").(*model.Note)
-	util.SendJson(w, r, payload.NewRespNote(ctxNote))
+	util.SendJson(w, r, payload.NewRespNote(ctxNote, h.todosStore))
 }
 
 func (h NotesHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +83,7 @@ func (h NotesHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	if updatedNote, err := h.notesStore.Update(ctxNote.ID, data.Name, userId); err != nil {
 		util.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendJson(w, r, payload.NewRespNote(updatedNote))
+		util.SendJson(w, r, payload.NewRespNote(updatedNote, h.todosStore))
 	}
 }
 
