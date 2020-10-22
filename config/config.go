@@ -12,7 +12,7 @@ import (
 type appMode string
 
 const (
-	appModeDEV  appMode = "Dev"
+	appModeDev  appMode = "Dev"
 	appModeTest appMode = "Test"
 	appModeProd appMode = "Prod"
 )
@@ -22,7 +22,7 @@ const (
 // 2. By default it will be `Dev` mode.
 // 3. For production, you have to set correctly all the environment variables in envconfig tags.
 // 3. Call `SetTestMode` in the API to switch to test mode for testing or writing unit tests.
-var currentAppMode appMode = appModeDEV
+var currentAppMode appMode = appModeDev
 
 func SetTestMode() {
 	currentAppMode = appModeTest
@@ -35,7 +35,7 @@ func IsDevMode() bool {
 		return false
 	case appModeTest:
 		return false
-	case appModeDEV:
+	case appModeDev:
 		return true
 	default:
 		return true
@@ -43,7 +43,7 @@ func IsDevMode() bool {
 }
 
 func IsProdMode() bool {
-	return currentAppMode == appModeDEV
+	return currentAppMode == appModeProd
 }
 
 func IsTestMode() bool {
@@ -121,7 +121,7 @@ func GetConfig() Config {
 		}
 		currentConfig = &defaultTestConfig
 		currentConfig.MigrationsPath = path.Join(rootDir, currentConfig.MigrationsPath)
-	case appModeDEV:
+	case appModeDev:
 		currentConfig = &defaultDevConfig
 	case appModeProd:
 		currentConfig = &Config{}
