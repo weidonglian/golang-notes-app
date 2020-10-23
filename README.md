@@ -35,3 +35,7 @@ After the whole test suite finishes, the database session pools will cleanup all
 see `./db/sessionpool.go` to understand how it works. Each test will start from a fresh new database.
 
 The benefit is that we can run all the tests independently in parallel without interfering with each other.    
+
+# Production
+
+## Deployment
