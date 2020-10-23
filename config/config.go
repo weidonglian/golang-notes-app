@@ -80,7 +80,7 @@ var (
 	defaultTestConfig = Config{
 		Postgres: PostgresConfig{
 			Host:     "localhost",
-			Port:     5432,
+			Port:     5433,
 			Username: "postgres",
 			Password: "postgres",
 			DBName:   "notes_app_test",

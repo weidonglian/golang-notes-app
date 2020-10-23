@@ -16,6 +16,7 @@ In order to test develop locally, you need:
 
 - Install `go`.
 - Install `docker` for running postgres. 
+- Add an `DEVROOT` in your `.bashrc` to define where to put the `dev` postgres volume data. See `Makefile` and search `DEVROOT`. 
 
 After you have installed the above requirements. You are good to go.
 
