@@ -1,0 +1,38 @@
+version: '3'
+services:
+
+  notes-app-postgres:
+    image: "postgres:12.3"
+    container_name: notes-app-postgres
+    volumes:
+      - notes-app-postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5440:5432
+    environment:
+      POSTGRES_DB: notes_app
+      POSTGRES_USER: mapodoufu
+      POSTGRES_PASSWORD: mapodoufu
+
+  notes-app:
+    build: .
+    container_name: notes-app
+    environment:
+      POSTGRES_HOST: notes-app-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: notes_app
+      POSTGRES_USER: mapodoufu
+      POSTGRES_PASSWORD: mapodoufu
+      SERVER_PORT: 5000
+      JWT_SECRET: jwtmapodoufu
+      MIGRATIONS_PATH: /app/migrations
+      APP_MODE: Prod
+    ports:
+      - 8080:5000
+    restart: always
+    depends_on:
+      - notes-app-postgres
+    links:
+      - notes-app-postgres
+
+volumes:
+  notes-app-postgres-data:

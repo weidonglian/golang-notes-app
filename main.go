@@ -11,10 +11,12 @@ func main() {
 	logger := logging.NewLogger()
 	cfg := config.GetConfig()
 
+	logger.Infof("The app is running in '%s' mode", config.GetAppMode())
+
 	app, err := app.NewApp(logger, cfg)
 
 	if err != nil {
-		logger.Error("Failed to create the main app")
+		logger.Errorf("Failed to create the main app: %s", err.Error())
 		return
 	}
 

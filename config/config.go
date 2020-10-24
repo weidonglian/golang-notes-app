@@ -29,6 +29,10 @@ func SetTestMode() {
 	currentConfig = nil
 }
 
+func GetAppMode() string {
+	return string(currentAppMode)
+}
+
 func IsDevMode() bool {
 	switch currentAppMode {
 	case appModeProd:
@@ -60,7 +64,7 @@ func init() {
 type PostgresConfig struct {
 	Host     string `default:"" envconfig:"POSTGRES_HOST"`
 	Port     int    `default:"" envconfig:"POSTGRES_PORT"`
-	Username string `default:"" envconfig:"POSTGRES_USERNAME"`
+	Username string `default:"" envconfig:"POSTGRES_USER"`
 	Password string `default:"" envconfig:"POSTGRES_PASSWORD"`
 	DBName   string `default:"" envconfig:"POSTGRES_DB"`
 }

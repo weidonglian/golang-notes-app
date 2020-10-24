@@ -1,12 +1,15 @@
 all: start
 .PHONY: all
 
+# Tools
 tools:
 	@echo "install tools"
 	command -v ginkgo >/dev/null 2>&1 || go install github.com/onsi/ginkgo/ginkgo
 
+# Development
 db-start-dev:
 	@echo "starting the postgres docker dev"
+	mkdir -p ${DEVROOT}/docker/volumes/postgres
 	docker container inspect docker-postgres-dev >/dev/null 2>&1 || docker run --rm --name docker-postgres-dev -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 -v ${DEVROOT}/docker/volumes/postgres:/var/lib/postgresql/data postgres:12.3
 
 db-stop-dev:
@@ -21,6 +24,7 @@ start: db-start-dev
 	@echo "run start dev"
 	go run main.go
 
+# Test
 db-start-test:
 	@echo "starting the postgres docker test"
 	docker container inspect docker-postgres-test >/dev/null 2>&1 || docker run --rm --name docker-postgres-test -e POSTGRES_PASSWORD=postgres -d -p 5433:5432 postgres:12.3
@@ -37,6 +41,12 @@ test: tools db-start-test
 	@echo "run test"
 	ginkgo test -r *
 
+# Production
 build:
-	@echo "build the optimized version for production"
+	@echo "Prod: build the optimized version for production"
 	CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+
+serve-prod:
+	@echo "Prod: serve the app using docker-compose"
+	#docker volume create notes-app-postgres-data
+	/usr/bin/env docker-compose up --build
