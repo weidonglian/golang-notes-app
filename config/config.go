@@ -62,7 +62,7 @@ type PostgresConfig struct {
 	Port     int    `default:"" envconfig:"POSTGRES_PORT"`
 	Username string `default:"" envconfig:"POSTGRES_USERNAME"`
 	Password string `default:"" envconfig:"POSTGRES_PASSWORD"`
-	DBName   string `default:"" envconfig:"POSTGRES_DBNAME"`
+	DBName   string `default:"" envconfig:"POSTGRES_DB"`
 }
 
 func (c PostgresConfig) GetDataSourceName() string {

@@ -36,3 +36,7 @@ db-ssh-test:
 test: tools db-start-test
 	@echo "run test"
 	ginkgo test -r *
+
+build:
+	@echo "build the optimized version for production"
+	CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
