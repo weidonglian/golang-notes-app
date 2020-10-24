@@ -1,0 +1,23 @@
+repositories:
+  - name: stable
+    url: https://kubernetes-charts.storage.googleapis.com
+
+releases:
+  - name: postgres
+    chart: ./charts/postgres
+    values:
+      - ./values/notes-app-postgres.yaml
+
+  - name: notes-app
+    chart: ./charts/app
+    values:
+      - ./values/notes-app.yaml
+
+  - name: ingress-backend
+    chart: stable/nginx-ingress
+    version: 1.36.0
+
+  - name: ingress-controller
+    chart: ./charts/ingress
+    values:
+      - ./values/ingress.yaml

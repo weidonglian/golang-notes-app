@@ -1,0 +1,11 @@
+ingress:
+  name: app-ingres
+  hosts:
+    - host: api.notes.biosave.com
+      paths:
+        - path: /
+          backend:
+            service:
+              name: notes-app
+              port:
+                number: 8080
