@@ -1,7 +1,7 @@
 ingress:
   name: app-ingres
   hosts:
-    - host: api.notes.biosave.com
+    - host: api.notes.biosave.org
       paths:
         - path: /
           backend:

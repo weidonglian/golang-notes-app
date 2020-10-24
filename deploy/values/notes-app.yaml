@@ -3,7 +3,7 @@ app:
   group: app
   replicaCount: 1
   container:
-    image: added-here
+    image: weidonglian/notes-app:v1
     port: 8080
     config:
       - name: app-postgres-config
