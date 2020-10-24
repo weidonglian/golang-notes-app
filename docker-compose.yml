@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: mapodoufu
 
   notes-app:
-    build: ..
+    build: .
     container_name: notes-app
     environment:
       POSTGRES_HOST: notes-app-postgres

@@ -53,4 +53,4 @@ build:
 serve-prod:
 	@echo "Prod: serve the app using docker-compose"
 	#docker volume create notes-app-postgres-data
-	docker-compose -f ./deploy/docker-compose.yml up --build
+	docker-compose up --build
