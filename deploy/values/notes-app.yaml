@@ -3,22 +3,22 @@ app:
   group: app
   replicaCount: 1
   container:
-    image: weidonglian/notes-app:v1
+    image: added-here
     port: 8080
     config:
       - name: app-postgres-config
     env:
-      - key: POSTGRES_HOST
+      - name: POSTGRES_HOST
         value: app-postgres
-      - key: POSTGRES_PORT
+      - name: POSTGRES_PORT
         value: 5432
-      - key: SERVER_PORT
+      - name: SERVER_PORT
         value: 8080
-      - key: JWT_SECRET
+      - name: JWT_SECRET
         value: jwtmapodoufu
-      - key: MIGRATIONS_PATH
+      - name: MIGRATIONS_PATH
         value: /app/migrations
-      - key: APP_MODE
+      - name: APP_MODE
         value: Prod
   service:
     type: ClusterIP

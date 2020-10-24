@@ -17,17 +17,17 @@ spec:
         group: {{ .Values.app.group }}
     spec:
       containers:
-        - name: {{ .Values.app.name }}
-          image: {{ .Values.app.container.image }}  
-          ports:
-            - containerPort: {{ .Values.app.container.port }}
-          envFrom:
-            {{- range .Values.app.container.config }}
-            - configMapRef:
-                name: {{ .name }}
-            {{- end}}
-          env:
-            {{- range .Values.app.container.env}}
-            - name: {{ .key}}
-              value: {{ .value}}
-            {{- end}}
+      - name: {{ .Values.app.name }}
+        image: {{ .Values.app.container.image }}
+        ports:
+          - containerPort: {{ .Values.app.container.port }}
+        envFrom:
+          {{- range .Values.app.container.config }}
+          - configMapRef:
+              name: {{ .name }}
+          {{- end}}
+        env:
+          {{- range .Values.app.container.env}}
+          - name: {{ .name}}
+            value: {{ .value | quote}}
+          {{- end}}

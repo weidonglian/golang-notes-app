@@ -54,3 +54,7 @@ serve-prod:
 	@echo "Prod: serve the app using docker-compose"
 	#docker volume create notes-app-postgres-data
 	docker-compose up --build
+
+sync-helmfile:
+	@echo "Prod: sync helmfile to kubernetes"
+	helmfile -f ./deploy/helmfile.yaml sync
