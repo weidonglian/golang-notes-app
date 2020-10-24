@@ -7,8 +7,7 @@ tools:
 
 db-start-dev:
 	@echo "starting the postgres docker dev"
-	docker container inspect docker-postgres-dev >/dev/null 2>&1 || (docker run --rm --name docker-postgres-dev -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 -v ${DEVROOT}/docker/volumes/postgres:/var/lib/postgresql/data postgres:12.3 && sleep 3)
-	docker exec -it docker-postgres-dev psql -U postgres -c "CREATE DATABASE notes_app_dev;" >/dev/null 2>&1 || true
+	docker container inspect docker-postgres-dev >/dev/null 2>&1 || docker run --rm --name docker-postgres-dev -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 -v ${DEVROOT}/docker/volumes/postgres:/var/lib/postgresql/data postgres:12.3
 
 db-stop-dev:
 	@echo "stopping the postgres docker dev"
@@ -24,8 +23,7 @@ start: db-start-dev
 
 db-start-test:
 	@echo "starting the postgres docker test"
-	docker container inspect docker-postgres-test >/dev/null 2>&1 || (docker run --rm --name docker-postgres-test -e POSTGRES_PASSWORD=postgres -d -p 5433:5432 postgres:12.3 && sleep 3)
-	docker exec -it docker-postgres-test psql -U postgres -c "CREATE DATABASE notes_app_test;" >/dev/null 2>&1 || true
+	docker container inspect docker-postgres-test >/dev/null 2>&1 || docker run --rm --name docker-postgres-test -e POSTGRES_PASSWORD=postgres -d -p 5433:5432 postgres:12.3
 
 db-stop-test:
 	@echo "stopping the postgres docker test"
