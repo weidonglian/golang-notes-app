@@ -1,4 +1,4 @@
-name: golang-notes-app
+name: main development
 on:
   push:
     branches: [ main ]
