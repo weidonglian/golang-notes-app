@@ -12,7 +12,7 @@ app:
         value: app-postgres
       - name: POSTGRES_PORT
         value: 5432
-      - name: SERVER_PORT
+      - name: PORT
         value: 8080
       - name: JWT_SECRET
         value: jwtmapodoufu

@@ -81,7 +81,7 @@ func (c PostgresConfig) GetDataSourceName() string {
 
 type Config struct {
 	Postgres       PostgresConfig
-	ServerPort     int    `default:"4000" envconfig:"SERVER_PORT"`
+	ServerPort     int    `default:"4000" envconfig:"PORT"`
 	JWTSecret      string `default:"MaPoDouFu" envconfig:"JWT_SECRET"`
 	MigrationsPath string `default:"./db/migrations" envconfig:"MIGRATIONS_PATH"`
 }

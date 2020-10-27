@@ -23,7 +23,8 @@ services:
       POSTGRES_DB: notes_app
       POSTGRES_USER: mapodoufu
       POSTGRES_PASSWORD: mapodoufu
-      SERVER_PORT: 5000
+      DATABASE_URL: ""
+      PORT: 5000
       JWT_SECRET: jwtmapodoufu
       MIGRATIONS_PATH: /app/migrations
       APP_MODE: Prod
