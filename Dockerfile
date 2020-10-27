@@ -5,7 +5,7 @@ ADD . /build/
 WORKDIR /build
 RUN make build
 
-FROM scratch
+FROM alpine:latest
 COPY --from=builder /build/main /app/
 COPY --from=builder /build/db/migrations /app/migrations
 WORKDIR /app
