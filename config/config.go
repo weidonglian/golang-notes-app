@@ -62,15 +62,21 @@ func init() {
 }
 
 type PostgresConfig struct {
-	Host     string `default:"" envconfig:"POSTGRES_HOST"`
-	Port     int    `default:"" envconfig:"POSTGRES_PORT"`
-	Username string `default:"" envconfig:"POSTGRES_USER"`
-	Password string `default:"" envconfig:"POSTGRES_PASSWORD"`
-	DBName   string `default:"" envconfig:"POSTGRES_DB"`
+	Host        string `default:"" envconfig:"POSTGRES_HOST"`
+	Port        int    `default:"" envconfig:"POSTGRES_PORT"`
+	Username    string `default:"" envconfig:"POSTGRES_USER"`
+	Password    string `default:"" envconfig:"POSTGRES_PASSWORD"`
+	DBName      string `default:"" envconfig:"POSTGRES_DB"`
+	DataBaseURL string `default:"" envconfig:"DATABASE_URL"`
 }
 
 func (c PostgresConfig) GetDataSourceName() string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.Username, c.Password, c.DBName)
+	if c.DataBaseURL != "" {
+		return c.DataBaseURL
+	} else {
+		return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.Username, c.Password, c.DBName)
+	}
+
 }
 
 type Config struct {
@@ -83,11 +89,12 @@ type Config struct {
 var (
 	defaultTestConfig = Config{
 		Postgres: PostgresConfig{
-			Host:     "localhost",
-			Port:     5433,
-			Username: "postgres",
-			Password: "postgres",
-			DBName:   "postgres",
+			Host:        "localhost",
+			Port:        5433,
+			Username:    "postgres",
+			Password:    "postgres",
+			DBName:      "postgres",
+			DataBaseURL: "",
 		},
 		ServerPort:     3000,
 		JWTSecret:      "@Test@NoteApp",
@@ -96,11 +103,12 @@ var (
 
 	defaultDevConfig = Config{
 		Postgres: PostgresConfig{
-			Host:     "localhost",
-			Port:     5432,
-			Username: "postgres",
-			Password: "postgres",
-			DBName:   "postgres",
+			Host:        "localhost",
+			Port:        5432,
+			Username:    "postgres",
+			Password:    "postgres",
+			DBName:      "postgres",
+			DataBaseURL: "",
 		},
 		ServerPort:     4000,
 		JWTSecret:      "@Dev@NoteApp",
