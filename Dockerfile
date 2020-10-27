@@ -9,4 +9,4 @@ FROM scratch
 COPY --from=builder /build/main /app/
 COPY --from=builder /build/db/migrations /app/migrations
 WORKDIR /app
-CMD ["./main"]
+CMD ["/app/main"]
