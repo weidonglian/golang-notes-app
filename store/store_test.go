@@ -56,9 +56,9 @@ var _ = Describe("Store", func() {
 			usersStore := sto.Users
 			By("Creat non-existent users should be pleasant")
 			for _, user := range users {
-				userId, err := usersStore.Create(user)
+				createdUser, err := usersStore.Create(user)
 				Expect(err).NotTo(HaveOccurred())
-				foundUser := usersStore.FindByID(userId)
+				foundUser := usersStore.FindByID(createdUser.ID)
 				Expect(foundUser.Username).To(Equal(user.Username))
 				Expect(store.CheckPassword(foundUser.Password, user.Password)).To(BeTrue())
 				Expect(foundUser.Role).To(Equal(user.Role))
@@ -83,9 +83,9 @@ var _ = Describe("Store", func() {
 			usersStore := sto.Users
 			By("Creat users should be found correctly by id")
 			for _, user := range users {
-				userId, err := usersStore.Create(user)
+				createdUser, err := usersStore.Create(user)
 				Expect(err).NotTo(HaveOccurred())
-				foundUser := usersStore.FindByID(userId)
+				foundUser := usersStore.FindByID(createdUser.ID)
 				Expect(foundUser).NotTo(BeNil())
 				Expect(foundUser.Username).To(Equal(user.Username))
 			}
