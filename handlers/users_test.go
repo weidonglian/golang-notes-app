@@ -31,9 +31,11 @@ var _ = Describe("Users", func() {
 		By("should be able to create users")
 		testApp.RawAPI.POST("/users/new").WithJSON(map[string]string{"username": "u1", "password": "p1"}).
 			Expect().
-			Status(http.StatusOK).JSON().Object().ContainsKey("username").ContainsKey("role").ContainsKey("id").NotContainsKey("password")
+			Status(http.StatusOK).JSON().Object().ContainsKey("username").ContainsKey("role").
+			ContainsKey("id").NotContainsKey("password")
 		testApp.RawAPI.POST("/users/new").WithJSON(map[string]string{"username": "u2", "password": "p2"}).
 			Expect().
-			Status(http.StatusOK).JSON().Object().ContainsKey("username").ContainsKey("role").ContainsKey("id").NotContainsKey("password")
+			Status(http.StatusOK).JSON().Object().ContainsKey("username").ContainsKey("role").
+			ContainsKey("id").NotContainsKey("password")
 	})
 })
