@@ -42,7 +42,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		// ping vs pong
 		r.Get("/ping", pingHandler)
 		// playground for graphql api
-		http.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+		r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 		// session
 		session := NewSessionHandler(store, auth)
 		r.Post("/session", session.NewSession)
@@ -71,7 +71,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		})
 
 		// Graphql handler
-		http.Handle("/graphql", handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}})))
+		r.Handle("/graphql", handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}})))
 
 		// notes handler
 		notes := NewNotesHandler(store)
