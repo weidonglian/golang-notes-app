@@ -41,7 +41,7 @@ func RunMigrations(conn *sqlx.DB, cfg config.Config, logger *logrus.Logger) erro
 
 	var mg *migrate.Migrate
 	if m, err := migrate.NewWithDatabaseInstance(
-		fmt.Sprintf("file://%s", absMigrationDir),
+		fmt.Sprintf("file://%s", filepath.ToSlash(absMigrationDir)),
 		cfg.Postgres.DBName, driver); err != nil {
 		return err
 	} else {
