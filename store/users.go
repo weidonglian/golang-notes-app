@@ -19,10 +19,10 @@ func NewUsersStore(ctx *Context) UsersStore {
 	}
 }
 
-func (i UsersStore) Create(user model.User) (int, error) {
-	var id int
+func (i UsersStore) Create(user model.User) (*model.User, error) {
+	var retUser model.User
 	if hashedPassword, err := HashPassword(user.Password); err != nil {
-		return id, err
+		return nil, err
 	} else {
 		user.Password = hashedPassword
 	}
@@ -33,13 +33,13 @@ func (i UsersStore) Create(user model.User) (int, error) {
 	stmt, err := i.db.PrepareNamed(`
 		INSERT INTO users (user_name, user_password, user_role)
 		VALUES(:user_name, :user_password, :user_role)
-		RETURNING user_id
+		RETURNING *
 	`)
 	if err != nil {
-		return id, err
+		return nil, err
 	}
-	err = stmt.Get(&id, user)
-	return id, err
+	err = stmt.Get(&retUser, user)
+	return &retUser, err
 }
 
 func (i UsersStore) UpdatePassword(user model.User) (int, error) {
