@@ -1,0 +1,37 @@
+schema {
+  query: Query,
+  mutation: Mutation
+}
+
+type Query {
+    notes: [Note]
+}
+
+type Mutation {
+    createNote(name: String!): Note
+    updateNote(id: Int!, name: String!): Note
+    deleteNote(id: Int!): Note
+
+    createTodo(name: String!, noteId: Int!): Todo
+    updateTodo(id: Int!, name: String!): Todo
+    deleteTodo(id: Int!): Todo
+    toggleTodo(id: Int!): Todo
+}
+
+interface Node {
+    id: Int!
+}
+
+type Todo implements Node {
+    id: Int!
+    name: String!
+    done: Boolean
+    noteId: Int!
+}
+
+type Note implements Node {
+    id: Int!
+    name: String!
+    userId: Int!
+    todos: [Todo]
+}
