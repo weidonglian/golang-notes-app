@@ -47,7 +47,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 
 	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
 	if config.IsDevMode() {
-		if r.Method == "POST" || r.Method == "PUT" {
+		if r.RequestURI != "/graphql" && r.Method == "POST" || r.Method == "PUT" {
 			buf, bodyErr := ioutil.ReadAll(r.Body)
 			if bodyErr != nil {
 				logFields["body"] = bodyErr.Error()
