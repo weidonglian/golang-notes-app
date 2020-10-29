@@ -42,11 +42,11 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Role:     model.UserRoleUser,
 	}
 
-	if _, err := h.usersStore.Create(newUser); err != nil {
+	if user, err := h.usersStore.Create(newUser); err != nil {
 		util.SendErrorInternalServer(w, r, err)
 		return
 	} else {
-		util.SendStatus(w, r, http.StatusOK)
+		util.SendJson(w, r, payload.NewRespUser(user))
 		return
 	}
 }
