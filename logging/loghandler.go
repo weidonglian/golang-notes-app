@@ -46,13 +46,15 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	logFields["user_agent"] = r.UserAgent()
 
 	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
-	if config.IsDevMode() && (r.Method == "POST" || r.Method == "PUT") {
-		buf, bodyErr := ioutil.ReadAll(r.Body)
-		if bodyErr != nil {
-			logFields["body"] = bodyErr.Error()
-		} else {
-			logFields["body"] = string(buf)
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
+	if config.IsDevMode() {
+		if r.Method == "POST" || r.Method == "PUT" {
+			buf, bodyErr := ioutil.ReadAll(r.Body)
+			if bodyErr != nil {
+				logFields["body"] = bodyErr.Error()
+			} else {
+				logFields["body"] = string(buf)
+				r.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
+			}
 		}
 	}
 	entry.Logger = entry.Logger.WithFields(logFields)
