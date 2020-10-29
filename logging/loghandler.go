@@ -70,6 +70,7 @@ type StructuredLoggerEntry struct {
 
 func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
 	l.Logger = l.Logger.WithFields(logrus.Fields{
+		"body":        nil, // clear the body has logged in request started
 		"resp_status": status, "resp_bytes_length": bytes,
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0,
 	})
