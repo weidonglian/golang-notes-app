@@ -44,24 +44,27 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		CreateNote func(childComplexity int, name string) int
-		CreateTodo func(childComplexity int, name string, noteID int) int
-		DeleteNote func(childComplexity int, id int) int
-		DeleteTodo func(childComplexity int, id int) int
-		ToggleTodo func(childComplexity int, id int) int
-		UpdateNote func(childComplexity int, id int, name string) int
-		UpdateTodo func(childComplexity int, id int, name string) int
+		AddNote     func(childComplexity int, input model.AddNoteInput) int
+		AddTodo     func(childComplexity int, input *model.AddTodoInput) int
+		DeleteNote  func(childComplexity int, input *model.DeleteNoteInput) int
+		DeleteTodo  func(childComplexity int, id int) int
+		PlaceHolder func(childComplexity int) int
+		ToggleTodo  func(childComplexity int, id int) int
+		UpdateNote  func(childComplexity int, input model.UpdateNoteInput) int
+		UpdateTodo  func(childComplexity int, input *model.UpdateTodoInput) int
 	}
 
 	Note struct {
-		ID     func(childComplexity int) int
-		Name   func(childComplexity int) int
-		Todos  func(childComplexity int) int
-		UserID func(childComplexity int) int
+		ID    func(childComplexity int) int
+		Name  func(childComplexity int) int
+		Todos func(childComplexity int) int
 	}
 
 	Query struct {
-		Notes func(childComplexity int) int
+		Note        func(childComplexity int, id string) int
+		Notes       func(childComplexity int) int
+		PlaceHolder func(childComplexity int) int
+		Todo        func(childComplexity int, id string) int
 	}
 
 	Todo struct {
@@ -73,16 +76,20 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateNote(ctx context.Context, name string) (*model.Note, error)
-	UpdateNote(ctx context.Context, id int, name string) (*model.Note, error)
-	DeleteNote(ctx context.Context, id int) (*model.Note, error)
-	CreateTodo(ctx context.Context, name string, noteID int) (*model.Todo, error)
-	UpdateTodo(ctx context.Context, id int, name string) (*model.Todo, error)
+	PlaceHolder(ctx context.Context) (*bool, error)
+	AddNote(ctx context.Context, input model.AddNoteInput) (*model.Note, error)
+	UpdateNote(ctx context.Context, input model.UpdateNoteInput) (*model.Note, error)
+	DeleteNote(ctx context.Context, input *model.DeleteNoteInput) (*model.Note, error)
+	AddTodo(ctx context.Context, input *model.AddTodoInput) (*model.Todo, error)
+	UpdateTodo(ctx context.Context, input *model.UpdateTodoInput) (*model.Todo, error)
 	DeleteTodo(ctx context.Context, id int) (*model.Todo, error)
 	ToggleTodo(ctx context.Context, id int) (*model.Todo, error)
 }
 type QueryResolver interface {
+	PlaceHolder(ctx context.Context) (*bool, error)
 	Notes(ctx context.Context) ([]*model.Note, error)
+	Note(ctx context.Context, id string) (*model.Note, error)
+	Todo(ctx context.Context, id string) (*model.Todo, error)
 }
 
 type executableSchema struct {
@@ -100,29 +107,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Mutation.createNote":
-		if e.complexity.Mutation.CreateNote == nil {
+	case "Mutation.addNote":
+		if e.complexity.Mutation.AddNote == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createNote_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_addNote_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateNote(childComplexity, args["name"].(string)), true
+		return e.complexity.Mutation.AddNote(childComplexity, args["input"].(model.AddNoteInput)), true
 
-	case "Mutation.createTodo":
-		if e.complexity.Mutation.CreateTodo == nil {
+	case "Mutation.addTodo":
+		if e.complexity.Mutation.AddTodo == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createTodo_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_addTodo_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateTodo(childComplexity, args["name"].(string), args["noteId"].(int)), true
+		return e.complexity.Mutation.AddTodo(childComplexity, args["input"].(*model.AddTodoInput)), true
 
 	case "Mutation.deleteNote":
 		if e.complexity.Mutation.DeleteNote == nil {
@@ -134,7 +141,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteNote(childComplexity, args["id"].(int)), true
+		return e.complexity.Mutation.DeleteNote(childComplexity, args["input"].(*model.DeleteNoteInput)), true
 
 	case "Mutation.deleteTodo":
 		if e.complexity.Mutation.DeleteTodo == nil {
@@ -147,6 +154,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteTodo(childComplexity, args["id"].(int)), true
+
+	case "Mutation.placeHolder":
+		if e.complexity.Mutation.PlaceHolder == nil {
+			break
+		}
+
+		return e.complexity.Mutation.PlaceHolder(childComplexity), true
 
 	case "Mutation.toggleTodo":
 		if e.complexity.Mutation.ToggleTodo == nil {
@@ -170,7 +184,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateNote(childComplexity, args["id"].(int), args["name"].(string)), true
+		return e.complexity.Mutation.UpdateNote(childComplexity, args["input"].(model.UpdateNoteInput)), true
 
 	case "Mutation.updateTodo":
 		if e.complexity.Mutation.UpdateTodo == nil {
@@ -182,7 +196,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateTodo(childComplexity, args["id"].(int), args["name"].(string)), true
+		return e.complexity.Mutation.UpdateTodo(childComplexity, args["input"].(*model.UpdateTodoInput)), true
 
 	case "Note.id":
 		if e.complexity.Note.ID == nil {
@@ -205,12 +219,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Note.Todos(childComplexity), true
 
-	case "Note.userId":
-		if e.complexity.Note.UserID == nil {
+	case "Query.note":
+		if e.complexity.Query.Note == nil {
 			break
 		}
 
-		return e.complexity.Note.UserID(childComplexity), true
+		args, err := ec.field_Query_note_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Note(childComplexity, args["id"].(string)), true
 
 	case "Query.notes":
 		if e.complexity.Query.Notes == nil {
@@ -218,6 +237,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Notes(childComplexity), true
+
+	case "Query.placeHolder":
+		if e.complexity.Query.PlaceHolder == nil {
+			break
+		}
+
+		return e.complexity.Query.PlaceHolder(childComplexity), true
+
+	case "Query.todo":
+		if e.complexity.Query.Todo == nil {
+			break
+		}
+
+		args, err := ec.field_Query_todo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Todo(childComplexity, args["id"].(string)), true
 
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
@@ -311,30 +349,55 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphql", Input: `schema {
+	{Name: "graph/note.graphql", Input: `type Note implements Node {
+    id: Int!
+    name: String!
+    todos: [Todo]
+}
+
+input AddNoteInput {
+    name: String!
+}
+
+input UpdateNoteInput {
+    id: Int!
+    name: String!
+}
+
+input DeleteNoteInput {
+    id: Int!
+}
+
+extend type Query {
+    notes: [Note]
+    note(id: ID!): Note
+}
+
+extend type Mutation {
+    addNote(input: AddNoteInput!): Note
+    updateNote(input: UpdateNoteInput!): Note
+    deleteNote(input: DeleteNoteInput): Note
+}
+`, BuiltIn: false},
+	{Name: "graph/schema.graphql", Input: `interface Node {
+    id: Int!
+}
+
+schema {
   query: Query,
   mutation: Mutation
 }
 
 type Query {
-    notes: [Note]
+    placeHolder : Boolean
 }
 
 type Mutation {
-    createNote(name: String!): Note
-    updateNote(id: Int!, name: String!): Note
-    deleteNote(id: Int!): Note
-
-    createTodo(name: String!, noteId: Int!): Todo
-    updateTodo(id: Int!, name: String!): Todo
-    deleteTodo(id: Int!): Todo
-    toggleTodo(id: Int!): Todo
+    placeHolder : Boolean
 }
 
-interface Node {
-    id: Int!
-}
-
+`, BuiltIn: false},
+	{Name: "graph/todo.graphql", Input: `
 type Todo implements Node {
     id: Int!
     name: String!
@@ -342,12 +405,28 @@ type Todo implements Node {
     noteId: Int!
 }
 
-type Note implements Node {
+input AddTodoInput {
+    name: String!
+    noteId: Int!
+}
+
+input UpdateTodoInput {
     id: Int!
     name: String!
-    userId: Int!
-    todos: [Todo]
-}`, BuiltIn: false},
+}
+
+extend type Query {
+    todo(id: ID!): Todo
+}
+
+extend type Mutation {
+    addTodo(input: AddTodoInput): Todo
+    updateTodo(input: UpdateTodoInput): Todo
+    deleteTodo(id: Int!): Todo
+    toggleTodo(id: Int!): Todo
+}
+
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -355,57 +434,48 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_createNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_addNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 model.AddNoteInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNAddNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddNoteInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_addTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 *model.AddTodoInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["noteId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noteId"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["noteId"] = arg1
+	args["input"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_deleteNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 *model.DeleteNoteInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐDeleteNoteInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -442,48 +512,30 @@ func (ec *executionContext) field_Mutation_toggleTodo_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 model.UpdateNoteInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateNoteInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg1
+	args["input"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_updateTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 *model.UpdateTodoInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg1
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -499,6 +551,36 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_note_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_todo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -540,7 +622,39 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Mutation_createNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_placeHolder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().PlaceHolder(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -557,7 +671,7 @@ func (ec *executionContext) _Mutation_createNote(ctx context.Context, field grap
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createNote_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_addNote_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -565,7 +679,7 @@ func (ec *executionContext) _Mutation_createNote(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateNote(rctx, args["name"].(string))
+		return ec.resolvers.Mutation().AddNote(rctx, args["input"].(model.AddNoteInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -604,7 +718,7 @@ func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateNote(rctx, args["id"].(int), args["name"].(string))
+		return ec.resolvers.Mutation().UpdateNote(rctx, args["input"].(model.UpdateNoteInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -643,7 +757,7 @@ func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteNote(rctx, args["id"].(int))
+		return ec.resolvers.Mutation().DeleteNote(rctx, args["input"].(*model.DeleteNoteInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -657,7 +771,7 @@ func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field grap
 	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_addTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -674,7 +788,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createTodo_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_addTodo_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -682,7 +796,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateTodo(rctx, args["name"].(string), args["noteId"].(int))
+		return ec.resolvers.Mutation().AddTodo(rctx, args["input"].(*model.AddTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -721,7 +835,7 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateTodo(rctx, args["id"].(int), args["name"].(string))
+		return ec.resolvers.Mutation().UpdateTodo(rctx, args["input"].(*model.UpdateTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -883,41 +997,6 @@ func (ec *executionContext) _Note_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Note_userId(ctx context.Context, field graphql.CollectedField, obj *model.Note) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Note",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UserID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Note_todos(ctx context.Context, field graphql.CollectedField, obj *model.Note) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -950,6 +1029,38 @@ func (ec *executionContext) _Note_todos(ctx context.Context, field graphql.Colle
 	return ec.marshalOTodo2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_placeHolder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PlaceHolder(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_notes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -980,6 +1091,84 @@ func (ec *executionContext) _Query_notes(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*model.Note)
 	fc.Result = res
 	return ec.marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_note(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_note_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Note(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Note)
+	fc.Result = res
+	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_todo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_todo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Todo(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Todo)
+	fc.Result = res
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2277,6 +2466,130 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAddNoteInput(ctx context.Context, obj interface{}) (model.AddNoteInput, error) {
+	var it model.AddNoteInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAddTodoInput(ctx context.Context, obj interface{}) (model.AddTodoInput, error) {
+	var it model.AddTodoInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "noteId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noteId"))
+			it.NoteID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeleteNoteInput(ctx context.Context, obj interface{}) (model.DeleteNoteInput, error) {
+	var it model.DeleteNoteInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateNoteInput(ctx context.Context, obj interface{}) (model.UpdateNoteInput, error) {
+	var it model.UpdateNoteInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateTodoInput(ctx context.Context, obj interface{}) (model.UpdateTodoInput, error) {
+	var it model.UpdateTodoInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2285,13 +2598,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Todo:
-		return ec._Todo(ctx, sel, &obj)
-	case *model.Todo:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Todo(ctx, sel, obj)
 	case model.Note:
 		return ec._Note(ctx, sel, &obj)
 	case *model.Note:
@@ -2299,6 +2605,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Note(ctx, sel, obj)
+	case model.Todo:
+		return ec._Todo(ctx, sel, &obj)
+	case *model.Todo:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Todo(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -2323,14 +2636,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createNote":
-			out.Values[i] = ec._Mutation_createNote(ctx, field)
+		case "placeHolder":
+			out.Values[i] = ec._Mutation_placeHolder(ctx, field)
+		case "addNote":
+			out.Values[i] = ec._Mutation_addNote(ctx, field)
 		case "updateNote":
 			out.Values[i] = ec._Mutation_updateNote(ctx, field)
 		case "deleteNote":
 			out.Values[i] = ec._Mutation_deleteNote(ctx, field)
-		case "createTodo":
-			out.Values[i] = ec._Mutation_createTodo(ctx, field)
+		case "addTodo":
+			out.Values[i] = ec._Mutation_addTodo(ctx, field)
 		case "updateTodo":
 			out.Values[i] = ec._Mutation_updateTodo(ctx, field)
 		case "deleteTodo":
@@ -2369,11 +2684,6 @@ func (ec *executionContext) _Note(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "userId":
-			out.Values[i] = ec._Note_userId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "todos":
 			out.Values[i] = ec._Note_todos(ctx, field, obj)
 		default:
@@ -2402,6 +2712,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "placeHolder":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_placeHolder(ctx, field)
+				return res
+			})
 		case "notes":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -2411,6 +2732,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_notes(ctx, field)
+				return res
+			})
+		case "note":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_note(ctx, field)
+				return res
+			})
+		case "todo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_todo(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2712,6 +3055,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNAddNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddNoteInput(ctx context.Context, v interface{}) (model.AddNoteInput, error) {
+	res, err := ec.unmarshalInputAddNoteInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2719,6 +3067,21 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
 	res := graphql.MarshalBoolean(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2755,6 +3118,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdateNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateNoteInput(ctx context.Context, v interface{}) (model.UpdateNoteInput, error) {
+	res, err := ec.unmarshalInputUpdateNoteInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -2986,6 +3354,14 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddTodoInput(ctx context.Context, v interface{}) (*model.AddTodoInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputAddTodoInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3008,6 +3384,14 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐDeleteNoteInput(ctx context.Context, v interface{}) (*model.DeleteNoteInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDeleteNoteInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx context.Context, sel ast.SelectionSet, v []*model.Note) graphql.Marshaler {
@@ -3126,6 +3510,14 @@ func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolang�
 		return graphql.Null
 	}
 	return ec._Todo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateTodoInput(ctx context.Context, v interface{}) (*model.UpdateTodoInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateTodoInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

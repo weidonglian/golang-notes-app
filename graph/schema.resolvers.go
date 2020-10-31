@@ -5,42 +5,17 @@ package graph
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/weidonglian/golang-notes-app/graph/generated"
-	"github.com/weidonglian/golang-notes-app/graph/model"
 )
 
-func (r *mutationResolver) CreateNote(ctx context.Context, name string) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) PlaceHolder(ctx context.Context) (*bool, error) {
+	dummy := true
+	return &dummy, nil
 }
 
-func (r *mutationResolver) UpdateNote(ctx context.Context, id int, name string) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) DeleteNote(ctx context.Context, id int) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) CreateTodo(ctx context.Context, name string, noteID int) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, name string) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) DeleteTodo(ctx context.Context, id int) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) ToggleTodo(ctx context.Context, id int) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) PlaceHolder(ctx context.Context) (*bool, error) {
+	dummy := true
+	return &dummy, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

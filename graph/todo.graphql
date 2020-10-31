@@ -1,0 +1,29 @@
+
+type Todo implements Node {
+    id: Int!
+    name: String!
+    done: Boolean
+    noteId: Int!
+}
+
+input AddTodoInput {
+    name: String!
+    noteId: Int!
+}
+
+input UpdateTodoInput {
+    id: Int!
+    name: String!
+}
+
+extend type Query {
+    todo(id: ID!): Todo
+}
+
+extend type Mutation {
+    addTodo(input: AddTodoInput): Todo
+    updateTodo(input: UpdateTodoInput): Todo
+    deleteTodo(id: Int!): Todo
+    toggleTodo(id: Int!): Todo
+}
+

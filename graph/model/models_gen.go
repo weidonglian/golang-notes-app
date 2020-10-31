@@ -6,11 +6,23 @@ type Node interface {
 	IsNode()
 }
 
+type AddNoteInput struct {
+	Name string `json:"name"`
+}
+
+type AddTodoInput struct {
+	Name   string `json:"name"`
+	NoteID int    `json:"noteId"`
+}
+
+type DeleteNoteInput struct {
+	ID int `json:"id"`
+}
+
 type Note struct {
-	ID     int     `json:"id"`
-	Name   string  `json:"name"`
-	UserID int     `json:"userId"`
-	Todos  []*Todo `json:"todos"`
+	ID    int     `json:"id"`
+	Name  string  `json:"name"`
+	Todos []*Todo `json:"todos"`
 }
 
 func (Note) IsNode() {}
@@ -23,3 +35,13 @@ type Todo struct {
 }
 
 func (Todo) IsNode() {}
+
+type UpdateNoteInput struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type UpdateTodoInput struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
