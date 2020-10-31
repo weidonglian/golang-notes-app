@@ -7,25 +7,25 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/weidonglian/golang-notes-app/graph/model"
+	"github.com/weidonglian/golang-notes-app/graph/gmodel"
 )
 
-func (r *mutationResolver) AddNote(ctx context.Context, input model.AddNoteInput) (*model.Note, error) {
+func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) UpdateNote(ctx context.Context, input model.UpdateNoteInput) (*model.Note, error) {
+func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.Note, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DeleteNote(ctx context.Context, input *model.DeleteNoteInput) (*model.Note, error) {
+func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.Note, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
+func (r *queryResolver) Notes(ctx context.Context) ([]*gmodel.Note, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Note(ctx context.Context, id string) (*model.Note, error) {
+func (r *queryResolver) Note(ctx context.Context, id string) (*gmodel.Note, error) {
 	panic(fmt.Errorf("not implemented"))
 }

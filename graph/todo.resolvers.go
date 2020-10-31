@@ -7,25 +7,25 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/weidonglian/golang-notes-app/graph/model"
+	"github.com/weidonglian/golang-notes-app/graph/gmodel"
 )
 
-func (r *mutationResolver) AddTodo(ctx context.Context, input *model.AddTodoInput) (*model.Todo, error) {
+func (r *mutationResolver) AddTodo(ctx context.Context, input *gmodel.AddTodoInput) (*gmodel.Todo, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) UpdateTodo(ctx context.Context, input *model.UpdateTodoInput) (*model.Todo, error) {
+func (r *mutationResolver) UpdateTodo(ctx context.Context, input *gmodel.UpdateTodoInput) (*gmodel.Todo, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DeleteTodo(ctx context.Context, id int) (*model.Todo, error) {
+func (r *mutationResolver) DeleteTodo(ctx context.Context, id int) (*gmodel.Todo, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) ToggleTodo(ctx context.Context, id int) (*model.Todo, error) {
+func (r *mutationResolver) ToggleTodo(ctx context.Context, id int) (*gmodel.Todo, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todo(ctx context.Context, id string) (*model.Todo, error) {
+func (r *queryResolver) Todo(ctx context.Context, id string) (*gmodel.Todo, error) {
 	panic(fmt.Errorf("not implemented"))
 }

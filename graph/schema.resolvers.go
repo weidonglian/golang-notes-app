@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+
 	"github.com/weidonglian/golang-notes-app/graph/generated"
 )
 

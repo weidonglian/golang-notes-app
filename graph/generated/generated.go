@@ -14,7 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/weidonglian/golang-notes-app/graph/model"
+	"github.com/weidonglian/golang-notes-app/graph/gmodel"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -44,14 +44,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		AddNote     func(childComplexity int, input model.AddNoteInput) int
-		AddTodo     func(childComplexity int, input *model.AddTodoInput) int
-		DeleteNote  func(childComplexity int, input *model.DeleteNoteInput) int
+		AddNote     func(childComplexity int, input gmodel.AddNoteInput) int
+		AddTodo     func(childComplexity int, input *gmodel.AddTodoInput) int
+		DeleteNote  func(childComplexity int, input *gmodel.DeleteNoteInput) int
 		DeleteTodo  func(childComplexity int, id int) int
 		PlaceHolder func(childComplexity int) int
 		ToggleTodo  func(childComplexity int, id int) int
-		UpdateNote  func(childComplexity int, input model.UpdateNoteInput) int
-		UpdateTodo  func(childComplexity int, input *model.UpdateTodoInput) int
+		UpdateNote  func(childComplexity int, input gmodel.UpdateNoteInput) int
+		UpdateTodo  func(childComplexity int, input *gmodel.UpdateTodoInput) int
 	}
 
 	Note struct {
@@ -77,19 +77,19 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	PlaceHolder(ctx context.Context) (*bool, error)
-	AddNote(ctx context.Context, input model.AddNoteInput) (*model.Note, error)
-	UpdateNote(ctx context.Context, input model.UpdateNoteInput) (*model.Note, error)
-	DeleteNote(ctx context.Context, input *model.DeleteNoteInput) (*model.Note, error)
-	AddTodo(ctx context.Context, input *model.AddTodoInput) (*model.Todo, error)
-	UpdateTodo(ctx context.Context, input *model.UpdateTodoInput) (*model.Todo, error)
-	DeleteTodo(ctx context.Context, id int) (*model.Todo, error)
-	ToggleTodo(ctx context.Context, id int) (*model.Todo, error)
+	AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error)
+	UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.Note, error)
+	DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.Note, error)
+	AddTodo(ctx context.Context, input *gmodel.AddTodoInput) (*gmodel.Todo, error)
+	UpdateTodo(ctx context.Context, input *gmodel.UpdateTodoInput) (*gmodel.Todo, error)
+	DeleteTodo(ctx context.Context, id int) (*gmodel.Todo, error)
+	ToggleTodo(ctx context.Context, id int) (*gmodel.Todo, error)
 }
 type QueryResolver interface {
 	PlaceHolder(ctx context.Context) (*bool, error)
-	Notes(ctx context.Context) ([]*model.Note, error)
-	Note(ctx context.Context, id string) (*model.Note, error)
-	Todo(ctx context.Context, id string) (*model.Todo, error)
+	Notes(ctx context.Context) ([]*gmodel.Note, error)
+	Note(ctx context.Context, id string) (*gmodel.Note, error)
+	Todo(ctx context.Context, id string) (*gmodel.Todo, error)
 }
 
 type executableSchema struct {
@@ -117,7 +117,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddNote(childComplexity, args["input"].(model.AddNoteInput)), true
+		return e.complexity.Mutation.AddNote(childComplexity, args["input"].(gmodel.AddNoteInput)), true
 
 	case "Mutation.addTodo":
 		if e.complexity.Mutation.AddTodo == nil {
@@ -129,7 +129,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddTodo(childComplexity, args["input"].(*model.AddTodoInput)), true
+		return e.complexity.Mutation.AddTodo(childComplexity, args["input"].(*gmodel.AddTodoInput)), true
 
 	case "Mutation.deleteNote":
 		if e.complexity.Mutation.DeleteNote == nil {
@@ -141,7 +141,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteNote(childComplexity, args["input"].(*model.DeleteNoteInput)), true
+		return e.complexity.Mutation.DeleteNote(childComplexity, args["input"].(*gmodel.DeleteNoteInput)), true
 
 	case "Mutation.deleteTodo":
 		if e.complexity.Mutation.DeleteTodo == nil {
@@ -184,7 +184,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateNote(childComplexity, args["input"].(model.UpdateNoteInput)), true
+		return e.complexity.Mutation.UpdateNote(childComplexity, args["input"].(gmodel.UpdateNoteInput)), true
 
 	case "Mutation.updateTodo":
 		if e.complexity.Mutation.UpdateTodo == nil {
@@ -196,7 +196,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateTodo(childComplexity, args["input"].(*model.UpdateTodoInput)), true
+		return e.complexity.Mutation.UpdateTodo(childComplexity, args["input"].(*gmodel.UpdateTodoInput)), true
 
 	case "Note.id":
 		if e.complexity.Note.ID == nil {
@@ -437,10 +437,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_addNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.AddNoteInput
+	var arg0 gmodel.AddNoteInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNAddNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddNoteInput(ctx, tmp)
+		arg0, err = ec.unmarshalNAddNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddNoteInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -452,10 +452,10 @@ func (ec *executionContext) field_Mutation_addNote_args(ctx context.Context, raw
 func (ec *executionContext) field_Mutation_addTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.AddTodoInput
+	var arg0 *gmodel.AddTodoInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddTodoInput(ctx, tmp)
+		arg0, err = ec.unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -467,10 +467,10 @@ func (ec *executionContext) field_Mutation_addTodo_args(ctx context.Context, raw
 func (ec *executionContext) field_Mutation_deleteNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.DeleteNoteInput
+	var arg0 *gmodel.DeleteNoteInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐDeleteNoteInput(ctx, tmp)
+		arg0, err = ec.unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteNoteInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -512,10 +512,10 @@ func (ec *executionContext) field_Mutation_toggleTodo_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.UpdateNoteInput
+	var arg0 gmodel.UpdateNoteInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateNoteInput(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateNoteInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -527,10 +527,10 @@ func (ec *executionContext) field_Mutation_updateNote_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.UpdateTodoInput
+	var arg0 *gmodel.UpdateTodoInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateTodoInput(ctx, tmp)
+		arg0, err = ec.unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -679,7 +679,7 @@ func (ec *executionContext) _Mutation_addNote(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddNote(rctx, args["input"].(model.AddNoteInput))
+		return ec.resolvers.Mutation().AddNote(rctx, args["input"].(gmodel.AddNoteInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -688,9 +688,9 @@ func (ec *executionContext) _Mutation_addNote(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Note)
+	res := resTmp.(*gmodel.Note)
 	fc.Result = res
-	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -718,7 +718,7 @@ func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateNote(rctx, args["input"].(model.UpdateNoteInput))
+		return ec.resolvers.Mutation().UpdateNote(rctx, args["input"].(gmodel.UpdateNoteInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -727,9 +727,9 @@ func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Note)
+	res := resTmp.(*gmodel.Note)
 	fc.Result = res
-	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -757,7 +757,7 @@ func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteNote(rctx, args["input"].(*model.DeleteNoteInput))
+		return ec.resolvers.Mutation().DeleteNote(rctx, args["input"].(*gmodel.DeleteNoteInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -766,9 +766,9 @@ func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Note)
+	res := resTmp.(*gmodel.Note)
 	fc.Result = res
-	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_addTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -796,7 +796,7 @@ func (ec *executionContext) _Mutation_addTodo(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddTodo(rctx, args["input"].(*model.AddTodoInput))
+		return ec.resolvers.Mutation().AddTodo(rctx, args["input"].(*gmodel.AddTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -805,9 +805,9 @@ func (ec *executionContext) _Mutation_addTodo(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Todo)
+	res := resTmp.(*gmodel.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -835,7 +835,7 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateTodo(rctx, args["input"].(*model.UpdateTodoInput))
+		return ec.resolvers.Mutation().UpdateTodo(rctx, args["input"].(*gmodel.UpdateTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -844,9 +844,9 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Todo)
+	res := resTmp.(*gmodel.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -883,9 +883,9 @@ func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Todo)
+	res := resTmp.(*gmodel.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_toggleTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -922,12 +922,12 @@ func (ec *executionContext) _Mutation_toggleTodo(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Todo)
+	res := resTmp.(*gmodel.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Note_id(ctx context.Context, field graphql.CollectedField, obj *model.Note) (ret graphql.Marshaler) {
+func (ec *executionContext) _Note_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.Note) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -962,7 +962,7 @@ func (ec *executionContext) _Note_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Note_name(ctx context.Context, field graphql.CollectedField, obj *model.Note) (ret graphql.Marshaler) {
+func (ec *executionContext) _Note_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.Note) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -997,7 +997,7 @@ func (ec *executionContext) _Note_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Note_todos(ctx context.Context, field graphql.CollectedField, obj *model.Note) (ret graphql.Marshaler) {
+func (ec *executionContext) _Note_todos(ctx context.Context, field graphql.CollectedField, obj *gmodel.Note) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1024,9 +1024,9 @@ func (ec *executionContext) _Note_todos(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Todo)
+	res := resTmp.([]*gmodel.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_placeHolder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1088,9 +1088,9 @@ func (ec *executionContext) _Query_notes(ctx context.Context, field graphql.Coll
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Note)
+	res := resTmp.([]*gmodel.Note)
 	fc.Result = res
-	return ec.marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_note(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1127,9 +1127,9 @@ func (ec *executionContext) _Query_note(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Note)
+	res := resTmp.(*gmodel.Note)
 	fc.Result = res
-	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_todo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1166,9 +1166,9 @@ func (ec *executionContext) _Query_todo(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Todo)
+	res := resTmp.(*gmodel.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1242,7 +1242,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.Todo) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1277,7 +1277,7 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_name(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.Todo) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1312,7 +1312,7 @@ func (ec *executionContext) _Todo_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *gmodel.Todo) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1344,7 +1344,7 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_noteId(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_noteId(ctx context.Context, field graphql.CollectedField, obj *gmodel.Todo) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2466,8 +2466,8 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAddNoteInput(ctx context.Context, obj interface{}) (model.AddNoteInput, error) {
-	var it model.AddNoteInput
+func (ec *executionContext) unmarshalInputAddNoteInput(ctx context.Context, obj interface{}) (gmodel.AddNoteInput, error) {
+	var it gmodel.AddNoteInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -2486,8 +2486,8 @@ func (ec *executionContext) unmarshalInputAddNoteInput(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputAddTodoInput(ctx context.Context, obj interface{}) (model.AddTodoInput, error) {
-	var it model.AddTodoInput
+func (ec *executionContext) unmarshalInputAddTodoInput(ctx context.Context, obj interface{}) (gmodel.AddTodoInput, error) {
+	var it gmodel.AddTodoInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -2514,8 +2514,8 @@ func (ec *executionContext) unmarshalInputAddTodoInput(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputDeleteNoteInput(ctx context.Context, obj interface{}) (model.DeleteNoteInput, error) {
-	var it model.DeleteNoteInput
+func (ec *executionContext) unmarshalInputDeleteNoteInput(ctx context.Context, obj interface{}) (gmodel.DeleteNoteInput, error) {
+	var it gmodel.DeleteNoteInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -2534,8 +2534,8 @@ func (ec *executionContext) unmarshalInputDeleteNoteInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateNoteInput(ctx context.Context, obj interface{}) (model.UpdateNoteInput, error) {
-	var it model.UpdateNoteInput
+func (ec *executionContext) unmarshalInputUpdateNoteInput(ctx context.Context, obj interface{}) (gmodel.UpdateNoteInput, error) {
+	var it gmodel.UpdateNoteInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -2562,8 +2562,8 @@ func (ec *executionContext) unmarshalInputUpdateNoteInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateTodoInput(ctx context.Context, obj interface{}) (model.UpdateTodoInput, error) {
-	var it model.UpdateTodoInput
+func (ec *executionContext) unmarshalInputUpdateTodoInput(ctx context.Context, obj interface{}) (gmodel.UpdateTodoInput, error) {
+	var it gmodel.UpdateTodoInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -2594,20 +2594,20 @@ func (ec *executionContext) unmarshalInputUpdateTodoInput(ctx context.Context, o
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj model.Node) graphql.Marshaler {
+func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj gmodel.Node) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Note:
+	case gmodel.Note:
 		return ec._Note(ctx, sel, &obj)
-	case *model.Note:
+	case *gmodel.Note:
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Note(ctx, sel, obj)
-	case model.Todo:
+	case gmodel.Todo:
 		return ec._Todo(ctx, sel, &obj)
-	case *model.Todo:
+	case *gmodel.Todo:
 		if obj == nil {
 			return graphql.Null
 		}
@@ -2665,7 +2665,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 var noteImplementors = []string{"Note", "Node"}
 
-func (ec *executionContext) _Note(ctx context.Context, sel ast.SelectionSet, obj *model.Note) graphql.Marshaler {
+func (ec *executionContext) _Note(ctx context.Context, sel ast.SelectionSet, obj *gmodel.Note) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, noteImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -2773,7 +2773,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var todoImplementors = []string{"Todo", "Node"}
 
-func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *model.Todo) graphql.Marshaler {
+func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *gmodel.Todo) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, todoImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3055,7 +3055,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAddNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddNoteInput(ctx context.Context, v interface{}) (model.AddNoteInput, error) {
+func (ec *executionContext) unmarshalNAddNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddNoteInput(ctx context.Context, v interface{}) (gmodel.AddNoteInput, error) {
 	res, err := ec.unmarshalInputAddNoteInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -3120,7 +3120,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateNoteInput(ctx context.Context, v interface{}) (model.UpdateNoteInput, error) {
+func (ec *executionContext) unmarshalNUpdateNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateNoteInput(ctx context.Context, v interface{}) (gmodel.UpdateNoteInput, error) {
 	res, err := ec.unmarshalInputUpdateNoteInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -3354,7 +3354,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐAddTodoInput(ctx context.Context, v interface{}) (*model.AddTodoInput, error) {
+func (ec *executionContext) unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoInput(ctx context.Context, v interface{}) (*gmodel.AddTodoInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -3386,7 +3386,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐDeleteNoteInput(ctx context.Context, v interface{}) (*model.DeleteNoteInput, error) {
+func (ec *executionContext) unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteNoteInput(ctx context.Context, v interface{}) (*gmodel.DeleteNoteInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -3394,7 +3394,7 @@ func (ec *executionContext) unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidongl
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx context.Context, sel ast.SelectionSet, v []*model.Note) graphql.Marshaler {
+func (ec *executionContext) marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx context.Context, sel ast.SelectionSet, v []*gmodel.Note) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3421,7 +3421,7 @@ func (ec *executionContext) marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgola
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx, sel, v[i])
+			ret[i] = ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3434,7 +3434,7 @@ func (ec *executionContext) marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgola
 	return ret
 }
 
-func (ec *executionContext) marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐNote(ctx context.Context, sel ast.SelectionSet, v *model.Note) graphql.Marshaler {
+func (ec *executionContext) marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx context.Context, sel ast.SelectionSet, v *gmodel.Note) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3465,7 +3465,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
-func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v []*model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v []*gmodel.Todo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3492,7 +3492,7 @@ func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋweidonglianᚋgola
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3505,14 +3505,14 @@ func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋweidonglianᚋgola
 	return ret
 }
 
-func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *gmodel.Todo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Todo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋmodelᚐUpdateTodoInput(ctx context.Context, v interface{}) (*model.UpdateTodoInput, error) {
+func (ec *executionContext) unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoInput(ctx context.Context, v interface{}) (*gmodel.UpdateTodoInput, error) {
 	if v == nil {
 		return nil, nil
 	}
