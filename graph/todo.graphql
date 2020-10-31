@@ -2,28 +2,66 @@
 type Todo implements Node {
     id: Int!
     name: String!
-    done: Boolean
+    done: Boolean!
     noteId: Int!
 }
 
 input AddTodoInput {
     name: String!
+    done: Boolean
+    noteId: Int!
+}
+
+type AddTodoPayload {
+    id: Int!
+    name: String!
+    done: Boolean!
     noteId: Int!
 }
 
 input UpdateTodoInput {
     id: Int!
     name: String!
+    done: Boolean
+    noteId: Int!
+}
+
+type UpdateTodoPayload {
+    id: Int!
+    name: String!
+    done: Boolean!
+    noteId: Int!
+}
+
+input DeleteTodoInput {
+    id: Int!
+    noteId: Int!
+}
+
+type DeleteTodoPayload {
+    id: Int!
+    noteId: Int!
+}
+
+input ToggleTodoInput {
+    id: Int!
+    noteId: Int!
+}
+
+type ToggleTodoPayload {
+    id: Int!
+    done: Boolean!
+    noteId: Int!
 }
 
 extend type Query {
-    todo(id: ID!): Todo
+    todo(id: Int!): Todo
 }
 
 extend type Mutation {
-    addTodo(input: AddTodoInput): Todo
-    updateTodo(input: UpdateTodoInput): Todo
-    deleteTodo(id: Int!): Todo
-    toggleTodo(id: Int!): Todo
+    addTodo(input: AddTodoInput!): AddTodoPayload
+    updateTodo(input: UpdateTodoInput!): UpdateTodoPayload
+    deleteTodo(input: DeleteTodoInput!): DeleteTodoPayload
+    toggleTodo(input: ToggleTodoInput!): ToggleTodoPayload
 }
 

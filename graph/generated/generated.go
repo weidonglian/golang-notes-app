@@ -43,15 +43,36 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AddNotePayload struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
+	AddTodoPayload struct {
+		Done   func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
+		NoteID func(childComplexity int) int
+	}
+
+	DeleteNotePayload struct {
+		ID func(childComplexity int) int
+	}
+
+	DeleteTodoPayload struct {
+		ID     func(childComplexity int) int
+		NoteID func(childComplexity int) int
+	}
+
 	Mutation struct {
 		AddNote     func(childComplexity int, input gmodel.AddNoteInput) int
-		AddTodo     func(childComplexity int, input *gmodel.AddTodoInput) int
+		AddTodo     func(childComplexity int, input gmodel.AddTodoInput) int
 		DeleteNote  func(childComplexity int, input *gmodel.DeleteNoteInput) int
-		DeleteTodo  func(childComplexity int, id int) int
+		DeleteTodo  func(childComplexity int, input gmodel.DeleteTodoInput) int
 		PlaceHolder func(childComplexity int) int
-		ToggleTodo  func(childComplexity int, id int) int
+		ToggleTodo  func(childComplexity int, input gmodel.ToggleTodoInput) int
 		UpdateNote  func(childComplexity int, input gmodel.UpdateNoteInput) int
-		UpdateTodo  func(childComplexity int, input *gmodel.UpdateTodoInput) int
+		UpdateTodo  func(childComplexity int, input gmodel.UpdateTodoInput) int
 	}
 
 	Note struct {
@@ -61,13 +82,31 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Note        func(childComplexity int, id string) int
+		Note        func(childComplexity int, id int) int
 		Notes       func(childComplexity int) int
 		PlaceHolder func(childComplexity int) int
-		Todo        func(childComplexity int, id string) int
+		Todo        func(childComplexity int, id int) int
 	}
 
 	Todo struct {
+		Done   func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
+		NoteID func(childComplexity int) int
+	}
+
+	ToggleTodoPayload struct {
+		Done   func(childComplexity int) int
+		ID     func(childComplexity int) int
+		NoteID func(childComplexity int) int
+	}
+
+	UpdateNotePayload struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
+	UpdateTodoPayload struct {
 		Done   func(childComplexity int) int
 		ID     func(childComplexity int) int
 		Name   func(childComplexity int) int
@@ -77,19 +116,19 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	PlaceHolder(ctx context.Context) (*bool, error)
-	AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error)
-	UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.Note, error)
-	DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.Note, error)
-	AddTodo(ctx context.Context, input *gmodel.AddTodoInput) (*gmodel.Todo, error)
-	UpdateTodo(ctx context.Context, input *gmodel.UpdateTodoInput) (*gmodel.Todo, error)
-	DeleteTodo(ctx context.Context, id int) (*gmodel.Todo, error)
-	ToggleTodo(ctx context.Context, id int) (*gmodel.Todo, error)
+	AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.AddNotePayload, error)
+	UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.UpdateNotePayload, error)
+	DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.DeleteNotePayload, error)
+	AddTodo(ctx context.Context, input gmodel.AddTodoInput) (*gmodel.AddTodoPayload, error)
+	UpdateTodo(ctx context.Context, input gmodel.UpdateTodoInput) (*gmodel.UpdateTodoPayload, error)
+	DeleteTodo(ctx context.Context, input gmodel.DeleteTodoInput) (*gmodel.DeleteTodoPayload, error)
+	ToggleTodo(ctx context.Context, input gmodel.ToggleTodoInput) (*gmodel.ToggleTodoPayload, error)
 }
 type QueryResolver interface {
 	PlaceHolder(ctx context.Context) (*bool, error)
 	Notes(ctx context.Context) ([]*gmodel.Note, error)
-	Note(ctx context.Context, id string) (*gmodel.Note, error)
-	Todo(ctx context.Context, id string) (*gmodel.Todo, error)
+	Note(ctx context.Context, id int) (*gmodel.Note, error)
+	Todo(ctx context.Context, id int) (*gmodel.Todo, error)
 }
 
 type executableSchema struct {
@@ -106,6 +145,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "AddNotePayload.id":
+		if e.complexity.AddNotePayload.ID == nil {
+			break
+		}
+
+		return e.complexity.AddNotePayload.ID(childComplexity), true
+
+	case "AddNotePayload.name":
+		if e.complexity.AddNotePayload.Name == nil {
+			break
+		}
+
+		return e.complexity.AddNotePayload.Name(childComplexity), true
+
+	case "AddTodoPayload.done":
+		if e.complexity.AddTodoPayload.Done == nil {
+			break
+		}
+
+		return e.complexity.AddTodoPayload.Done(childComplexity), true
+
+	case "AddTodoPayload.id":
+		if e.complexity.AddTodoPayload.ID == nil {
+			break
+		}
+
+		return e.complexity.AddTodoPayload.ID(childComplexity), true
+
+	case "AddTodoPayload.name":
+		if e.complexity.AddTodoPayload.Name == nil {
+			break
+		}
+
+		return e.complexity.AddTodoPayload.Name(childComplexity), true
+
+	case "AddTodoPayload.noteId":
+		if e.complexity.AddTodoPayload.NoteID == nil {
+			break
+		}
+
+		return e.complexity.AddTodoPayload.NoteID(childComplexity), true
+
+	case "DeleteNotePayload.id":
+		if e.complexity.DeleteNotePayload.ID == nil {
+			break
+		}
+
+		return e.complexity.DeleteNotePayload.ID(childComplexity), true
+
+	case "DeleteTodoPayload.id":
+		if e.complexity.DeleteTodoPayload.ID == nil {
+			break
+		}
+
+		return e.complexity.DeleteTodoPayload.ID(childComplexity), true
+
+	case "DeleteTodoPayload.noteId":
+		if e.complexity.DeleteTodoPayload.NoteID == nil {
+			break
+		}
+
+		return e.complexity.DeleteTodoPayload.NoteID(childComplexity), true
 
 	case "Mutation.addNote":
 		if e.complexity.Mutation.AddNote == nil {
@@ -129,7 +231,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddTodo(childComplexity, args["input"].(*gmodel.AddTodoInput)), true
+		return e.complexity.Mutation.AddTodo(childComplexity, args["input"].(gmodel.AddTodoInput)), true
 
 	case "Mutation.deleteNote":
 		if e.complexity.Mutation.DeleteNote == nil {
@@ -153,7 +255,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteTodo(childComplexity, args["id"].(int)), true
+		return e.complexity.Mutation.DeleteTodo(childComplexity, args["input"].(gmodel.DeleteTodoInput)), true
 
 	case "Mutation.placeHolder":
 		if e.complexity.Mutation.PlaceHolder == nil {
@@ -172,7 +274,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ToggleTodo(childComplexity, args["id"].(int)), true
+		return e.complexity.Mutation.ToggleTodo(childComplexity, args["input"].(gmodel.ToggleTodoInput)), true
 
 	case "Mutation.updateNote":
 		if e.complexity.Mutation.UpdateNote == nil {
@@ -196,7 +298,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateTodo(childComplexity, args["input"].(*gmodel.UpdateTodoInput)), true
+		return e.complexity.Mutation.UpdateTodo(childComplexity, args["input"].(gmodel.UpdateTodoInput)), true
 
 	case "Note.id":
 		if e.complexity.Note.ID == nil {
@@ -229,7 +331,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Note(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Note(childComplexity, args["id"].(int)), true
 
 	case "Query.notes":
 		if e.complexity.Query.Notes == nil {
@@ -255,7 +357,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Todo(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Todo(childComplexity, args["id"].(int)), true
 
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
@@ -284,6 +386,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.NoteID(childComplexity), true
+
+	case "ToggleTodoPayload.done":
+		if e.complexity.ToggleTodoPayload.Done == nil {
+			break
+		}
+
+		return e.complexity.ToggleTodoPayload.Done(childComplexity), true
+
+	case "ToggleTodoPayload.id":
+		if e.complexity.ToggleTodoPayload.ID == nil {
+			break
+		}
+
+		return e.complexity.ToggleTodoPayload.ID(childComplexity), true
+
+	case "ToggleTodoPayload.noteId":
+		if e.complexity.ToggleTodoPayload.NoteID == nil {
+			break
+		}
+
+		return e.complexity.ToggleTodoPayload.NoteID(childComplexity), true
+
+	case "UpdateNotePayload.id":
+		if e.complexity.UpdateNotePayload.ID == nil {
+			break
+		}
+
+		return e.complexity.UpdateNotePayload.ID(childComplexity), true
+
+	case "UpdateNotePayload.name":
+		if e.complexity.UpdateNotePayload.Name == nil {
+			break
+		}
+
+		return e.complexity.UpdateNotePayload.Name(childComplexity), true
+
+	case "UpdateTodoPayload.done":
+		if e.complexity.UpdateTodoPayload.Done == nil {
+			break
+		}
+
+		return e.complexity.UpdateTodoPayload.Done(childComplexity), true
+
+	case "UpdateTodoPayload.id":
+		if e.complexity.UpdateTodoPayload.ID == nil {
+			break
+		}
+
+		return e.complexity.UpdateTodoPayload.ID(childComplexity), true
+
+	case "UpdateTodoPayload.name":
+		if e.complexity.UpdateTodoPayload.Name == nil {
+			break
+		}
+
+		return e.complexity.UpdateTodoPayload.Name(childComplexity), true
+
+	case "UpdateTodoPayload.noteId":
+		if e.complexity.UpdateTodoPayload.NoteID == nil {
+			break
+		}
+
+		return e.complexity.UpdateTodoPayload.NoteID(childComplexity), true
 
 	}
 	return 0, false
@@ -359,7 +524,17 @@ input AddNoteInput {
     name: String!
 }
 
+type AddNotePayload {
+    id: Int!
+    name: String!
+}
+
 input UpdateNoteInput {
+    id: Int!
+    name: String!
+}
+
+type UpdateNotePayload {
     id: Int!
     name: String!
 }
@@ -368,15 +543,19 @@ input DeleteNoteInput {
     id: Int!
 }
 
+type DeleteNotePayload {
+    id: Int!
+}
+
 extend type Query {
     notes: [Note]
-    note(id: ID!): Note
+    note(id: Int!): Note
 }
 
 extend type Mutation {
-    addNote(input: AddNoteInput!): Note
-    updateNote(input: UpdateNoteInput!): Note
-    deleteNote(input: DeleteNoteInput): Note
+    addNote(input: AddNoteInput!): AddNotePayload
+    updateNote(input: UpdateNoteInput!): UpdateNotePayload
+    deleteNote(input: DeleteNoteInput): DeleteNotePayload
 }
 `, BuiltIn: false},
 	{Name: "graph/schema.graphql", Input: `interface Node {
@@ -401,29 +580,67 @@ type Mutation {
 type Todo implements Node {
     id: Int!
     name: String!
-    done: Boolean
+    done: Boolean!
     noteId: Int!
 }
 
 input AddTodoInput {
     name: String!
+    done: Boolean
+    noteId: Int!
+}
+
+type AddTodoPayload {
+    id: Int!
+    name: String!
+    done: Boolean!
     noteId: Int!
 }
 
 input UpdateTodoInput {
     id: Int!
     name: String!
+    done: Boolean
+    noteId: Int!
+}
+
+type UpdateTodoPayload {
+    id: Int!
+    name: String!
+    done: Boolean!
+    noteId: Int!
+}
+
+input DeleteTodoInput {
+    id: Int!
+    noteId: Int!
+}
+
+type DeleteTodoPayload {
+    id: Int!
+    noteId: Int!
+}
+
+input ToggleTodoInput {
+    id: Int!
+    noteId: Int!
+}
+
+type ToggleTodoPayload {
+    id: Int!
+    done: Boolean!
+    noteId: Int!
 }
 
 extend type Query {
-    todo(id: ID!): Todo
+    todo(id: Int!): Todo
 }
 
 extend type Mutation {
-    addTodo(input: AddTodoInput): Todo
-    updateTodo(input: UpdateTodoInput): Todo
-    deleteTodo(id: Int!): Todo
-    toggleTodo(id: Int!): Todo
+    addTodo(input: AddTodoInput!): AddTodoPayload
+    updateTodo(input: UpdateTodoInput!): UpdateTodoPayload
+    deleteTodo(input: DeleteTodoInput!): DeleteTodoPayload
+    toggleTodo(input: ToggleTodoInput!): ToggleTodoPayload
 }
 
 `, BuiltIn: false},
@@ -452,10 +669,10 @@ func (ec *executionContext) field_Mutation_addNote_args(ctx context.Context, raw
 func (ec *executionContext) field_Mutation_addTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *gmodel.AddTodoInput
+	var arg0 gmodel.AddTodoInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoInput(ctx, tmp)
+		arg0, err = ec.unmarshalNAddTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -482,30 +699,30 @@ func (ec *executionContext) field_Mutation_deleteNote_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 gmodel.DeleteTodoInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeleteTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_toggleTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 gmodel.ToggleTodoInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNToggleTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐToggleTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -527,10 +744,10 @@ func (ec *executionContext) field_Mutation_updateNote_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *gmodel.UpdateTodoInput
+	var arg0 gmodel.UpdateTodoInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoInput(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -557,10 +774,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_note_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -572,10 +789,10 @@ func (ec *executionContext) field_Query_note_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_todo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -621,6 +838,321 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _AddNotePayload_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.AddNotePayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddNotePayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AddNotePayload_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.AddNotePayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddNotePayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AddTodoPayload_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.AddTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AddTodoPayload_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.AddTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AddTodoPayload_done(ctx context.Context, field graphql.CollectedField, obj *gmodel.AddTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Done, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AddTodoPayload_noteId(ctx context.Context, field graphql.CollectedField, obj *gmodel.AddTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NoteID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DeleteNotePayload_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.DeleteNotePayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DeleteNotePayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DeleteTodoPayload_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.DeleteTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DeleteTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DeleteTodoPayload_noteId(ctx context.Context, field graphql.CollectedField, obj *gmodel.DeleteTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DeleteTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NoteID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
 
 func (ec *executionContext) _Mutation_placeHolder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
@@ -688,9 +1220,9 @@ func (ec *executionContext) _Mutation_addNote(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.Note)
+	res := resTmp.(*gmodel.AddNotePayload)
 	fc.Result = res
-	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalOAddNotePayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddNotePayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -727,9 +1259,9 @@ func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.Note)
+	res := resTmp.(*gmodel.UpdateNotePayload)
 	fc.Result = res
-	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalOUpdateNotePayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateNotePayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -766,9 +1298,9 @@ func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.Note)
+	res := resTmp.(*gmodel.DeleteNotePayload)
 	fc.Result = res
-	return ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalODeleteNotePayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteNotePayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_addTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -796,7 +1328,7 @@ func (ec *executionContext) _Mutation_addTodo(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddTodo(rctx, args["input"].(*gmodel.AddTodoInput))
+		return ec.resolvers.Mutation().AddTodo(rctx, args["input"].(gmodel.AddTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -805,9 +1337,9 @@ func (ec *executionContext) _Mutation_addTodo(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.Todo)
+	res := resTmp.(*gmodel.AddTodoPayload)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOAddTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -835,7 +1367,7 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateTodo(rctx, args["input"].(*gmodel.UpdateTodoInput))
+		return ec.resolvers.Mutation().UpdateTodo(rctx, args["input"].(gmodel.UpdateTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -844,9 +1376,9 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.Todo)
+	res := resTmp.(*gmodel.UpdateTodoPayload)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOUpdateTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -874,7 +1406,7 @@ func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteTodo(rctx, args["id"].(int))
+		return ec.resolvers.Mutation().DeleteTodo(rctx, args["input"].(gmodel.DeleteTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -883,9 +1415,9 @@ func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.Todo)
+	res := resTmp.(*gmodel.DeleteTodoPayload)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalODeleteTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteTodoPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_toggleTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -913,7 +1445,7 @@ func (ec *executionContext) _Mutation_toggleTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ToggleTodo(rctx, args["id"].(int))
+		return ec.resolvers.Mutation().ToggleTodo(rctx, args["input"].(gmodel.ToggleTodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -922,9 +1454,9 @@ func (ec *executionContext) _Mutation_toggleTodo(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.Todo)
+	res := resTmp.(*gmodel.ToggleTodoPayload)
 	fc.Result = res
-	return ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOToggleTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐToggleTodoPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Note_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.Note) (ret graphql.Marshaler) {
@@ -1118,7 +1650,7 @@ func (ec *executionContext) _Query_note(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Note(rctx, args["id"].(string))
+		return ec.resolvers.Query().Note(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1157,7 +1689,7 @@ func (ec *executionContext) _Query_todo(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Todo(rctx, args["id"].(string))
+		return ec.resolvers.Query().Todo(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1337,11 +1869,14 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*bool)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Todo_noteId(ctx context.Context, field graphql.CollectedField, obj *gmodel.Todo) (ret graphql.Marshaler) {
@@ -1353,6 +1888,321 @@ func (ec *executionContext) _Todo_noteId(ctx context.Context, field graphql.Coll
 	}()
 	fc := &graphql.FieldContext{
 		Object:     "Todo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NoteID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ToggleTodoPayload_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.ToggleTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ToggleTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ToggleTodoPayload_done(ctx context.Context, field graphql.CollectedField, obj *gmodel.ToggleTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ToggleTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Done, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ToggleTodoPayload_noteId(ctx context.Context, field graphql.CollectedField, obj *gmodel.ToggleTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ToggleTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NoteID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UpdateNotePayload_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdateNotePayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UpdateNotePayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UpdateNotePayload_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdateNotePayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UpdateNotePayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UpdateTodoPayload_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdateTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UpdateTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UpdateTodoPayload_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdateTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UpdateTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UpdateTodoPayload_done(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdateTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UpdateTodoPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Done, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UpdateTodoPayload_noteId(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdateTodoPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UpdateTodoPayload",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -2500,6 +3350,14 @@ func (ec *executionContext) unmarshalInputAddTodoInput(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "done":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
+			it.Done, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "noteId":
 			var err error
 
@@ -2525,6 +3383,62 @@ func (ec *executionContext) unmarshalInputDeleteNoteInput(ctx context.Context, o
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeleteTodoInput(ctx context.Context, obj interface{}) (gmodel.DeleteTodoInput, error) {
+	var it gmodel.DeleteTodoInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "noteId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noteId"))
+			it.NoteID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputToggleTodoInput(ctx context.Context, obj interface{}) (gmodel.ToggleTodoInput, error) {
+	var it gmodel.ToggleTodoInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "noteId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noteId"))
+			it.NoteID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2584,6 +3498,22 @@ func (ec *executionContext) unmarshalInputUpdateTodoInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "done":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
+			it.Done, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "noteId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noteId"))
+			it.NoteID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -2620,6 +3550,139 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var addNotePayloadImplementors = []string{"AddNotePayload"}
+
+func (ec *executionContext) _AddNotePayload(ctx context.Context, sel ast.SelectionSet, obj *gmodel.AddNotePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addNotePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddNotePayload")
+		case "id":
+			out.Values[i] = ec._AddNotePayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._AddNotePayload_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var addTodoPayloadImplementors = []string{"AddTodoPayload"}
+
+func (ec *executionContext) _AddTodoPayload(ctx context.Context, sel ast.SelectionSet, obj *gmodel.AddTodoPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addTodoPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddTodoPayload")
+		case "id":
+			out.Values[i] = ec._AddTodoPayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._AddTodoPayload_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "done":
+			out.Values[i] = ec._AddTodoPayload_done(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "noteId":
+			out.Values[i] = ec._AddTodoPayload_noteId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var deleteNotePayloadImplementors = []string{"DeleteNotePayload"}
+
+func (ec *executionContext) _DeleteNotePayload(ctx context.Context, sel ast.SelectionSet, obj *gmodel.DeleteNotePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteNotePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteNotePayload")
+		case "id":
+			out.Values[i] = ec._DeleteNotePayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var deleteTodoPayloadImplementors = []string{"DeleteTodoPayload"}
+
+func (ec *executionContext) _DeleteTodoPayload(ctx context.Context, sel ast.SelectionSet, obj *gmodel.DeleteTodoPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteTodoPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteTodoPayload")
+		case "id":
+			out.Values[i] = ec._DeleteTodoPayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "noteId":
+			out.Values[i] = ec._DeleteTodoPayload_noteId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
 
 var mutationImplementors = []string{"Mutation"}
 
@@ -2794,8 +3857,122 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "done":
 			out.Values[i] = ec._Todo_done(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "noteId":
 			out.Values[i] = ec._Todo_noteId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var toggleTodoPayloadImplementors = []string{"ToggleTodoPayload"}
+
+func (ec *executionContext) _ToggleTodoPayload(ctx context.Context, sel ast.SelectionSet, obj *gmodel.ToggleTodoPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, toggleTodoPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ToggleTodoPayload")
+		case "id":
+			out.Values[i] = ec._ToggleTodoPayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "done":
+			out.Values[i] = ec._ToggleTodoPayload_done(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "noteId":
+			out.Values[i] = ec._ToggleTodoPayload_noteId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var updateNotePayloadImplementors = []string{"UpdateNotePayload"}
+
+func (ec *executionContext) _UpdateNotePayload(ctx context.Context, sel ast.SelectionSet, obj *gmodel.UpdateNotePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateNotePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateNotePayload")
+		case "id":
+			out.Values[i] = ec._UpdateNotePayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._UpdateNotePayload_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var updateTodoPayloadImplementors = []string{"UpdateTodoPayload"}
+
+func (ec *executionContext) _UpdateTodoPayload(ctx context.Context, sel ast.SelectionSet, obj *gmodel.UpdateTodoPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateTodoPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateTodoPayload")
+		case "id":
+			out.Values[i] = ec._UpdateTodoPayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._UpdateTodoPayload_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "done":
+			out.Values[i] = ec._UpdateTodoPayload_done(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "noteId":
+			out.Values[i] = ec._UpdateTodoPayload_noteId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3060,6 +4237,11 @@ func (ec *executionContext) unmarshalNAddNoteInput2githubᚗcomᚋweidonglianᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNAddTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoInput(ctx context.Context, v interface{}) (gmodel.AddTodoInput, error) {
+	res, err := ec.unmarshalInputAddTodoInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3075,19 +4257,9 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
+func (ec *executionContext) unmarshalNDeleteTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteTodoInput(ctx context.Context, v interface{}) (gmodel.DeleteTodoInput, error) {
+	res, err := ec.unmarshalInputDeleteTodoInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
@@ -3120,8 +4292,18 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalNToggleTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐToggleTodoInput(ctx context.Context, v interface{}) (gmodel.ToggleTodoInput, error) {
+	res, err := ec.unmarshalInputToggleTodoInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNUpdateNoteInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateNoteInput(ctx context.Context, v interface{}) (gmodel.UpdateNoteInput, error) {
 	res, err := ec.unmarshalInputUpdateNoteInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateTodoInput2githubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoInput(ctx context.Context, v interface{}) (gmodel.UpdateTodoInput, error) {
+	res, err := ec.unmarshalInputUpdateTodoInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -3354,12 +4536,18 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) unmarshalOAddTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoInput(ctx context.Context, v interface{}) (*gmodel.AddTodoInput, error) {
+func (ec *executionContext) marshalOAddNotePayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddNotePayload(ctx context.Context, sel ast.SelectionSet, v *gmodel.AddNotePayload) graphql.Marshaler {
 	if v == nil {
-		return nil, nil
+		return graphql.Null
 	}
-	res, err := ec.unmarshalInputAddTodoInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return ec._AddNotePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAddTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐAddTodoPayload(ctx context.Context, sel ast.SelectionSet, v *gmodel.AddTodoPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AddTodoPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -3392,6 +4580,20 @@ func (ec *executionContext) unmarshalODeleteNoteInput2ᚖgithubᚗcomᚋweidongl
 	}
 	res, err := ec.unmarshalInputDeleteNoteInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODeleteNotePayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteNotePayload(ctx context.Context, sel ast.SelectionSet, v *gmodel.DeleteNotePayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeleteNotePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODeleteTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐDeleteTodoPayload(ctx context.Context, sel ast.SelectionSet, v *gmodel.DeleteTodoPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeleteTodoPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalONote2ᚕᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐNote(ctx context.Context, sel ast.SelectionSet, v []*gmodel.Note) graphql.Marshaler {
@@ -3512,12 +4714,25 @@ func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋgolang�
 	return ec._Todo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOUpdateTodoInput2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoInput(ctx context.Context, v interface{}) (*gmodel.UpdateTodoInput, error) {
+func (ec *executionContext) marshalOToggleTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐToggleTodoPayload(ctx context.Context, sel ast.SelectionSet, v *gmodel.ToggleTodoPayload) graphql.Marshaler {
 	if v == nil {
-		return nil, nil
+		return graphql.Null
 	}
-	res, err := ec.unmarshalInputUpdateTodoInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return ec._ToggleTodoPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUpdateNotePayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateNotePayload(ctx context.Context, sel ast.SelectionSet, v *gmodel.UpdateNotePayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UpdateNotePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUpdateTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋgolangᚑnotesᚑappᚋgraphᚋgmodelᚐUpdateTodoPayload(ctx context.Context, sel ast.SelectionSet, v *gmodel.UpdateTodoPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UpdateTodoPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

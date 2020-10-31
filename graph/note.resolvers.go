@@ -8,24 +8,64 @@ import (
 	"fmt"
 
 	"github.com/weidonglian/golang-notes-app/graph/gmodel"
+	"github.com/weidonglian/golang-notes-app/graph/util"
+	"github.com/weidonglian/golang-notes-app/model"
 )
 
-func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.AddNotePayload, error) {
+	n, err := r.store.Notes.Create(model.Note{
+		Name:   input.Name,
+		UserID: util.GetUserId(ctx),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &gmodel.AddNotePayload{
+		ID:   n.ID,
+		Name: n.Name,
+	}, nil
 }
 
-func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.UpdateNotePayload, error) {
+	n, err := r.store.Notes.Update(input.ID, input.Name, util.GetUserId(ctx))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &gmodel.UpdateNotePayload{
+		ID:   n.ID,
+		Name: n.Name,
+	}, nil
 }
 
-func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.DeleteNotePayload, error) {
+	err := r.store.Notes.Delete(input.ID, util.GetUserId(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	return &gmodel.DeleteNotePayload{
+		ID: input.ID,
+	}, nil
 }
 
 func (r *queryResolver) Notes(ctx context.Context) ([]*gmodel.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+	notes := r.store.Notes.FindByUserID(util.GetUserId(ctx))
+	gnotes := make([]*gmodel.Note, len(notes))
+	for i := range notes {
+		gnotes[i] = util.NewGNote(&notes[i], r.store.Todos.FindByNoteID(notes[i].ID))
+	}
+	return gnotes, nil
 }
 
-func (r *queryResolver) Note(ctx context.Context, id string) (*gmodel.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Note(ctx context.Context, id int) (*gmodel.Note, error) {
+	n := r.store.Notes.FindByID(id, util.GetUserId(ctx))
+	if n != nil {
+		return util.NewGNote(n, r.store.Todos.FindByNoteID(n.ID)), nil
+	} else {
+		return nil, fmt.Errorf("failed to find a note with id '%d'", id)
+	}
 }
