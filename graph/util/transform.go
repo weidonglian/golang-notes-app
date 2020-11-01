@@ -9,7 +9,7 @@ func NewGTodo(todo *model.Todo) *gmodel.Todo {
 	return &gmodel.Todo{
 		ID:     todo.ID,
 		Name:   todo.Name,
-		Done:   &todo.Done,
+		Done:   todo.Done,
 		NoteID: todo.NoteID,
 	}
 }
