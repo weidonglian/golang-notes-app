@@ -71,9 +71,55 @@ func NewTestAppAndServe() TestApp {
 	}
 }
 
-func (ta TestApp) Close() {
-	ta.server.Close()
-	ta.App.Close()
+func newReqGraphQLPayload(query string, opts []interface{}) map[string]interface{} {
+	var payload map[string]interface{}
+	switch len(opts) {
+	case 0:
+		payload = map[string]interface{}{
+			"query": query,
+		}
+	case 1:
+		payload = map[string]interface{}{
+			"query":         query,
+			"operationName": nil,
+			"variables":     opts[0].(map[string]interface{}),
+		}
+	case 2:
+		payload = map[string]interface{}{
+			"query":         query,
+			"variables":     opts[0].(map[string]interface{}),
+			"operationName": opts[1].(string),
+		}
+	default:
+		panic("Only 1 or 2 optional arguments are allowed.")
+	}
+	return payload
+}
+
+func (t *TestApp) GraphPost(query string, opts ...interface{}) *httpexpect.Object {
+	payload := newReqGraphQLPayload(query, opts)
+	return t.API.POST("/graphql").WithJSON(payload).
+		Expect().
+		JSON().Object()
+}
+
+func (t *TestApp) GraphMustData(query string, opts ...interface{}) *httpexpect.Object {
+	payload := newReqGraphQLPayload(query, opts)
+	return t.API.POST("/graphql").WithJSON(payload).
+		Expect().
+		JSON().Object().NotContainsKey("error").ContainsKey("data").Value("data").Object()
+}
+
+func (t *TestApp) GraphMustError(query string, opts ...interface{}) *httpexpect.Object {
+	payload := newReqGraphQLPayload(query, opts)
+	return t.API.POST("/graphql").WithJSON(payload).
+		Expect().
+		JSON().Object().NotContainsKey("data").ContainsKey("error").Value("error").Object()
+}
+
+func (t *TestApp) Close() {
+	t.server.Close()
+	t.App.Close()
 }
 
 func FillDataToStore(s *store.Store, userName string, notes []model.NoteWithTodos) {
