@@ -3,8 +3,8 @@ package handlers_test
 import (
 	. "github.com/onsi/ginkgo"
 	"github.com/rs/xid"
-	"github.com/weidonglian/golang-notes-app/handlers/test"
 	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/golang-notes-app/test"
 	"net/http"
 )
 
