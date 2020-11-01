@@ -2,7 +2,7 @@ package test
 
 import "github.com/weidonglian/golang-notes-app/model"
 
-func NewTestUserNotesData(testApp *HandlerTestApp) []model.NoteWithTodos {
+func NewTestUserNotesData(testApp *TestApp) []model.NoteWithTodos {
 	// test user test data
 	testUserNotes := []model.NoteWithTodos{
 		{
@@ -75,7 +75,7 @@ func NewTestUserNotesData(testApp *HandlerTestApp) []model.NoteWithTodos {
 	return testUserNotes
 }
 
-func NewDevUserNotesData(testApp *HandlerTestApp) []model.NoteWithTodos {
+func NewDevUserNotesData(testApp *TestApp) []model.NoteWithTodos {
 	// dev user test data
 	devUserNotes := []model.NoteWithTodos{
 		{

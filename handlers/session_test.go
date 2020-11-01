@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("Session", func() {
 	Describe("POST /session", func() {
-		var testApp HandlerTestApp
+		var testApp TestApp
 
 		BeforeEach(func() {
 			testApp = NewTestAppAndServe()

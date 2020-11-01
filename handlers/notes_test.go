@@ -13,7 +13,7 @@ import (
 var _ = Describe("Notes", func() {
 
 	var (
-		testApp       test.HandlerTestApp
+		testApp       test.TestApp
 		notesStore    store.NotesStore
 		testUserId    int
 		devUserId     int

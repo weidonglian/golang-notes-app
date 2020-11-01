@@ -13,7 +13,7 @@ import (
 	"github.com/onsi/ginkgo"
 )
 
-type HandlerTestApp struct {
+type TestApp struct {
 	App    *app.App
 	RawAPI *httpexpect.Expect // Raw vanilla request with any header pre-injection
 	API    *httpexpect.Expect // With test user's auth header bearer token
@@ -21,7 +21,7 @@ type HandlerTestApp struct {
 }
 
 // Each new test app will fork a new db session and will be cleanup after suite test.
-func NewTestAppAndServe() HandlerTestApp {
+func NewTestAppAndServe() TestApp {
 	// Mandatory
 	config.SetTestMode()
 
@@ -52,7 +52,7 @@ func NewTestAppAndServe() HandlerTestApp {
 			req.WithHeader("Authorization", "Bearer "+testUserToken)
 		})
 
-		return HandlerTestApp{
+		return TestApp{
 			App:    tapp,
 			RawAPI: rawapi,
 			API:    api,
@@ -61,7 +61,7 @@ func NewTestAppAndServe() HandlerTestApp {
 	}
 }
 
-func (ta HandlerTestApp) Close() {
+func (ta TestApp) Close() {
 	ta.server.Close()
 	ta.App.Close()
 }

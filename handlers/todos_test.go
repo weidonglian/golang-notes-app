@@ -11,7 +11,7 @@ import (
 var _ = Describe("Todos", func() {
 
 	var (
-		testApp       test.HandlerTestApp
+		testApp       test.TestApp
 		testUserNotes []model.NoteWithTodos
 		devUserNotes  []model.NoteWithTodos
 	)
