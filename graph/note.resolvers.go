@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/weidonglian/golang-notes-app/graph/gmodel"
@@ -13,6 +14,10 @@ import (
 )
 
 func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.AddNotePayload, error) {
+	if input.Name == "" {
+		return nil, errors.New(`'name' field can not be empty`)
+	}
+
 	n, err := r.store.Notes.Create(model.Note{
 		Name:   input.Name,
 		UserID: util.GetUserId(ctx),
@@ -29,6 +34,9 @@ func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInpu
 }
 
 func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.UpdateNotePayload, error) {
+	if input.Name == "" {
+		return nil, errors.New("'name' field can not be empty")
+	}
 	n, err := r.store.Notes.Update(input.ID, input.Name, util.GetUserId(ctx))
 
 	if err != nil {
@@ -42,13 +50,13 @@ func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNo
 }
 
 func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.DeleteNotePayload, error) {
-	err := r.store.Notes.Delete(input.ID, util.GetUserId(ctx))
+	id, err := r.store.Notes.Delete(input.ID, util.GetUserId(ctx))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unprocessable entity with 'id' %d", input.ID)
 	}
 
 	return &gmodel.DeleteNotePayload{
-		ID: input.ID,
+		ID: id,
 	}, nil
 }
 

@@ -71,6 +71,13 @@ func NewTestAppAndServe() TestApp {
 	}
 }
 
+// graphql request format, it has to be `POST` method with json body as:
+//
+// {
+//  "query": "...",
+//  "operationName": "...",
+//  "variables": { "myVariable": "someValue", ... }
+// }
 func newReqGraphQLPayload(query string, opts []interface{}) map[string]interface{} {
 	var payload map[string]interface{}
 	switch len(opts) {
@@ -82,13 +89,13 @@ func newReqGraphQLPayload(query string, opts []interface{}) map[string]interface
 		payload = map[string]interface{}{
 			"query":         query,
 			"operationName": nil,
-			"variables":     opts[0].(map[string]interface{}),
+			"variables":     opts[0],
 		}
 	case 2:
 		payload = map[string]interface{}{
 			"query":         query,
-			"variables":     opts[0].(map[string]interface{}),
-			"operationName": opts[1].(string),
+			"variables":     opts[0],
+			"operationName": opts[1],
 		}
 	default:
 		panic("Only 1 or 2 optional arguments are allowed.")
@@ -96,6 +103,17 @@ func newReqGraphQLPayload(query string, opts []interface{}) map[string]interface
 	return payload
 }
 
+// graphql response always http succeed with json body as:
+//
+// {
+//  "data": { ... },
+//  "errors": [ ... ]
+// }
+// GraphPost is a bit raw graphql API that you need to extract the `data` and `errors`
+// `opts` only supports two optional arguments, 1st argument is `variables` should be
+// a `struct` with json tags or a `map[string]interface{}` that can be converted to
+// a json. The 2nd argument must be a string for `operationName`. If no argument is
+// provided then it will include no `variables` and `operationName`.
 func (t *TestApp) GraphPost(query string, opts ...interface{}) *httpexpect.Object {
 	payload := newReqGraphQLPayload(query, opts)
 	return t.API.POST("/graphql").WithJSON(payload).
@@ -103,18 +121,26 @@ func (t *TestApp) GraphPost(query string, opts ...interface{}) *httpexpect.Objec
 		JSON().Object()
 }
 
+// sugar that expects the `data` only no error. It will return the `data` json object.
 func (t *TestApp) GraphMustData(query string, opts ...interface{}) *httpexpect.Object {
 	payload := newReqGraphQLPayload(query, opts)
 	return t.API.POST("/graphql").WithJSON(payload).
 		Expect().
-		JSON().Object().NotContainsKey("error").ContainsKey("data").Value("data").Object()
+		JSON().Object().NotContainsKey("errors").ContainsKey("data").Value("data").Object()
 }
 
-func (t *TestApp) GraphMustError(query string, opts ...interface{}) *httpexpect.Object {
+// sugar to expects `errors` but `data` could exist with `null`. It will return the `errors` json array.
+func (t *TestApp) GraphMustError(query string, opts ...interface{}) *httpexpect.Array {
 	payload := newReqGraphQLPayload(query, opts)
 	return t.API.POST("/graphql").WithJSON(payload).
 		Expect().
-		JSON().Object().NotContainsKey("data").ContainsKey("error").Value("error").Object()
+		JSON().Object().ContainsKey("errors").Value("errors").Array()
+}
+
+func GraphWithInput(v interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"input": v,
+	}
 }
 
 func (t *TestApp) Close() {

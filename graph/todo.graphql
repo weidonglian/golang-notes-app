@@ -55,7 +55,7 @@ type ToggleTodoPayload {
 }
 
 extend type Query {
-    todo(id: Int!): Todo
+    todos(noteId: Int!): [Todo]
 }
 
 extend type Mutation {

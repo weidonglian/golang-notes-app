@@ -63,9 +63,14 @@ func (i TodosStore) Toggle(id int) (*model.Todo, error) {
 }
 
 // Tries to delete a user by id, and returns the number of records deleted;
-func (i TodosStore) Delete(id int) error {
-	_, err := i.db.Exec("DELETE FROM todos WHERE todo_id = $1", id)
-	return err
+func (i TodosStore) Delete(id int, noteID int) (int, error) {
+	stmt, err := i.db.Preparex("DELETE FROM todos WHERE todo_id = $1 AND note_id = $2 RETURNING todo_id")
+	if err != nil {
+		return 0, err
+	}
+	retID := 0
+	err = stmt.Get(&retID, id, noteID)
+	return retID, err
 }
 
 // Tries to find from id;

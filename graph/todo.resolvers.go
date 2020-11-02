@@ -5,9 +5,8 @@ package graph
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/weidonglian/golang-notes-app/graph/gmodel"
+	"github.com/weidonglian/golang-notes-app/graph/util"
 	"github.com/weidonglian/golang-notes-app/model"
 )
 
@@ -24,10 +23,11 @@ func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInpu
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, util.ErrorUnprocessableEntity
 	}
 
 	return &gmodel.AddTodoPayload{
+		ID:     todo.ID,
 		Name:   todo.Name,
 		Done:   todo.Done,
 		NoteID: todo.NoteID,
@@ -35,10 +35,14 @@ func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInpu
 }
 
 func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTodoInput) (*gmodel.UpdateTodoPayload, error) {
+	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
+		return nil, util.ErrorUnprocessableEntity
+	}
+
 	todo, err := r.store.Todos.Update(input.ID, input.Name, input.Done)
 
 	if err != nil {
-		return nil, err
+		return nil, util.ErrorUnprocessableEntity
 	}
 
 	return &gmodel.UpdateTodoPayload{
@@ -47,26 +51,33 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTo
 		Done:   todo.Done,
 		NoteID: todo.NoteID,
 	}, nil
-
 }
 
 func (r *mutationResolver) DeleteTodo(ctx context.Context, input gmodel.DeleteTodoInput) (*gmodel.DeleteTodoPayload, error) {
-	err := r.store.Todos.Delete(input.ID)
+	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
+		return nil, util.ErrorUnprocessableEntity
+	}
+
+	id, err := r.store.Todos.Delete(input.ID, input.NoteID)
 	if err != nil {
-		return nil, err
+		return nil, util.ErrorUnprocessableEntity
 	}
 
 	return &gmodel.DeleteTodoPayload{
-		ID:     input.ID,
+		ID:     id,
 		NoteID: input.NoteID,
 	}, nil
 }
 
 func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTodoInput) (*gmodel.ToggleTodoPayload, error) {
+	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
+		return nil, util.ErrorUnprocessableEntity
+	}
+
 	todo, err := r.store.Todos.Toggle(input.ID)
 
 	if err != nil {
-		return nil, err
+		return nil, util.ErrorUnprocessableEntity
 	}
 
 	return &gmodel.ToggleTodoPayload{
@@ -76,6 +87,15 @@ func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTo
 	}, nil
 }
 
-func (r *queryResolver) Todo(ctx context.Context, id int) (*gmodel.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Todos(ctx context.Context, noteID int) ([]*gmodel.Todo, error) {
+	if r.store.Notes.FindByID(noteID, util.GetUserId(ctx)) == nil {
+		return nil, util.ErrorUnprocessableEntity
+	}
+
+	todos := r.store.Todos.FindByNoteID(noteID)
+	gtodos := make([]*gmodel.Todo, len(todos))
+	for i := range todos {
+		gtodos[i] = util.NewGTodo(&todos[i])
+	}
+	return gtodos, nil
 }

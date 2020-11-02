@@ -59,7 +59,9 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	}
 	entry.Logger = entry.Logger.WithFields(logFields)
 
-	entry.Logger.Infoln("request started <<<===")
+	if !config.IsTestMode() {
+		entry.Logger.Infoln("request started <<<===")
+	}
 
 	return entry
 }
@@ -74,7 +76,9 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, ela
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0,
 	})
 
-	l.Logger.Infoln("request complete ===>>>")
+	if !config.IsTestMode() {
+		l.Logger.Infoln("request complete ===>>>")
+	}
 }
 
 func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {

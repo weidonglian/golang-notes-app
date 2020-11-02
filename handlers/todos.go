@@ -115,7 +115,7 @@ func (h TodosHandler) ToggleByID(w http.ResponseWriter, r *http.Request) {
 
 func (h TodosHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	todo := r.Context().Value("CtxID").(*model.Todo)
-	if err := h.todosStore.Delete(todo.ID); err != nil {
+	if _, err := h.todosStore.Delete(todo.ID, todo.NoteID); err != nil {
 		util.SendErrorUnprocessableEntity(w, r, err)
 	} else {
 		util.SendStatus(w, r, http.StatusOK)

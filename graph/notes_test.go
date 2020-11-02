@@ -2,30 +2,22 @@ package graph_test
 
 import (
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"github.com/rs/xid"
+	"github.com/weidonglian/golang-notes-app/graph/gmodel"
 	"github.com/weidonglian/golang-notes-app/model"
-	"github.com/weidonglian/golang-notes-app/store"
 	"github.com/weidonglian/golang-notes-app/test"
-	"net/http"
 )
 
 var _ = Describe("Graph Notes", func() {
 
 	var (
 		testApp       test.TestApp
-		notesStore    store.NotesStore
-		testUserId    int
-		devUserId     int
 		testUserNotes []model.NoteWithTodos
 		devUserNotes  []model.NoteWithTodos
 	)
 
 	BeforeEach(func() {
 		testApp = test.NewTestAppAndServe()
-		notesStore = testApp.App.GetStore().Notes
-		testUserId = testApp.App.GetStore().Users.FindByName("test").ID
-		devUserId = testApp.App.GetStore().Users.FindByName("dev").ID
 		testUserNotes = test.NewTestUserNotesData(&testApp)
 		devUserNotes = test.NewDevUserNotesData(&testApp)
 	})
@@ -36,18 +28,7 @@ var _ = Describe("Graph Notes", func() {
 
 	It("query notes", func() {
 		Context("should fetch notes of test user, should not include notes of dev user", func() {
-			fetchedNotes := testApp.GraphMustData(`query{
-			  notes {
-				id
-				name    
-				todos {
-				  id
-				  name
-				  done
-				  noteId
-				}
-			  }
-            }`).ContainsKey("notes").Value("notes").Array()
+			fetchedNotes := testApp.GraphMustData(test.QueryNotes).ContainsKey("notes").Value("notes").Array()
 
 			fetchedNotes.Length().Equal(len(testUserNotes))
 			for i := range testUserNotes {
@@ -70,18 +51,7 @@ var _ = Describe("Graph Notes", func() {
 	It("query note by id", func() {
 		Context("we should be able to get the test users notes by id", func() {
 			for i := range testUserNotes {
-				fetchedNote := testApp.GraphMustData(`query($id: Int!){
-				  note(id: $id) {
-					id
-					name    
-					todos {
-					  id
-					  name
-					  done
-					  noteId
-					}
-				  }
-				}`, map[string]interface{}{
+				fetchedNote := testApp.GraphMustData(test.QueryNote, map[string]interface{}{
 					"id": testUserNotes[i].ID,
 				}).ContainsKey("note").Value("note").Object()
 				fetchedNote.Value("id").Equal(testUserNotes[i].ID)
@@ -94,75 +64,76 @@ var _ = Describe("Graph Notes", func() {
 		Context("we are not allowed to fetch another user's resources", func() {
 			// testApp.API is authenticated for 'test' user should not get notes of 'dev' user even the note id is valid
 			for i := range devUserNotes {
-				testApp.API.GET("/notes/{id}", devUserNotes[i].ID).
-					Expect().
-					Status(http.StatusUnprocessableEntity).Body().Contains("unable to find note")
+				testApp.GraphMustError(test.QueryNote, map[string]interface{}{
+					"id": devUserNotes[i].ID,
+				}).NotEmpty().Element(0).Object().Value("message").String().
+					Contains("failed to find a note with id")
 			}
 		})
 	})
 
-	It("POST /notes", func() {
+	It("mutation addNote", func() {
 		Context("we should be able to create name with any non-empty string", func() {
 			noteNames := []string{"pn1", "pn2", "pn3"}
 			for _, noteName := range noteNames {
-				newNote := testApp.API.POST("/notes").WithJSON(map[string]string{"name": noteName}).
-					Expect().
-					Status(http.StatusOK).JSON().Object()
-				newNote.Keys().Contains("id", "name", "todos").NotContains("userId")
+				newNote := testApp.GraphMustData(test.MutationAddNote, test.GraphWithInput(gmodel.AddNoteInput{
+					Name: noteName,
+				})).ContainsKey("addNote").Value("addNote").Object()
+				newNote.Keys().Contains("id", "name").NotContains("userId", "todos")
 				newNote.Value("name").Equal(noteName)
-				newNote.Value("todos").Array().Length().Equal(0)
 			}
 		})
 
 		Context("empty note name is not allowed to create", func() {
-			testApp.API.POST("/notes").WithJSON(map[string]string{"name": ""}).
-				Expect().
-				Status(http.StatusBadRequest).JSON().Object().Value("error").String().Contains("missing required fields")
-			testApp.API.POST("/notes").
-				Expect().
-				Status(http.StatusBadRequest).Body().Contains("unable to automatically decode the request content type")
+			testApp.GraphMustError(test.MutationAddNote, test.GraphWithInput(gmodel.AddNoteInput{Name: ""})).
+				NotEmpty().Element(0).Object().Value("message").String().
+				Contains("'name' field can not be empty")
+			testApp.GraphMustError(test.MutationAddNote).
+				NotEmpty().Element(0).Object().Value("message").String().
+				Contains("must be defined")
 		})
 	})
 
-	It("PUT /notes/{id}", func() {
+	It("mutation updateNote", func() {
 		Context("we should be able to update note name", func() {
 			for _, note := range testUserNotes {
 				randomName := xid.New().String()
-				updatedNote := testApp.API.PUT("/notes/{id}", note.ID).WithJSON(map[string]string{"name": randomName}).
-					Expect().
-					Status(http.StatusOK).JSON().Object()
-				updatedNote.Keys().Contains("id", "name", "todos").NotContains("userId")
+
+				updatedNote := testApp.GraphMustData(test.MutationUpdateNote, test.GraphWithInput(gmodel.UpdateNoteInput{
+					ID:   note.ID,
+					Name: randomName,
+				})).ContainsKey("updateNote").Value("updateNote").Object()
+
+				updatedNote.Keys().Contains("id", "name").NotContains("userId", "todos")
 				updatedNote.Value("name").Equal(randomName)
-				updatedNote.Value("todos").Equal(note.Todos)
+				updatedNote.Value("id").Equal(note.ID)
 			}
+		})
+
+		Context("empty name is not allowed to update", func() {
+			testApp.GraphMustError(test.MutationUpdateNote, test.GraphWithInput(gmodel.UpdateNoteInput{
+				ID:   testUserNotes[0].ID,
+				Name: "",
+			})).NotEmpty().Element(0).Object().Value("message").String().Contains("'name' field can not be empty")
 		})
 	})
 
-	It("DELETE /notes/{id}", func() {
+	It("mutation deleteNote", func() {
 		Context("we should be able to delete the test user's notes by id", func() {
 			for _, note := range testUserNotes {
-				testApp.API.DELETE("/notes/{id}", note.ID).
-					Expect().
-					Status(http.StatusOK).Body().Empty()
+				testApp.GraphMustData(test.MutationDeleteNote, test.GraphWithInput(gmodel.DeleteNoteInput{
+					ID: note.ID,
+				})).ContainsKey("deleteNote").Value("deleteNote").
+					Object().Keys().ContainsOnly("id")
 			}
 		})
 
 		Context("we should not be able to delete valid id of another user", func() {
 			for _, note := range devUserNotes {
-				testApp.API.DELETE("/notes/{id}", note.ID).
-					Expect().
-					Status(http.StatusUnprocessableEntity).Body().Contains("unable to find note")
+				testApp.GraphMustError(test.MutationDeleteNote, test.GraphWithInput(gmodel.DeleteNoteInput{
+					ID: note.ID,
+				})).NotEmpty().Element(0).Object().Value("message").String().Contains("unprocessable entity with")
 			}
-		})
-	})
-
-	It("DELETE /notes", func() {
-		Context("we should be able to delete the test user's notes", func() {
-			testApp.API.DELETE("/notes").
-				Expect().
-				Status(http.StatusOK).Body().Empty()
-			Expect(len(notesStore.FindByUserID(testUserId))).To(BeZero())
-			Expect(len(notesStore.FindByUserID(devUserId))).NotTo(BeZero())
 		})
 	})
 })

@@ -280,7 +280,9 @@ var _ = Describe("Store", func() {
 				Expect(len(foundTodos)).To(BeIdenticalTo(4))
 				By("Remove all those one by one and should drop to zero")
 				for _, todo := range foundTodos {
-					Expect(todosStore.Delete(todo.ID)).NotTo(HaveOccurred())
+					todoID, err := todosStore.Delete(todo.ID, note.ID)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(todoID).To(Equal(todo.ID))
 				}
 				Expect(len(todosStore.FindByNoteID(note.ID))).To(BeZero())
 			}
