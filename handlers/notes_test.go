@@ -123,7 +123,7 @@ var _ = Describe("Notes", func() {
 			for _, note := range testUserNotes {
 				testApp.API.DELETE("/notes/{id}", note.ID).
 					Expect().
-					Status(http.StatusOK).Body().Empty()
+					Status(http.StatusOK)
 			}
 		})
 
