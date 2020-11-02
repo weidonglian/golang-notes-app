@@ -47,9 +47,14 @@ func (i NotesStore) Update(id int, name string, userId int) (*model.Note, error)
 	return &note, err
 }
 
-func (i NotesStore) Delete(id int, userId int) error {
-	_, err := i.db.Exec("DELETE FROM notes WHERE note_id = $1 AND user_id = $2", id, userId)
-	return err
+func (i NotesStore) Delete(id int, userId int) (int, error) {
+	stmt, err := i.db.Preparex("DELETE FROM notes WHERE note_id = $1 AND user_id = $2 RETURNING note_id")
+	if err != nil {
+		return 0, err
+	}
+	retID := 0
+	err = stmt.Get(&retID, id, userId)
+	return retID, err
 }
 
 func (i NotesStore) DropAll(userId int) error {

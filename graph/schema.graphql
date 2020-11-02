@@ -1,0 +1,17 @@
+interface Node {
+    id: Int!
+}
+
+schema {
+  query: Query,
+  mutation: Mutation
+}
+
+type Query {
+    placeHolder : Boolean
+}
+
+type Mutation {
+    placeHolder : Boolean
+}
+

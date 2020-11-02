@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/golang-notes-app/auth"
+	"github.com/weidonglian/golang-notes-app/graph"
 	"github.com/weidonglian/golang-notes-app/handlers/util"
 	"github.com/weidonglian/golang-notes-app/logging"
 	"github.com/weidonglian/golang-notes-app/store"
@@ -51,6 +53,11 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		r.Use(auth.Verifier())
 		r.Use(auth.Authenticator())
 
+		// playground for graphql api
+		r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+		// Graphql handler
+		r.Handle("/graphql", graph.NewGraphQLHandler(logger, store))
+
 		// session handler
 		session := NewSessionHandler(store, auth)
 		r.Delete("/session", session.DeleteSession)
@@ -63,6 +70,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 			r.Put("/", users.UpdateByID)
 			r.Delete("/", users.DeleteByID)
 		})
+
 		// notes handler
 		notes := NewNotesHandler(store)
 		r.Get("/notes", notes.List)

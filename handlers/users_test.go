@@ -2,14 +2,14 @@ package handlers_test
 
 import (
 	. "github.com/onsi/ginkgo"
-	. "github.com/weidonglian/golang-notes-app/handlers/test"
 	"github.com/weidonglian/golang-notes-app/model"
+	. "github.com/weidonglian/golang-notes-app/test"
 	"net/http"
 )
 
 var _ = Describe("Users", func() {
 
-	var testApp HandlerTestApp
+	var testApp TestApp
 
 	BeforeEach(func() {
 		testApp = NewTestAppAndServe()

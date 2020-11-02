@@ -4,16 +4,16 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/rs/xid"
-	"github.com/weidonglian/golang-notes-app/handlers/test"
 	"github.com/weidonglian/golang-notes-app/model"
 	"github.com/weidonglian/golang-notes-app/store"
+	"github.com/weidonglian/golang-notes-app/test"
 	"net/http"
 )
 
 var _ = Describe("Notes", func() {
 
 	var (
-		testApp       test.HandlerTestApp
+		testApp       test.TestApp
 		notesStore    store.NotesStore
 		testUserId    int
 		devUserId     int
@@ -123,7 +123,7 @@ var _ = Describe("Notes", func() {
 			for _, note := range testUserNotes {
 				testApp.API.DELETE("/notes/{id}", note.ID).
 					Expect().
-					Status(http.StatusOK).Body().Empty()
+					Status(http.StatusOK)
 			}
 		})
 

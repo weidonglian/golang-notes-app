@@ -51,53 +51,24 @@ func (a *App) Close() {
 
 // NewApp create the main application
 func NewApp(logger *logrus.Logger, cfg config.Config) (*App, error) {
-
-	var (
-		dbSess *db.Session
-		s      *store.Store
-	)
 	if sess, err := db.NewSession(logger, cfg); err != nil {
 		return nil, err
 	} else {
-		dbSess = sess
+		return NewAppWith(logger, cfg, sess)
 	}
-
-	if sto, err := store.NewStore(dbSess); err != nil {
-		return nil, err
-	} else {
-		s = sto
-	}
-
-	a := &App{
-		logger: logger,
-		config: cfg,
-		db:     dbSess,
-		auth:   auth.NewAuth(cfg),
-		store:  s,
-	}
-	return a, nil
 }
 
-func NewTestApp(logger *logrus.Logger, cfg config.Config) (*App, error) {
-	if !config.IsTestMode() {
-		panic("NewTestApp should only be used for test application")
-	}
-
-	dbSess := db.LoadSessionPool(logger, cfg).ForkNewSession()
-
-	var s *store.Store
-	if sto, err := store.NewStore(dbSess); err != nil {
+func NewAppWith(logger *logrus.Logger, cfg config.Config, db *db.Session) (*App, error) {
+	if sto, err := store.NewStore(db); err != nil {
 		return nil, err
 	} else {
-		s = sto
+		return &App{
+			logger: logger,
+			config: cfg,
+			db:     db,
+			auth:   auth.NewAuth(cfg),
+			store:  sto,
+		}, nil
 	}
 
-	a := &App{
-		logger: logger,
-		config: cfg,
-		db:     dbSess,
-		auth:   auth.NewAuth(cfg),
-		store:  s,
-	}
-	return a, nil
 }

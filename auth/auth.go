@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -39,4 +40,12 @@ func (auth Auth) Authenticator() func(http.Handler) http.Handler {
 func NewAuth(cfg config.Config) *Auth {
 	tokenAuth := jwtauth.New("HS256", []byte(cfg.JWTSecret), nil)
 	return &Auth{tokenAuth}
+}
+
+func GetClaimsFromRequest(ctx context.Context) jwt.MapClaims {
+	if _, claims, err := jwtauth.FromContext(ctx); err != nil {
+		panic(err)
+	} else {
+		return claims
+	}
 }

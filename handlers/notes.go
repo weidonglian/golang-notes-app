@@ -98,10 +98,10 @@ func (h NotesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (h NotesHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	note := r.Context().Value("CtxID").(*model.Note)
-	if err := h.notesStore.Delete(note.ID, util.GetUserIDFromRequest(r)); err != nil {
+	if _, err := h.notesStore.Delete(note.ID, util.GetUserIDFromRequest(r)); err != nil {
 		util.SendErrorUnprocessableEntity(w, r, err)
 		return
 	}
 
-	util.SendStatus(w, r, http.StatusOK)
+	util.SendJson(w, r, http.StatusOK)
 }
