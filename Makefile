@@ -10,6 +10,11 @@ tools:
 	@echo Installing tools from tools.go
 	@cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
 
+# GraphQL
+graphql:
+	@echo Graphql Generator
+	@gqlgen generate
+
 # Development
 db-start-dev:
 	@echo "starting the postgres docker dev"
