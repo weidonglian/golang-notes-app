@@ -1,7 +1,3 @@
-interface Node {
-    id: Int!
-}
-
 schema {
   query: Query,
   mutation: Mutation
@@ -15,3 +11,6 @@ type Mutation {
     placeHolder : Boolean
 }
 
+interface Node {
+    id: Int!
+}

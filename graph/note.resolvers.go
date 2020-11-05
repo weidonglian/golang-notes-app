@@ -13,7 +13,7 @@ import (
 	"github.com/weidonglian/golang-notes-app/model"
 )
 
-func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.AddNotePayload, error) {
+func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error) {
 	if input.Name == "" {
 		return nil, errors.New(`'name' field can not be empty`)
 	}
@@ -27,13 +27,10 @@ func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInpu
 		return nil, err
 	}
 
-	return &gmodel.AddNotePayload{
-		ID:   n.ID,
-		Name: n.Name,
-	}, nil
+	return util.NewGNote(n, make([]model.Todo, 0)), nil
 }
 
-func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.UpdateNotePayload, error) {
+func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.Note, error) {
 	if input.Name == "" {
 		return nil, errors.New("'name' field can not be empty")
 	}
@@ -43,10 +40,7 @@ func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNo
 		return nil, err
 	}
 
-	return &gmodel.UpdateNotePayload{
-		ID:   n.ID,
-		Name: n.Name,
-	}, nil
+	return util.NewGNote(n, r.store.Todos.FindByNoteID(n.ID)), nil
 }
 
 func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.DeleteNotePayload, error) {

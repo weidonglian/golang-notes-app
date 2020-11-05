@@ -8,17 +8,7 @@ input AddNoteInput {
     name: String!
 }
 
-type AddNotePayload {
-    id: Int!
-    name: String!
-}
-
 input UpdateNoteInput {
-    id: Int!
-    name: String!
-}
-
-type UpdateNotePayload {
     id: Int!
     name: String!
 }
@@ -37,7 +27,7 @@ extend type Query {
 }
 
 extend type Mutation {
-    addNote(input: AddNoteInput!): AddNotePayload
-    updateNote(input: UpdateNoteInput!): UpdateNotePayload
+    addNote(input: AddNoteInput!): Note
+    updateNote(input: UpdateNoteInput!): Note
     deleteNote(input: DeleteNoteInput): DeleteNotePayload
 }

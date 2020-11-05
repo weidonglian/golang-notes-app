@@ -79,7 +79,8 @@ var _ = Describe("Graph Notes", func() {
 				newNote := testApp.GraphMustData(test.MutationAddNote, test.GraphWithInput(gmodel.AddNoteInput{
 					Name: noteName,
 				})).ContainsKey("addNote").Value("addNote").Object()
-				newNote.Keys().Contains("id", "name").NotContains("userId", "todos")
+
+				newNote.Keys().Contains("id", "name", "todos").NotContains("userId")
 				newNote.Value("name").Equal(noteName)
 			}
 		})
@@ -104,7 +105,7 @@ var _ = Describe("Graph Notes", func() {
 					Name: randomName,
 				})).ContainsKey("updateNote").Value("updateNote").Object()
 
-				updatedNote.Keys().Contains("id", "name").NotContains("userId", "todos")
+				updatedNote.Keys().Contains("id", "name", "todos").NotContains("userId")
 				updatedNote.Value("name").Equal(randomName)
 				updatedNote.Value("id").Equal(note.ID)
 			}

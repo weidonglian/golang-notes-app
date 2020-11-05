@@ -12,24 +12,10 @@ input AddTodoInput {
     noteId: Int!
 }
 
-type AddTodoPayload {
-    id: Int!
-    name: String!
-    done: Boolean!
-    noteId: Int!
-}
-
 input UpdateTodoInput {
     id: Int!
     name: String!
     done: Boolean
-    noteId: Int!
-}
-
-type UpdateTodoPayload {
-    id: Int!
-    name: String!
-    done: Boolean!
     noteId: Int!
 }
 
@@ -48,20 +34,14 @@ input ToggleTodoInput {
     noteId: Int!
 }
 
-type ToggleTodoPayload {
-    id: Int!
-    done: Boolean!
-    noteId: Int!
-}
-
 extend type Query {
     todos(noteId: Int!): [Todo]
 }
 
 extend type Mutation {
-    addTodo(input: AddTodoInput!): AddTodoPayload
-    updateTodo(input: UpdateTodoInput!): UpdateTodoPayload
+    addTodo(input: AddTodoInput!): Todo
+    updateTodo(input: UpdateTodoInput!): Todo
     deleteTodo(input: DeleteTodoInput!): DeleteTodoPayload
-    toggleTodo(input: ToggleTodoInput!): ToggleTodoPayload
+    toggleTodo(input: ToggleTodoInput!): Todo
 }
 
