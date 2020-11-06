@@ -10,21 +10,9 @@ type AddNoteInput struct {
 	Name string `json:"name"`
 }
 
-type AddNotePayload struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
 type AddTodoInput struct {
 	Name   string `json:"name"`
 	Done   *bool  `json:"done"`
-	NoteID int    `json:"noteId"`
-}
-
-type AddTodoPayload struct {
-	ID     int    `json:"id"`
-	Name   string `json:"name"`
-	Done   bool   `json:"done"`
 	NoteID int    `json:"noteId"`
 }
 
@@ -68,18 +56,7 @@ type ToggleTodoInput struct {
 	NoteID int `json:"noteId"`
 }
 
-type ToggleTodoPayload struct {
-	ID     int  `json:"id"`
-	Done   bool `json:"done"`
-	NoteID int  `json:"noteId"`
-}
-
 type UpdateNoteInput struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-type UpdateNotePayload struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
@@ -88,12 +65,5 @@ type UpdateTodoInput struct {
 	ID     int    `json:"id"`
 	Name   string `json:"name"`
 	Done   *bool  `json:"done"`
-	NoteID int    `json:"noteId"`
-}
-
-type UpdateTodoPayload struct {
-	ID     int    `json:"id"`
-	Name   string `json:"name"`
-	Done   bool   `json:"done"`
 	NoteID int    `json:"noteId"`
 }

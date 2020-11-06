@@ -104,7 +104,7 @@ var _ = Describe("Graph Todos", func() {
 						NoteID: testUserNotes[i].ID,
 					})).ContainsKey("toggleTodo").Value("toggleTodo").Object()
 
-					obj.Keys().ContainsOnly("id", "done", "noteId")
+					obj.Keys().ContainsOnly("id", "done", "noteId", "name")
 					obj.Values().Contains(testUserNotes[i].Todos[j].ID, !testUserNotes[i].Todos[j].Done, testUserNotes[i].ID)
 				}
 			}

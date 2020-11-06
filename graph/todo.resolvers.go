@@ -11,7 +11,7 @@ import (
 	"github.com/weidonglian/golang-notes-app/model"
 )
 
-func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInput) (*gmodel.AddTodoPayload, error) {
+func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInput) (*gmodel.Todo, error) {
 	done := false
 	if input.Done != nil {
 		done = *input.Done
@@ -27,15 +27,10 @@ func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInpu
 		return nil, util.ErrorUnprocessableEntity
 	}
 
-	return &gmodel.AddTodoPayload{
-		ID:     todo.ID,
-		Name:   todo.Name,
-		Done:   todo.Done,
-		NoteID: todo.NoteID,
-	}, nil
+	return util.NewGTodo(todo), nil
 }
 
-func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTodoInput) (*gmodel.UpdateTodoPayload, error) {
+func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTodoInput) (*gmodel.Todo, error) {
 	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
 		return nil, util.ErrorUnprocessableEntity
 	}
@@ -46,12 +41,7 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTo
 		return nil, util.ErrorUnprocessableEntity
 	}
 
-	return &gmodel.UpdateTodoPayload{
-		ID:     todo.ID,
-		Name:   todo.Name,
-		Done:   todo.Done,
-		NoteID: todo.NoteID,
-	}, nil
+	return util.NewGTodo(todo), nil
 }
 
 func (r *mutationResolver) DeleteTodo(ctx context.Context, input gmodel.DeleteTodoInput) (*gmodel.DeleteTodoPayload, error) {
@@ -70,7 +60,7 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, input gmodel.DeleteTo
 	}, nil
 }
 
-func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTodoInput) (*gmodel.ToggleTodoPayload, error) {
+func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTodoInput) (*gmodel.Todo, error) {
 	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
 		return nil, util.ErrorUnprocessableEntity
 	}
@@ -81,11 +71,7 @@ func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTo
 		return nil, util.ErrorUnprocessableEntity
 	}
 
-	return &gmodel.ToggleTodoPayload{
-		ID:     todo.ID,
-		Done:   todo.Done,
-		NoteID: todo.NoteID,
-	}, nil
+	return util.NewGTodo(todo), nil
 }
 
 func (r *queryResolver) Todos(ctx context.Context, noteID int) ([]*gmodel.Todo, error) {

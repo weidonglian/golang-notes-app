@@ -1,7 +1,8 @@
 package test
 
 // GraphQL `note`
-var QueryNotes = `query {
+var QueryNotes = `
+query {
   notes {
 	id
 	name    
@@ -12,9 +13,11 @@ var QueryNotes = `query {
 	  noteId
 	}
   }
-}`
+}
+`
 
-var QueryNote = `query($id: Int!){
+var QueryNote = `
+query($id: Int!){
   note(id: $id) {
 	id
 	name    
@@ -25,21 +28,38 @@ var QueryNote = `query($id: Int!){
 	  noteId
 	}
   }
-}`
+}
+`
 
-var MutationAddNote = `mutation ($input: AddNoteInput!) {
+var MutationAddNote = `
+mutation ($input: AddNoteInput!) {
   addNote(input: $input) {
     id
     name
+    todos {
+	  id
+	  name
+	  done
+	  noteId
+    }
   }
-}`
+}
+`
 
-var MutationUpdateNote = `mutation ($input: UpdateNoteInput!) {
+var MutationUpdateNote = `
+mutation ($input: UpdateNoteInput!) {
   updateNote(input: $input) {
     id
     name
+    todos {
+      id
+      name
+	  done
+	  noteId
+    }
   }
-}`
+}
+`
 
 var MutationDeleteNote = `mutation ($input: DeleteNoteInput!) {
   deleteNote(input: $input) {
@@ -48,44 +68,55 @@ var MutationDeleteNote = `mutation ($input: DeleteNoteInput!) {
 }`
 
 // GraphQL `todo`
-var QueryTodos = `query ($noteId: Int!){
+var QueryTodos = `
+query ($noteId: Int!){
   todos(noteId: $noteId) {
     id
     name
     done
     noteId
   }
-}`
+}
+`
 
-var MutationAddTodo = `mutation ($input: AddTodoInput!){
+var MutationAddTodo = `
+mutation ($input: AddTodoInput!){
   addTodo(input: $input) {
     id
     name
-    done
-    noteId
+	done
+	noteId
   }
-}`
+}
+`
 
-var MutationUpdateTodo = `mutation ($input: UpdateTodoInput!){
+var MutationUpdateTodo = `
+mutation ($input: UpdateTodoInput!){
   updateTodo(input: $input) {
     id
     name
     done
     noteId
   }
-}`
+}
+`
 
-var MutationToggleTodo = `mutation ($input: ToggleTodoInput!){
-  toggleTodo(input: $input) {
+var MutationToggleTodo = `
+mutation ($input: ToggleTodoInput!){
+  toggleTodo(input: $input) {    
     id
-    done
-    noteId
+	name
+	done
+	noteId    
   }
-}`
+}
+`
 
-var MutationDeleteTodo = `mutation ($input: DeleteTodoInput!){
+var MutationDeleteTodo = `
+mutation ($input: DeleteTodoInput!){
   deleteTodo(input: $input) {
     id
     noteId
   }
-}`
+}
+`
