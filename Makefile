@@ -16,48 +16,48 @@ graphql:
 	@gqlgen generate
 
 # Development
+DOCKER_DEV=postgres-dev-notes-app
 db-start-dev:
 	@echo "starting the postgres docker dev"
-	@mkdir -p ${DEVROOT}/docker/volumes/postgres
-	@docker container inspect docker-postgres-dev >/dev/null 2>&1 || docker run --rm --name docker-postgres-dev -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 -v ${DEVROOT}/docker/volumes/postgres:/var/lib/postgresql/data postgres:12.3
+	@docker container inspect $(DOCKER_DEV) >/dev/null 2>&1 || docker run --rm --name $(DOCKER_DEV) -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 --mount source=$(DOCKER_DEV),target=/var/lib/postgresql/data postgres:12.3
 
 db-stop-dev:
 	@echo "stopping the postgres docker dev"
-	@docker container stop docker-postgres-dev
+	@docker container stop $(DOCKER_DEV)
 
 db-ssh-dev:
-	@echo "ssh login the docker-postgres container"
-	@docker exec -it docker-postgres-dev psql -U postgres
+	@echo "ssh login the $(DOCKER_DEV) container"
+	@docker exec -it $(DOCKER_DEV) psql -U postgres
 
 start: db-start-dev
 	@echo "run start dev"
-	@go run main.go
+	@go run ./cmd/app
 
 # Test
+DOCKER_TEST=postgres-test-notes-app
 db-start-test:
 	@echo "starting the postgres docker test"
-	@docker container inspect docker-postgres-test >/dev/null 2>&1 || docker run --rm --name docker-postgres-test -e POSTGRES_PASSWORD=postgres -d -p 5433:5432 postgres:12.3
+	@docker container inspect $(DOCKER_TEST) >/dev/null 2>&1 || docker run --rm --name $(DOCKER_TEST) -e POSTGRES_PASSWORD=postgres -d -p 5433:5432 postgres:12.3
 
 db-stop-test:
 	@echo "stopping the postgres docker test"
-	@docker container stop docker-postgres-test
+	@docker container stop $(DOCKER_TEST)
 
 db-ssh-test:
-	@echo "ssh login the docker-postgres-test container"
-	@docker exec -it docker-postgres-test psql -U postgres
+	@echo "ssh login the $(DOCKER_TEST) container"
+	@docker exec -it $(DOCKER_TEST) psql -U postgres
 
 test: tools db-start-test
 	@echo "run test"
-	@ginkgo test -r *
+	@ginkgo test -r internal/*
 
 # Production
 build:
 	@echo "Prod: build the optimized version for production"
-	@CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+	@CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main ./cmd/app
 
 serve-prod:
 	@echo "Prod: serve the app using docker-compose"
-	#docker volume create notes-app-postgres-data
 	docker-compose up --build
 
 sync-helmfile:

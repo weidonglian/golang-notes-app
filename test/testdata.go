@@ -1,6 +1,6 @@
 package test
 
-import "github.com/weidonglian/notes-app/model"
+import "github.com/weidonglian/notes-app/pkg/model"
 
 func NewTestUserNotesData(testApp *TestApp) []model.NoteWithTodos {
 	// test user test data

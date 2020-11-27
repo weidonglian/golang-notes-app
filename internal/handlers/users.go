@@ -1,0 +1,68 @@
+package handlers
+
+import (
+	"fmt"
+	"github.com/weidonglian/notes-app/internal/handlers/payload"
+	"github.com/weidonglian/notes-app/internal/store"
+	"github.com/weidonglian/notes-app/pkg/model"
+	"github.com/weidonglian/notes-app/pkg/util"
+	"net/http"
+)
+
+type UsersHandler struct {
+	usersStore *store.UsersStore
+}
+
+func NewUsersHandler(s *store.Store) UsersHandler {
+	return UsersHandler{
+		usersStore: &s.Users,
+	}
+}
+
+func (h UsersHandler) CtxID(next http.Handler) http.Handler {
+	return next
+}
+
+func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
+	data := &payload.ReqUser{}
+
+	if err := util.ReceiveJson(r, data); err != nil {
+		util.SendErrorBadRequest(w, r, err)
+		return
+	}
+
+	if h.usersStore.FindByName(data.Username) != nil {
+		util.SendErrorBadRequest(w, r, fmt.Errorf("username '%s' already exists", data.Username))
+		return
+	}
+
+	newUser := model.User{
+		Username: data.Username,
+		Password: data.Password,
+		Role:     model.UserRoleUser,
+	}
+
+	if user, err := h.usersStore.Create(newUser); err != nil {
+		util.SendErrorInternalServer(w, r, err)
+		return
+	} else {
+		util.SendJson(w, r, payload.NewRespUser(user))
+		return
+	}
+}
+
+func (h UsersHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("NotImplementedYet"))
+}
+
+func (h UsersHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("NotImplementedYet"))
+}
+
+func (h UsersHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("NotImplementedYet"))
+}
+
+func (h UsersHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("NotImplementedYet"))
+}
