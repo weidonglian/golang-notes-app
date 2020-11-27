@@ -2,8 +2,8 @@ package util
 
 import (
 	"github.com/go-chi/render"
-	"github.com/weidonglian/golang-notes-app/config"
-	"github.com/weidonglian/golang-notes-app/logging"
+	"github.com/weidonglian/notes-app/config"
+	"github.com/weidonglian/notes-app/logging"
 	"net/http"
 )
 

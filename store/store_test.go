@@ -3,9 +3,9 @@ package store_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/weidonglian/golang-notes-app/db"
-	"github.com/weidonglian/golang-notes-app/model"
-	"github.com/weidonglian/golang-notes-app/store"
+	"github.com/weidonglian/notes-app/db"
+	"github.com/weidonglian/notes-app/model"
+	"github.com/weidonglian/notes-app/store"
 )
 
 var _ = Describe("Store", func() {

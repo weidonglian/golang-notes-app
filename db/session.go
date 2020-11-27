@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/weidonglian/golang-notes-app/config"
+	"github.com/weidonglian/notes-app/config"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"

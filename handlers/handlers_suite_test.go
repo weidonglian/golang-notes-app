@@ -1,7 +1,7 @@
 package handlers_test
 
 import (
-	"github.com/weidonglian/golang-notes-app/db"
+	"github.com/weidonglian/notes-app/db"
 	"testing"
 
 	. "github.com/onsi/ginkgo"

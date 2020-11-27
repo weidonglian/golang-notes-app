@@ -1,8 +1,8 @@
 package util
 
 import (
-	"github.com/weidonglian/golang-notes-app/graph/gmodel"
-	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/notes-app/graph/gmodel"
+	"github.com/weidonglian/notes-app/model"
 )
 
 func NewGTodo(todo *model.Todo) *gmodel.Todo {

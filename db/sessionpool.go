@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/golang-notes-app/config"
+	"github.com/weidonglian/notes-app/config"
 )
 
 type SessionPool struct {

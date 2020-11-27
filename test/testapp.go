@@ -3,12 +3,12 @@ package test
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/golang-notes-app/app"
-	"github.com/weidonglian/golang-notes-app/config"
-	"github.com/weidonglian/golang-notes-app/db"
-	"github.com/weidonglian/golang-notes-app/logging"
-	"github.com/weidonglian/golang-notes-app/model"
-	"github.com/weidonglian/golang-notes-app/store"
+	"github.com/weidonglian/notes-app/app"
+	"github.com/weidonglian/notes-app/config"
+	"github.com/weidonglian/notes-app/db"
+	"github.com/weidonglian/notes-app/logging"
+	"github.com/weidonglian/notes-app/model"
+	"github.com/weidonglian/notes-app/store"
 	"net/http/httptest"
 
 	"github.com/gavv/httpexpect/v2"

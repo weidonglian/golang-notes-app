@@ -7,7 +7,7 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
-	"github.com/weidonglian/golang-notes-app/config"
+	"github.com/weidonglian/notes-app/config"
 )
 
 type Auth struct {

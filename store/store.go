@@ -1,9 +1,9 @@
 package store
 
 import (
-	"github.com/weidonglian/golang-notes-app/config"
-	"github.com/weidonglian/golang-notes-app/db"
-	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/notes-app/config"
+	"github.com/weidonglian/notes-app/db"
+	"github.com/weidonglian/notes-app/model"
 )
 
 type Context struct {

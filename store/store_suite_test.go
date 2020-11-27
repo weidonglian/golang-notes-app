@@ -3,9 +3,9 @@ package store_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/weidonglian/golang-notes-app/config"
-	"github.com/weidonglian/golang-notes-app/db"
-	"github.com/weidonglian/golang-notes-app/logging"
+	"github.com/weidonglian/notes-app/config"
+	"github.com/weidonglian/notes-app/db"
+	"github.com/weidonglian/notes-app/logging"
 	"testing"
 )
 

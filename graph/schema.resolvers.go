@@ -6,7 +6,7 @@ package graph
 import (
 	"context"
 
-	"github.com/weidonglian/golang-notes-app/graph/generated"
+	"github.com/weidonglian/notes-app/graph/generated"
 )
 
 func (r *mutationResolver) PlaceHolder(ctx context.Context) (*bool, error) {

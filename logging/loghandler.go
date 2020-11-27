@@ -3,7 +3,7 @@ package logging
 import (
 	"bytes"
 	"fmt"
-	"github.com/weidonglian/golang-notes-app/config"
+	"github.com/weidonglian/notes-app/config"
 	"io/ioutil"
 	"net/http"
 	"time"

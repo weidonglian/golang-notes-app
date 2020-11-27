@@ -1,7 +1,7 @@
 package payload
 
 import (
-	"github.com/weidonglian/golang-notes-app/handlers/util"
+	"github.com/weidonglian/notes-app/handlers/util"
 	"net/http"
 )
 

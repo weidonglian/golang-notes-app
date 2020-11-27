@@ -1,7 +1,7 @@
 package util
 
 import (
-	"github.com/weidonglian/golang-notes-app/auth"
+	"github.com/weidonglian/notes-app/auth"
 	"net/http"
 )
 

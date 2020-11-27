@@ -3,8 +3,8 @@ package graph
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/golang-notes-app/graph/generated"
-	"github.com/weidonglian/golang-notes-app/store"
+	"github.com/weidonglian/notes-app/graph/generated"
+	"github.com/weidonglian/notes-app/store"
 	"net/http"
 )
 

@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/notes-app/model"
 )
 
 type NotesStore struct {

@@ -13,7 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/golang-notes-app/config"
+	"github.com/weidonglian/notes-app/config"
 )
 
 func RunMigrations(conn *sqlx.DB, cfg config.Config, logger *logrus.Logger) error {

@@ -3,10 +3,10 @@ package graph_test
 import (
 	. "github.com/onsi/ginkgo"
 	"github.com/rs/xid"
-	"github.com/weidonglian/golang-notes-app/graph/gmodel"
-	"github.com/weidonglian/golang-notes-app/graph/util"
-	"github.com/weidonglian/golang-notes-app/model"
-	"github.com/weidonglian/golang-notes-app/test"
+	"github.com/weidonglian/notes-app/graph/gmodel"
+	"github.com/weidonglian/notes-app/graph/util"
+	"github.com/weidonglian/notes-app/model"
+	"github.com/weidonglian/notes-app/test"
 )
 
 var _ = Describe("Graph Todos", func() {

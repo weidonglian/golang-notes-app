@@ -3,13 +3,13 @@ package app
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/golang-notes-app/db"
+	"github.com/weidonglian/notes-app/db"
 	"net/http"
 
-	"github.com/weidonglian/golang-notes-app/auth"
-	"github.com/weidonglian/golang-notes-app/config"
-	"github.com/weidonglian/golang-notes-app/handlers"
-	"github.com/weidonglian/golang-notes-app/store"
+	"github.com/weidonglian/notes-app/auth"
+	"github.com/weidonglian/notes-app/config"
+	"github.com/weidonglian/notes-app/handlers"
+	"github.com/weidonglian/notes-app/store"
 
 	"github.com/go-chi/chi"
 )

@@ -4,9 +4,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/rs/xid"
-	"github.com/weidonglian/golang-notes-app/model"
-	"github.com/weidonglian/golang-notes-app/store"
-	"github.com/weidonglian/golang-notes-app/test"
+	"github.com/weidonglian/notes-app/model"
+	"github.com/weidonglian/notes-app/store"
+	"github.com/weidonglian/notes-app/test"
 	"net/http"
 )
 

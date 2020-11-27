@@ -14,7 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/weidonglian/golang-notes-app/graph/gmodel"
+	"github.com/weidonglian/notes-app/graph/gmodel"
 )
 
 // region    ************************** generated!.gotpl **************************

@@ -1,4 +1,4 @@
-module github.com/weidonglian/golang-notes-app
+module github.com/weidonglian/notes-app
 
 go 1.15
 

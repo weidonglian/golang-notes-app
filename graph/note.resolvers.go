@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/weidonglian/golang-notes-app/graph/gmodel"
-	"github.com/weidonglian/golang-notes-app/graph/util"
-	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/notes-app/graph/gmodel"
+	"github.com/weidonglian/notes-app/graph/util"
+	"github.com/weidonglian/notes-app/model"
 )
 
 func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error) {

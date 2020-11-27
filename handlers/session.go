@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/weidonglian/golang-notes-app/auth"
-	"github.com/weidonglian/golang-notes-app/handlers/payload"
-	"github.com/weidonglian/golang-notes-app/handlers/util"
-	"github.com/weidonglian/golang-notes-app/store"
+	"github.com/weidonglian/notes-app/auth"
+	"github.com/weidonglian/notes-app/handlers/payload"
+	"github.com/weidonglian/notes-app/handlers/util"
+	"github.com/weidonglian/notes-app/store"
 	"net/http"
 )
 

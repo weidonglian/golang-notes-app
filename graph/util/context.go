@@ -2,7 +2,7 @@ package util
 
 import (
 	"context"
-	"github.com/weidonglian/golang-notes-app/auth"
+	"github.com/weidonglian/notes-app/auth"
 )
 
 func GetUserId(ctx context.Context) int {

@@ -6,9 +6,9 @@ package graph
 import (
 	"context"
 
-	"github.com/weidonglian/golang-notes-app/graph/gmodel"
-	"github.com/weidonglian/golang-notes-app/graph/util"
-	"github.com/weidonglian/golang-notes-app/model"
+	"github.com/weidonglian/notes-app/graph/gmodel"
+	"github.com/weidonglian/notes-app/graph/util"
+	"github.com/weidonglian/notes-app/model"
 )
 
 func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInput) (*gmodel.Todo, error) {
