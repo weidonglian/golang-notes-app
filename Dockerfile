@@ -7,6 +7,6 @@ RUN make build
 
 FROM alpine:latest
 COPY --from=builder /build/main /app/
-COPY --from=builder /build/db/migrations /app/migrations
+COPY --from=builder /build/internal/db/migrations /app/migrations
 WORKDIR /app
 CMD ["/app/main"]
