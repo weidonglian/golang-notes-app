@@ -11,7 +11,7 @@ func NewLogger() *logrus.Logger {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
 		DisableColors: false,
-		//FullTimestamp: true,
+		// FullTimestamp: true,
 		DisableTimestamp: true,
 	})
 	/* logger.Formatter = &logrus.JSONFormatter{

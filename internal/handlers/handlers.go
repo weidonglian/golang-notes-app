@@ -56,7 +56,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		// playground for graphql api
 		r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 		// Graphql handler
-		r.Handle("/graphql", graph.NewGraphQLHandler(logger, store))
+		r.Handle("/graphql", graphql.NewGraphQLHandler(logger, store))
 
 		// session handler
 		session := NewSessionHandler(store, auth)
