@@ -31,7 +31,7 @@ db-ssh-dev:
 
 start: db-start-dev
 	@echo "run start dev"
-	@go run main.go
+	@go run ./cmd/app
 
 
 # Test
@@ -55,7 +55,7 @@ test: tools db-start-test
 # Production
 build:
 	@echo "Prod: build the optimized version for production"
-	@CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+	@CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main ./cmd/app
 
 serve-prod:
 	@echo "Prod: serve the app using docker-compose"
