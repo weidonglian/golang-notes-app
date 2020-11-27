@@ -3,12 +3,12 @@ package test
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/notes-app/app"
 	"github.com/weidonglian/notes-app/config"
-	"github.com/weidonglian/notes-app/db"
-	"github.com/weidonglian/notes-app/logging"
-	"github.com/weidonglian/notes-app/model"
-	"github.com/weidonglian/notes-app/store"
+	"github.com/weidonglian/notes-app/internal/app"
+	"github.com/weidonglian/notes-app/internal/db"
+	"github.com/weidonglian/notes-app/internal/store"
+	"github.com/weidonglian/notes-app/pkg/logging"
+	"github.com/weidonglian/notes-app/pkg/model"
 	"net/http/httptest"
 
 	"github.com/gavv/httpexpect/v2"

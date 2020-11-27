@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/weidonglian/notes-app/app"
 	"github.com/weidonglian/notes-app/config"
-	"github.com/weidonglian/notes-app/logging"
+	"github.com/weidonglian/notes-app/internal/app"
+	"github.com/weidonglian/notes-app/pkg/logging"
 )
 
 func main() {

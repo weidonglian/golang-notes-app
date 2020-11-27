@@ -83,7 +83,7 @@ type Config struct {
 	Postgres       PostgresConfig
 	ServerPort     int    `default:"4000" envconfig:"PORT"`
 	JWTSecret      string `default:"MaPoDouFu" envconfig:"JWT_SECRET"`
-	MigrationsPath string `default:"./db/migrations" envconfig:"MIGRATIONS_PATH"`
+	MigrationsPath string `default:"./internal/db/migrations" envconfig:"MIGRATIONS_PATH"`
 }
 
 var (
@@ -98,7 +98,7 @@ var (
 		},
 		ServerPort:     3000,
 		JWTSecret:      "@Test@NoteApp",
-		MigrationsPath: "./db/migrations",
+		MigrationsPath: "./internal/db/migrations",
 	}
 
 	defaultDevConfig = Config{
@@ -112,7 +112,7 @@ var (
 		},
 		ServerPort:     4000,
 		JWTSecret:      "@Dev@NoteApp",
-		MigrationsPath: "./db/migrations",
+		MigrationsPath: "./internal/db/migrations",
 	}
 )
 
