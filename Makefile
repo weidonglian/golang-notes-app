@@ -33,7 +33,6 @@ start: db-start-dev
 	@echo "run start dev"
 	@go run ./cmd/app
 
-
 # Test
 DOCKER_TEST=postgres-test-notes-app
 db-start-test:
@@ -50,7 +49,7 @@ db-ssh-test:
 
 test: tools db-start-test
 	@echo "run test"
-	@ginkgo test -r *
+	@ginkgo test -r internal/*
 
 # Production
 build:
