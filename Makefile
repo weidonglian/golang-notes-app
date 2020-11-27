@@ -16,11 +16,10 @@ graphql:
 	@gqlgen generate
 
 # Development
-DOCKER_DEV=docker-postgres-dev-notes-app
+DOCKER_DEV=postgres-dev-notes-app
 db-start-dev:
 	@echo "starting the postgres docker dev"
-	@mkdir -p ${DEVROOT}/docker/volumes/postgres
-	@docker container inspect $(DOCKER_DEV) >/dev/null 2>&1 || docker run --rm --name $(DOCKER_DEV) -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 -v ${DEVROOT}/docker/volumes/postgres:/var/lib/postgresql/data postgres:12.3
+	@docker container inspect $(DOCKER_DEV) >/dev/null 2>&1 || docker run --rm --name $(DOCKER_DEV) -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 --mount source=$(DOCKER_DEV),target=/var/lib/postgresql/data postgres:12.3
 
 db-stop-dev:
 	@echo "stopping the postgres docker dev"
@@ -36,7 +35,7 @@ start: db-start-dev
 
 
 # Test
-DOCKER_TEST=docker-postgres-test-notes-app
+DOCKER_TEST=postgres-test-notes-app
 db-start-test:
 	@echo "starting the postgres docker test"
 	@docker container inspect $(DOCKER_TEST) >/dev/null 2>&1 || docker run --rm --name $(DOCKER_TEST) -e POSTGRES_PASSWORD=postgres -d -p 5433:5432 postgres:12.3

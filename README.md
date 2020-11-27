@@ -15,7 +15,6 @@ In order to test develop locally, you need:
 
 - Install `go`.
 - Install `docker` for running postgres.
-- Add an `DEVROOT` in your `.bashrc` to define where to put the `dev` postgres volume data. See `Makefile` and search `DEVROOT`.
 
 After you have installed the above requirements. You are good to go.
 
@@ -129,14 +128,15 @@ Instead of mocking the database for every test, so-called unit test, here we wil
 name for every `TestApp`. The trick is that with one database connection to `postgres`, we could creat a new database.
 We will use the new one for every single test. check the `./db/sessionpool.go` for more details how to fork a new database
 base for `TestApp`. The `App` will use the `database` specified in the config, but the `TestApp` will use the database
-specified in config for `Test` mode as a parent to spin up a new database for every test. That is the only difference between `TestApp`
-and `App`.
+specified in config for `Test` mode as a parent to spin up a new database for every test. That is the only difference 
+between `TestApp` and `App`.
 
 
 ### Development locally with the database docker
 
-Run `make db-start-dev`, it will start up a database docker for development only, it will try to map a `<DEVROOT>/xxxx`
-folder to your docker's postgres `data` folder. Then next time you run the `dev` postgres, you will continue your last
+Run `make db-start-dev`, it will start up a database docker for development only, it will use a volume `postgres-dev-notes-app`.
+It is does not exist, it will create one. Docker volume is good and easy to use during dev process. Then next time you 
+run the `dev` postgres, you will continue your last
 database and data.
 
 You can also run `make serve-prod` to spin a docker-compose for both postgres docker and app docker in production mode.
