@@ -5,8 +5,8 @@ import (
 	"github.com/rs/xid"
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
 	"github.com/weidonglian/notes-app/pkg/model"
+	"github.com/weidonglian/notes-app/pkg/test"
 	"github.com/weidonglian/notes-app/pkg/util"
-	"github.com/weidonglian/notes-app/test"
 )
 
 var _ = Describe("Graph Todos", func() {

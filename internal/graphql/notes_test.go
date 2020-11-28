@@ -5,7 +5,7 @@ import (
 	"github.com/rs/xid"
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
 	"github.com/weidonglian/notes-app/pkg/model"
-	"github.com/weidonglian/notes-app/test"
+	"github.com/weidonglian/notes-app/pkg/test"
 )
 
 var _ = Describe("Graph Notes", func() {

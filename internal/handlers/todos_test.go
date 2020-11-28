@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/rs/xid"
 	"github.com/weidonglian/notes-app/pkg/model"
-	"github.com/weidonglian/notes-app/test"
+	"github.com/weidonglian/notes-app/pkg/test"
 	"net/http"
 )
 
