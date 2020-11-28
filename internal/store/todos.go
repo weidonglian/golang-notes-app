@@ -14,7 +14,7 @@ type TodosStore struct {
 func NewTodosStore(ctx *Context) TodosStore {
 	return TodosStore{
 		db:     ctx.Session.GetDB(),
-		logger: ctx.Session.Logger,
+		logger: ctx.Logger,
 	}
 }
 

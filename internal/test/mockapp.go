@@ -26,7 +26,7 @@ func newTestApp(logger *logrus.Logger, cfg config.Config) (*app.App, error) {
 	if !config.IsTestMode() {
 		panic("NewTestApp should only be used for test application")
 	}
-	dbSess := db.LoadSessionPool(logger, cfg).ForkNewSession()
+	dbSess := db.NewForkedRandomSession(logger, cfg)
 	return app.NewAppWith(logger, cfg, dbSess)
 }
 

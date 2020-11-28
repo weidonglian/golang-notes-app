@@ -21,7 +21,7 @@ import (
 type App struct {
 	logger *logrus.Logger
 	config config.Config
-	db     *db.Session
+	db     db.Session
 	store  *store.Store
 	auth   *auth.Auth
 }
@@ -91,8 +91,8 @@ func NewApp(logger *logrus.Logger, cfg config.Config) (*App, error) {
 	}
 }
 
-func NewAppWith(logger *logrus.Logger, cfg config.Config, db *db.Session) (*App, error) {
-	if sto, err := store.NewStore(db); err != nil {
+func NewAppWith(logger *logrus.Logger, cfg config.Config, db db.Session) (*App, error) {
+	if sto, err := store.NewStore(db, logger); err != nil {
 		return nil, err
 	} else {
 		return &App{

@@ -14,7 +14,7 @@ type NotesStore struct {
 func NewNotesStore(ctx *Context) NotesStore {
 	return NotesStore{
 		db:     ctx.Session.GetDB(),
-		logger: ctx.Session.Logger,
+		logger: ctx.Logger,
 	}
 }
 

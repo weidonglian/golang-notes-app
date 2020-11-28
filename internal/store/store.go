@@ -1,13 +1,15 @@
 package store
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/db"
 	"github.com/weidonglian/notes-app/internal/model"
 )
 
 type Context struct {
-	Session *db.Session
+	Session db.Session
+	Logger  *logrus.Logger
 }
 
 type Store struct {
@@ -17,9 +19,10 @@ type Store struct {
 	Todos TodosStore
 }
 
-func NewStore(sess *db.Session) (*Store, error) {
+func NewStore(sess db.Session, logger *logrus.Logger) (*Store, error) {
 	ctx := Context{
 		Session: sess,
+		Logger:  logger,
 	}
 
 	s := Store{

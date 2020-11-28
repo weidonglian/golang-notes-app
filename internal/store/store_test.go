@@ -3,21 +3,24 @@ package store_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/db"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
+	"github.com/weidonglian/notes-app/pkg/logging"
 )
 
 var _ = Describe("Store", func() {
 	var (
-		dbSession *db.Session
+		dbSession db.Session
 		sto       *store.Store
 	)
 
 	// we need to set up a new db session for different stores
 	BeforeEach(func() {
-		dbSession = dbSessionPool.ForkNewSession()
-		if s, err := store.NewStore(dbSession); err != nil {
+		logger := logging.NewLogger()
+		dbSession = db.NewForkedRandomSession(logger, config.GetConfig())
+		if s, err := store.NewStore(dbSession, logger); err != nil {
 			panic(err)
 		} else {
 			sto = s

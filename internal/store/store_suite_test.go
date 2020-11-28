@@ -4,8 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/weidonglian/notes-app/config"
-	"github.com/weidonglian/notes-app/internal/db"
-	"github.com/weidonglian/notes-app/pkg/logging"
 	"testing"
 )
 
@@ -14,18 +12,6 @@ func TestStore(t *testing.T) {
 	RunSpecs(t, "Store Suite")
 }
 
-var (
-	dbSessionPool *db.SessionPool
-)
-
 var _ = BeforeSuite(func() {
 	config.SetTestMode()
-	dbSessionPool = db.LoadSessionPool(logging.NewLogger(), config.GetConfig())
-})
-
-var _ = AfterSuite(func() {
-	if dbSessionPool != nil {
-		db.UnloadSessionPool()
-		dbSessionPool = nil
-	}
 })
