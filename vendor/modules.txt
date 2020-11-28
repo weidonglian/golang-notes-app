@@ -177,6 +177,7 @@ github.com/valyala/fasthttp/stackless
 github.com/vektah/dataloaden
 github.com/vektah/dataloaden/pkg/generator
 # github.com/vektah/gqlparser/v2 v2.1.0
+## explicit
 github.com/vektah/gqlparser/v2
 github.com/vektah/gqlparser/v2/ast
 github.com/vektah/gqlparser/v2/gqlerror
