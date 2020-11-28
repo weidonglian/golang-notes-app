@@ -3,8 +3,8 @@ package handlers
 import (
 	"fmt"
 	"github.com/weidonglian/notes-app/internal/handlers/payload"
+	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
-	"github.com/weidonglian/notes-app/pkg/model"
 	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 )

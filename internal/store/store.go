@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/db"
-	"github.com/weidonglian/notes-app/pkg/model"
+	"github.com/weidonglian/notes-app/internal/model"
 )
 
 type Context struct {

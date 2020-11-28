@@ -6,9 +6,9 @@ import (
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/app"
 	"github.com/weidonglian/notes-app/internal/db"
+	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
 	"github.com/weidonglian/notes-app/pkg/logging"
-	"github.com/weidonglian/notes-app/pkg/model"
 	"net/http/httptest"
 
 	"github.com/gavv/httpexpect/v2"

@@ -2,8 +2,8 @@ package handlers_test
 
 import (
 	. "github.com/onsi/ginkgo"
-	"github.com/weidonglian/notes-app/pkg/model"
-	. "github.com/weidonglian/notes-app/pkg/test"
+	"github.com/weidonglian/notes-app/internal/model"
+	. "github.com/weidonglian/notes-app/internal/test"
 	"net/http"
 )
 

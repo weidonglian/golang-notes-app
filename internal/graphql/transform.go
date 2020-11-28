@@ -2,7 +2,7 @@ package graphql
 
 import (
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
-	"github.com/weidonglian/notes-app/pkg/model"
+	"github.com/weidonglian/notes-app/internal/model"
 )
 
 func NewGTodo(todo *model.Todo) *gmodel.Todo {

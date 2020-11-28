@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
-	"github.com/weidonglian/notes-app/pkg/model"
+	"github.com/weidonglian/notes-app/internal/model"
 )
 
 type TodosStore struct {
