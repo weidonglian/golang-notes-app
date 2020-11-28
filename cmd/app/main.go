@@ -4,6 +4,7 @@ import (
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/app"
 	"github.com/weidonglian/notes-app/pkg/logging"
+	"log"
 )
 
 func main() {
@@ -20,5 +21,7 @@ func main() {
 		return
 	}
 
-	app.Serve()
+	if err := app.Serve(); err != nil {
+		log.Printf("failed to serve:+%v\n", err)
+	}
 }

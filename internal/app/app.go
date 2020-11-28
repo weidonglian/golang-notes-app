@@ -1,10 +1,13 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/notes-app/internal/db"
+	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
+	"time"
 
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/auth"
@@ -36,13 +39,43 @@ func (a *App) GetAuth() *auth.Auth {
 }
 
 // Serve is the core serve http
-func (a *App) Serve() {
+func (a *App) Serve() error {
+	ctx := util.NewShutdownContext()
+
 	r := a.Router()
 	addr := fmt.Sprintf(":%v", a.config.ServerPort)
-	a.logger.Infof("Listening on addr %v", addr)
-	if err := http.ListenAndServe(addr, r); err != nil {
-		a.logger.Fatal(err)
+
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: r,
 	}
+
+	go func() {
+		a.logger.Infof("Listening on addr %v", addr)
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			a.logger.Fatal(err)
+		}
+	}()
+
+	<-ctx.Done()
+
+	a.logger.Info("Server is stopping")
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		cancel()
+	}()
+
+	if err := srv.Shutdown(ctxTimeout); err != nil {
+		a.logger.Fatalf("server Shutdown Failed:%+s", err)
+		return err
+	}
+
+	a.logger.Info("server exited properly")
+
+	a.Close()
+
+	return nil
 }
 
 func (a *App) Close() {
