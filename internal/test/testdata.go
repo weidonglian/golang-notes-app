@@ -2,7 +2,7 @@ package test
 
 import "github.com/weidonglian/notes-app/internal/model"
 
-func NewTestUserNotesData(testApp *TestApp) []model.NoteWithTodos {
+func NewTestUserNotesData(testApp *MockApp) []model.NoteWithTodos {
 	// test user test data
 	testUserNotes := []model.NoteWithTodos{
 		{
@@ -75,7 +75,7 @@ func NewTestUserNotesData(testApp *TestApp) []model.NoteWithTodos {
 	return testUserNotes
 }
 
-func NewDevUserNotesData(testApp *TestApp) []model.NoteWithTodos {
+func NewDevUserNotesData(testApp *MockApp) []model.NoteWithTodos {
 	// dev user test data
 	devUserNotes := []model.NoteWithTodos{
 		{

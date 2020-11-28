@@ -12,13 +12,13 @@ import (
 var _ = Describe("Graph Todos", func() {
 
 	var (
-		testApp       test.TestApp
+		testApp       test.MockApp
 		testUserNotes []model.NoteWithTodos
 		devUserNotes  []model.NoteWithTodos
 	)
 
 	BeforeEach(func() {
-		testApp = test.NewTestAppAndServe()
+		testApp = test.NewMockApp()
 		testUserNotes = test.NewTestUserNotesData(&testApp)
 		devUserNotes = test.NewDevUserNotesData(&testApp)
 	})
@@ -30,7 +30,7 @@ var _ = Describe("Graph Todos", func() {
 	It("query todo by noteId", func() {
 		Context("fetch the todos of given noteId", func() {
 			for _, note := range testUserNotes {
-				testApp.GraphMustData(test.QueryTodos, map[string]interface{}{"noteId": note.ID}).
+				testApp.GraphqlMustData(test.QueryTodos, map[string]interface{}{"noteId": note.ID}).
 					ContainsKey("todos").Value("todos").Array().Length().Equal(len(note.Todos))
 			}
 		})
@@ -38,7 +38,7 @@ var _ = Describe("Graph Todos", func() {
 		Context("we are not allowed to fetch another user's resources", func() {
 			// testApp.API is authenticated for 'test' user should not get notes of 'dev' user even the note id is valid
 			for _, note := range devUserNotes {
-				testApp.GraphMustError(test.QueryTodos, map[string]interface{}{"noteId": note.ID}).
+				testApp.GraphqlMustError(test.QueryTodos, map[string]interface{}{"noteId": note.ID}).
 					NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
 			}
 		})
@@ -52,7 +52,7 @@ var _ = Describe("Graph Todos", func() {
 			done := true
 			for i := range testUserNotes {
 				for _, todoName := range todoNames {
-					fetchedObject := testApp.GraphMustData(test.MutationAddTodo, test.GraphWithInput(gmodel.AddTodoInput{
+					fetchedObject := testApp.GraphqlMustData(test.MutationAddTodo, test.GraphqlWithInput(gmodel.AddTodoInput{
 						Name:   todoName,
 						Done:   &done,
 						NoteID: testUserNotes[i].ID,
@@ -66,7 +66,7 @@ var _ = Describe("Graph Todos", func() {
 		Context("Invalid noteId should not be able to create any todo", func() {
 			for _, noteID := range []int{100, 200, 500, 999999} {
 				for _, todoName := range todoNames {
-					testApp.GraphMustError(test.MutationAddTodo, test.GraphWithInput(gmodel.AddTodoInput{
+					testApp.GraphqlMustError(test.MutationAddTodo, test.GraphqlWithInput(gmodel.AddTodoInput{
 						Name:   todoName,
 						NoteID: noteID,
 					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
@@ -81,7 +81,7 @@ var _ = Describe("Graph Todos", func() {
 			for i := range testUserNotes {
 				for j := range testUserNotes[i].Todos {
 					randomName := xid.New().String()
-					obj := testApp.GraphMustData(test.MutationUpdateTodo, test.GraphWithInput(gmodel.UpdateTodoInput{
+					obj := testApp.GraphqlMustData(test.MutationUpdateTodo, test.GraphqlWithInput(gmodel.UpdateTodoInput{
 						ID:     testUserNotes[i].Todos[j].ID,
 						Name:   randomName,
 						Done:   &done,
@@ -99,7 +99,7 @@ var _ = Describe("Graph Todos", func() {
 		Context("we should be able to toggle done", func() {
 			for i := range testUserNotes {
 				for j := range testUserNotes[i].Todos {
-					obj := testApp.GraphMustData(test.MutationToggleTodo, test.GraphWithInput(gmodel.ToggleTodoInput{
+					obj := testApp.GraphqlMustData(test.MutationToggleTodo, test.GraphqlWithInput(gmodel.ToggleTodoInput{
 						ID:     testUserNotes[i].Todos[j].ID,
 						NoteID: testUserNotes[i].ID,
 					})).ContainsKey("toggleTodo").Value("toggleTodo").Object()
@@ -113,7 +113,7 @@ var _ = Describe("Graph Todos", func() {
 		Context("we should not be able to toggle another user's resources even valid ids", func() {
 			for i := range devUserNotes {
 				for j := range devUserNotes[i].Todos {
-					testApp.GraphMustError(test.MutationToggleTodo, test.GraphWithInput(gmodel.ToggleTodoInput{
+					testApp.GraphqlMustError(test.MutationToggleTodo, test.GraphqlWithInput(gmodel.ToggleTodoInput{
 						ID:     devUserNotes[i].Todos[j].ID,
 						NoteID: devUserNotes[i].ID,
 					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
@@ -126,14 +126,14 @@ var _ = Describe("Graph Todos", func() {
 		Context("we should be able to delete the test user's todo by id", func() {
 			for i := range testUserNotes {
 				for j := range testUserNotes[i].Todos {
-					obj := testApp.GraphMustData(test.MutationDeleteTodo, test.GraphWithInput(gmodel.DeleteTodoInput{
+					obj := testApp.GraphqlMustData(test.MutationDeleteTodo, test.GraphqlWithInput(gmodel.DeleteTodoInput{
 						ID:     testUserNotes[i].Todos[j].ID,
 						NoteID: testUserNotes[i].ID,
 					})).ContainsKey("deleteTodo").Value("deleteTodo").Object()
 					obj.Keys().ContainsOnly("id", "noteId")
 					obj.Values().Contains(testUserNotes[i].Todos[j].ID, testUserNotes[i].ID)
 
-					testApp.GraphMustError(test.MutationDeleteTodo, test.GraphWithInput(gmodel.DeleteTodoInput{
+					testApp.GraphqlMustError(test.MutationDeleteTodo, test.GraphqlWithInput(gmodel.DeleteTodoInput{
 						ID:     testUserNotes[i].Todos[j].ID,
 						NoteID: testUserNotes[i].ID,
 					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
@@ -144,7 +144,7 @@ var _ = Describe("Graph Todos", func() {
 		Context("we should not be able to delete valid id of another user", func() {
 			for i := range devUserNotes {
 				for j := range devUserNotes[i].Todos {
-					testApp.GraphMustError(test.MutationDeleteTodo, test.GraphWithInput(gmodel.DeleteTodoInput{
+					testApp.GraphqlMustError(test.MutationDeleteTodo, test.GraphqlWithInput(gmodel.DeleteTodoInput{
 						ID:     devUserNotes[i].Todos[j].ID,
 						NoteID: devUserNotes[i].ID,
 					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())

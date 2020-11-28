@@ -11,13 +11,13 @@ import (
 var _ = Describe("Todos", func() {
 
 	var (
-		testApp       test.TestApp
+		testApp       test.MockApp
 		testUserNotes []model.NoteWithTodos
 		devUserNotes  []model.NoteWithTodos
 	)
 
 	BeforeEach(func() {
-		testApp = test.NewTestAppAndServe()
+		testApp = test.NewMockApp()
 		testUserNotes = test.NewTestUserNotesData(&testApp)
 		devUserNotes = test.NewDevUserNotesData(&testApp)
 	})

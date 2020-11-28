@@ -13,7 +13,7 @@ import (
 var _ = Describe("Notes", func() {
 
 	var (
-		testApp       test.TestApp
+		testApp       test.MockApp
 		notesStore    store.NotesStore
 		testUserId    int
 		devUserId     int
@@ -22,7 +22,7 @@ var _ = Describe("Notes", func() {
 	)
 
 	BeforeEach(func() {
-		testApp = test.NewTestAppAndServe()
+		testApp = test.NewMockApp()
 		notesStore = testApp.App.GetStore().Notes
 		testUserId = testApp.App.GetStore().Users.FindByName("test").ID
 		devUserId = testApp.App.GetStore().Users.FindByName("dev").ID

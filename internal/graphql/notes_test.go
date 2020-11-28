@@ -11,13 +11,13 @@ import (
 var _ = Describe("Graph Notes", func() {
 
 	var (
-		testApp       test.TestApp
+		testApp       test.MockApp
 		testUserNotes []model.NoteWithTodos
 		devUserNotes  []model.NoteWithTodos
 	)
 
 	BeforeEach(func() {
-		testApp = test.NewTestAppAndServe()
+		testApp = test.NewMockApp()
 		testUserNotes = test.NewTestUserNotesData(&testApp)
 		devUserNotes = test.NewDevUserNotesData(&testApp)
 	})
@@ -28,7 +28,7 @@ var _ = Describe("Graph Notes", func() {
 
 	It("query notes", func() {
 		Context("should fetch notes of test user, should not include notes of dev user", func() {
-			fetchedNotes := testApp.GraphMustData(test.QueryNotes).ContainsKey("notes").Value("notes").Array()
+			fetchedNotes := testApp.GraphqlMustData(test.QueryNotes).ContainsKey("notes").Value("notes").Array()
 
 			fetchedNotes.Length().Equal(len(testUserNotes))
 			for i := range testUserNotes {
@@ -51,7 +51,7 @@ var _ = Describe("Graph Notes", func() {
 	It("query note by id", func() {
 		Context("we should be able to get the test users notes by id", func() {
 			for i := range testUserNotes {
-				fetchedNote := testApp.GraphMustData(test.QueryNote, map[string]interface{}{
+				fetchedNote := testApp.GraphqlMustData(test.QueryNote, map[string]interface{}{
 					"id": testUserNotes[i].ID,
 				}).ContainsKey("note").Value("note").Object()
 				fetchedNote.Value("id").Equal(testUserNotes[i].ID)
@@ -64,7 +64,7 @@ var _ = Describe("Graph Notes", func() {
 		Context("we are not allowed to fetch another user's resources", func() {
 			// testApp.API is authenticated for 'test' user should not get notes of 'dev' user even the note id is valid
 			for i := range devUserNotes {
-				testApp.GraphMustError(test.QueryNote, map[string]interface{}{
+				testApp.GraphqlMustError(test.QueryNote, map[string]interface{}{
 					"id": devUserNotes[i].ID,
 				}).NotEmpty().Element(0).Object().Value("message").String().
 					Contains("failed to find a note with id")
@@ -76,7 +76,7 @@ var _ = Describe("Graph Notes", func() {
 		Context("we should be able to create name with any non-empty string", func() {
 			noteNames := []string{"pn1", "pn2", "pn3"}
 			for _, noteName := range noteNames {
-				newNote := testApp.GraphMustData(test.MutationAddNote, test.GraphWithInput(gmodel.AddNoteInput{
+				newNote := testApp.GraphqlMustData(test.MutationAddNote, test.GraphqlWithInput(gmodel.AddNoteInput{
 					Name: noteName,
 				})).ContainsKey("addNote").Value("addNote").Object()
 
@@ -86,10 +86,10 @@ var _ = Describe("Graph Notes", func() {
 		})
 
 		Context("empty note name is not allowed to create", func() {
-			testApp.GraphMustError(test.MutationAddNote, test.GraphWithInput(gmodel.AddNoteInput{Name: ""})).
+			testApp.GraphqlMustError(test.MutationAddNote, test.GraphqlWithInput(gmodel.AddNoteInput{Name: ""})).
 				NotEmpty().Element(0).Object().Value("message").String().
 				Contains("'name' field can not be empty")
-			testApp.GraphMustError(test.MutationAddNote).
+			testApp.GraphqlMustError(test.MutationAddNote).
 				NotEmpty().Element(0).Object().Value("message").String().
 				Contains("must be defined")
 		})
@@ -100,7 +100,7 @@ var _ = Describe("Graph Notes", func() {
 			for _, note := range testUserNotes {
 				randomName := xid.New().String()
 
-				updatedNote := testApp.GraphMustData(test.MutationUpdateNote, test.GraphWithInput(gmodel.UpdateNoteInput{
+				updatedNote := testApp.GraphqlMustData(test.MutationUpdateNote, test.GraphqlWithInput(gmodel.UpdateNoteInput{
 					ID:   note.ID,
 					Name: randomName,
 				})).ContainsKey("updateNote").Value("updateNote").Object()
@@ -112,7 +112,7 @@ var _ = Describe("Graph Notes", func() {
 		})
 
 		Context("empty name is not allowed to update", func() {
-			testApp.GraphMustError(test.MutationUpdateNote, test.GraphWithInput(gmodel.UpdateNoteInput{
+			testApp.GraphqlMustError(test.MutationUpdateNote, test.GraphqlWithInput(gmodel.UpdateNoteInput{
 				ID:   testUserNotes[0].ID,
 				Name: "",
 			})).NotEmpty().Element(0).Object().Value("message").String().Contains("'name' field can not be empty")
@@ -122,7 +122,7 @@ var _ = Describe("Graph Notes", func() {
 	It("mutation deleteNote", func() {
 		Context("we should be able to delete the test user's notes by id", func() {
 			for _, note := range testUserNotes {
-				testApp.GraphMustData(test.MutationDeleteNote, test.GraphWithInput(gmodel.DeleteNoteInput{
+				testApp.GraphqlMustData(test.MutationDeleteNote, test.GraphqlWithInput(gmodel.DeleteNoteInput{
 					ID: note.ID,
 				})).ContainsKey("deleteNote").Value("deleteNote").
 					Object().Keys().ContainsOnly("id")
@@ -131,7 +131,7 @@ var _ = Describe("Graph Notes", func() {
 
 		Context("we should not be able to delete valid id of another user", func() {
 			for _, note := range devUserNotes {
-				testApp.GraphMustError(test.MutationDeleteNote, test.GraphWithInput(gmodel.DeleteNoteInput{
+				testApp.GraphqlMustError(test.MutationDeleteNote, test.GraphqlWithInput(gmodel.DeleteNoteInput{
 					ID: note.ID,
 				})).NotEmpty().Element(0).Object().Value("message").String().Contains("unprocessable entity with")
 			}

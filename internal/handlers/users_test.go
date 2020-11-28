@@ -9,10 +9,10 @@ import (
 
 var _ = Describe("Users", func() {
 
-	var testApp TestApp
+	var testApp MockApp
 
 	BeforeEach(func() {
-		testApp = NewTestAppAndServe()
+		testApp = NewMockApp()
 	})
 
 	AfterEach(func() {

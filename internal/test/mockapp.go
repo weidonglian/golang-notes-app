@@ -15,7 +15,7 @@ import (
 	"github.com/onsi/ginkgo"
 )
 
-type TestApp struct {
+type MockApp struct {
 	App    *app.App
 	RawAPI *httpexpect.Expect // Raw vanilla request with any header pre-injection
 	API    *httpexpect.Expect // With test user's auth header bearer token
@@ -31,7 +31,7 @@ func newTestApp(logger *logrus.Logger, cfg config.Config) (*app.App, error) {
 }
 
 // Each new test app will fork a new db session and will be cleanup after suite test.
-func NewTestAppAndServe() TestApp {
+func NewMockApp() MockApp {
 	// Mandatory
 	config.SetTestMode()
 
@@ -62,7 +62,7 @@ func NewTestAppAndServe() TestApp {
 			req.WithHeader("Authorization", "Bearer "+testUserToken)
 		})
 
-		return TestApp{
+		return MockApp{
 			App:    tapp,
 			RawAPI: rawapi,
 			API:    api,
@@ -78,7 +78,7 @@ func NewTestAppAndServe() TestApp {
 //  "operationName": "...",
 //  "variables": { "myVariable": "someValue", ... }
 // }
-func newReqGraphQLPayload(query string, opts []interface{}) map[string]interface{} {
+func newReqGraphqlPayload(query string, opts []interface{}) map[string]interface{} {
 	var payload map[string]interface{}
 	switch len(opts) {
 	case 0:
@@ -109,41 +109,41 @@ func newReqGraphQLPayload(query string, opts []interface{}) map[string]interface
 //  "data": { ... },
 //  "errors": [ ... ]
 // }
-// GraphPost is a bit raw graphql API that you need to extract the `data` and `errors`
+// GraphqlPost is a bit raw graphql API that you need to extract the `data` and `errors`
 // `opts` only supports two optional arguments, 1st argument is `variables` should be
 // a `struct` with json tags or a `map[string]interface{}` that can be converted to
 // a json. The 2nd argument must be a string for `operationName`. If no argument is
 // provided then it will include no `variables` and `operationName`.
-func (t *TestApp) GraphPost(query string, opts ...interface{}) *httpexpect.Object {
-	payload := newReqGraphQLPayload(query, opts)
+func (t *MockApp) GraphqlPost(query string, opts ...interface{}) *httpexpect.Object {
+	payload := newReqGraphqlPayload(query, opts)
 	return t.API.POST("/graphql").WithJSON(payload).
 		Expect().
 		JSON().Object()
 }
 
 // sugar that expects the `data` only no error. It will return the `data` json object.
-func (t *TestApp) GraphMustData(query string, opts ...interface{}) *httpexpect.Object {
-	payload := newReqGraphQLPayload(query, opts)
+func (t *MockApp) GraphqlMustData(query string, opts ...interface{}) *httpexpect.Object {
+	payload := newReqGraphqlPayload(query, opts)
 	return t.API.POST("/graphql").WithJSON(payload).
 		Expect().
 		JSON().Object().NotContainsKey("errors").ContainsKey("data").Value("data").Object()
 }
 
 // sugar to expects `errors` but `data` could exist with `null`. It will return the `errors` json array.
-func (t *TestApp) GraphMustError(query string, opts ...interface{}) *httpexpect.Array {
-	payload := newReqGraphQLPayload(query, opts)
+func (t *MockApp) GraphqlMustError(query string, opts ...interface{}) *httpexpect.Array {
+	payload := newReqGraphqlPayload(query, opts)
 	return t.API.POST("/graphql").WithJSON(payload).
 		Expect().
 		JSON().Object().ContainsKey("errors").Value("errors").Array()
 }
 
-func GraphWithInput(v interface{}) map[string]interface{} {
+func GraphqlWithInput(v interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"input": v,
 	}
 }
 
-func (t *TestApp) Close() {
+func (t *MockApp) Close() {
 	t.server.Close()
 	t.App.Close()
 }
