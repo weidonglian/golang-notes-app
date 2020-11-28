@@ -131,7 +131,9 @@ func GetConfig() Config {
 		if rootDir == "" {
 			panic("Failed to get the project root dir")
 		}
-		currentConfig = &defaultTestConfig
+
+		currentConfig = &Config{}
+
 		currentConfig.MigrationsPath = path.Join(rootDir, currentConfig.MigrationsPath)
 	case appModeDev:
 		currentConfig = &defaultDevConfig

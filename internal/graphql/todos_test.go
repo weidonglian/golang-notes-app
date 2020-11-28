@@ -9,7 +9,7 @@ import (
 	"github.com/weidonglian/notes-app/pkg/util"
 )
 
-var _ = Describe("Graph Todos", func() {
+var _ = Describe("GraphQL Todos", func() {
 
 	var (
 		testApp       test.MockApp

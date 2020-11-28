@@ -43,7 +43,7 @@ func (self forkedSession) Close() error {
 	return nil
 }
 
-func NewForkedRandomSession(logger *logrus.Logger, cfg config.Config) Session {
+func NewForkedSession(logger *logrus.Logger, cfg config.Config) Session {
 	dbParent, err := NewPostgresConnection(logger, cfg.Postgres)
 	if err != nil {
 		panic(err)

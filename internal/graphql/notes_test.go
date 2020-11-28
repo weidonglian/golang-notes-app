@@ -8,7 +8,7 @@ import (
 	"github.com/weidonglian/notes-app/internal/test"
 )
 
-var _ = Describe("Graph Notes", func() {
+var _ = Describe("GraphQL Notes", func() {
 
 	var (
 		testApp       test.MockApp

@@ -19,7 +19,7 @@ var _ = Describe("Store", func() {
 	// we need to set up a new db session for different stores
 	BeforeEach(func() {
 		logger := logging.NewLogger()
-		dbSession = db.NewForkedRandomSession(logger, config.GetConfig())
+		dbSession = db.NewForkedSession(logger, config.GetConfig())
 		if s, err := store.NewStore(dbSession, logger); err != nil {
 			panic(err)
 		} else {

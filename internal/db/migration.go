@@ -17,6 +17,7 @@ import (
 )
 
 func RunMigrations(conn *sqlx.DB, cfg config.Config, logger *logrus.Logger) error {
+	logger.Info(cfg.MigrationsPath)
 	if _, err := os.Stat(cfg.MigrationsPath); os.IsNotExist(err) {
 		workDir, _ := os.Getwd()
 		logger.Errorf("Skipping migration, could not find migration path:%s with current working directory:%s", cfg.MigrationsPath, workDir)
