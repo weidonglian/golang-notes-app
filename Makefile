@@ -7,8 +7,8 @@ sync-vendor:
 	@go mod download && go mod tidy && go mod vendor
 
 tools:
-	@echo Installing tools from tools.go
-	@cat tools/tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
+	echo Installing tools from tools.go
+	cat tools/tools.go | grep _ | awk -F'"' '{print $2}' | xargs -tI % go install %
 
 # GraphQL
 graphql:
