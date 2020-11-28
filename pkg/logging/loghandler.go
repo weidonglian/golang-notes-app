@@ -3,7 +3,6 @@ package logging
 import (
 	"bytes"
 	"fmt"
-	"github.com/weidonglian/notes-app/config"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -46,7 +45,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	logFields["user_agent"] = r.UserAgent()
 
 	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
-	if config.IsDevMode() {
+	if l.Logger.IsLevelEnabled(logrus.DebugLevel) {
 		if r.RequestURI != "/graphql" && r.Method == "POST" || r.Method == "PUT" {
 			buf, bodyErr := ioutil.ReadAll(r.Body)
 			if bodyErr != nil {
@@ -58,10 +57,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 		}
 	}
 	entry.Logger = entry.Logger.WithFields(logFields)
-
-	if !config.IsTestMode() {
-		entry.Logger.Infoln("request started <<<===")
-	}
+	entry.Logger.Infoln("request started <<<===")
 
 	return entry
 }
@@ -75,10 +71,7 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, ela
 		"resp_status": status, "resp_bytes_length": bytes,
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0,
 	})
-
-	if !config.IsTestMode() {
-		l.Logger.Infoln("request complete ===>>>")
-	}
+	l.Logger.Infoln("request complete ===>>>")
 }
 
 func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {

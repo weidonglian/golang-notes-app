@@ -22,32 +22,22 @@ type MockApp struct {
 	server *httptest.Server
 }
 
-func newTestApp(logger *logrus.Logger, cfg config.Config) (*app.App, error) {
-	if !config.IsTestMode() {
-		panic("NewTestApp should only be used for test application")
-	}
-	dbSess := db.NewForkedSession(logger, cfg)
-	return app.NewAppWith(logger, cfg, dbSess)
-}
-
 // Each new test app will fork a new db session and will be cleanup after suite test.
 func NewMockApp() MockApp {
-	// Mandatory
-	config.SetTestMode()
-
 	logger := logging.NewLogger()
-	cfg := config.GetConfig()
+	logger.SetLevel(logrus.WarnLevel)
+	cfg := config.DefaultTestConfig()
 
 	logger.Infof("Creating a new test app")
 
-	if tapp, err := newTestApp(logger, cfg); err != nil {
+	if tapp, err := app.NewAppWith(logger, *cfg, db.NewForkedSession(logger, *cfg)); err != nil {
 		panic("Failed to create the test app")
 	} else {
 		// run server using httptest
 		server := httptest.NewServer(tapp.Router())
-
 		// create httpexpect instance
 		rawapi := httpexpect.New(ginkgo.GinkgoT(), server.URL)
+		LoadTestUsers(tapp.GetStore())
 		testUser := tapp.GetStore().Users.FindByName("test")
 		if testUser == nil {
 			panic("'test' user has not been injected into the database")

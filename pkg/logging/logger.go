@@ -14,6 +14,7 @@ func NewLogger() *logrus.Logger {
 		// FullTimestamp: true,
 		DisableTimestamp: true,
 	})
+	logger.SetLevel(logrus.InfoLevel)
 	/* logger.Formatter = &logrus.JSONFormatter{
 		// disable, as we set our own
 		DisableTimestamp: true,

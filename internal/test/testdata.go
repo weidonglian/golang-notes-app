@@ -1,6 +1,19 @@
 package test
 
-import "github.com/weidonglian/notes-app/internal/model"
+import (
+	"github.com/weidonglian/notes-app/internal/model"
+	"github.com/weidonglian/notes-app/internal/store"
+)
+
+func LoadTestUsers(s *store.Store) {
+	for _, user := range model.TestUsers {
+		if s.Users.FindByName(user.Username) == nil {
+			if _, err := s.Users.Create(user); err != nil {
+				panic(err)
+			}
+		}
+	}
+}
 
 func NewTestUserNotesData(testApp *MockApp) []model.NoteWithTodos {
 	// test user test data

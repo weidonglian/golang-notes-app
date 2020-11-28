@@ -3,10 +3,12 @@ package store_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/db"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
+	"github.com/weidonglian/notes-app/internal/test"
 	"github.com/weidonglian/notes-app/pkg/logging"
 )
 
@@ -19,12 +21,14 @@ var _ = Describe("Store", func() {
 	// we need to set up a new db session for different stores
 	BeforeEach(func() {
 		logger := logging.NewLogger()
-		dbSession = db.NewForkedSession(logger, config.GetConfig())
+		logger.SetLevel(logrus.WarnLevel)
+		dbSession = db.NewForkedSession(logger, *config.DefaultTestConfig())
 		if s, err := store.NewStore(dbSession, logger); err != nil {
 			panic(err)
 		} else {
 			sto = s
 		}
+		test.LoadTestUsers(sto)
 	})
 
 	AfterEach(func() {

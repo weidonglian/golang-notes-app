@@ -2,8 +2,6 @@ package util
 
 import (
 	"github.com/go-chi/render"
-	"github.com/weidonglian/notes-app/config"
-	"github.com/weidonglian/notes-app/pkg/logging"
 	"net/http"
 )
 
@@ -15,9 +13,7 @@ func ReceiveJson(r *http.Request, v render.Binder) error {
 
 // SendJson sends a given json struct as response
 func SendJson(w http.ResponseWriter, r *http.Request, v interface{}) {
-	if config.IsDevMode() {
-		logging.LogEntrySetField(r, "resp_body", ToJSON(v))
-	}
+	// logging.LogEntrySetField(r, "resp_body", ToJSON(v))
 	render.JSON(w, r, v)
 }
 
