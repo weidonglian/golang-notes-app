@@ -1,14 +1,15 @@
-all: start
 .PHONY: all
+all: start
 
 # Tools
 sync-vendor:
 	@echo Download go.mod dependencies
 	@go mod download && go mod tidy && go mod vendor
 
+.PHONY: tools
 tools:
 	echo Installing tools from tools.go
-	cat tools/tools.go | grep _ | awk -F'"' '{print $2}' | xargs -tI % go install %
+	cat tools/tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
 
 # GraphQL
 graphql:
