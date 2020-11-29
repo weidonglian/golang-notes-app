@@ -10,6 +10,7 @@ import (
 	"github.com/weidonglian/notes-app/internal/store"
 	"github.com/weidonglian/notes-app/internal/test"
 	"github.com/weidonglian/notes-app/pkg/logging"
+	"github.com/weidonglian/notes-app/pkg/util"
 )
 
 var _ = Describe("Store", func() {
@@ -67,7 +68,7 @@ var _ = Describe("Store", func() {
 				Expect(err).NotTo(HaveOccurred())
 				foundUser := usersStore.FindByID(createdUser.ID)
 				Expect(foundUser.Username).To(Equal(user.Username))
-				Expect(store.CheckPassword(foundUser.Password, user.Password)).To(BeTrue())
+				Expect(util.CheckPassword(foundUser.Password, user.Password)).To(BeTrue())
 				Expect(foundUser.Role).To(Equal(user.Role))
 			}
 
