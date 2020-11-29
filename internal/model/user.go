@@ -29,7 +29,3 @@ type User struct {
 	Password string `db:"user_password" json:"password"`
 	Role     string `db:"user_role" json:"role"`
 }
-
-func NewUser() User {
-	return User{}
-}

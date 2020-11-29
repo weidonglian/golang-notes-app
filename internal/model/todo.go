@@ -6,7 +6,3 @@ type Todo struct {
 	Done   bool   `db:"todo_done" json:"done"`
 	NoteID int    `db:"note_id" json:"noteId"`
 }
-
-func NewTodo() Todo {
-	return Todo{}
-}

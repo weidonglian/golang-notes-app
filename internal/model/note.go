@@ -6,10 +6,6 @@ type Note struct {
 	UserID int    `db:"user_id" json:"userId"`
 }
 
-func NewNote() Note {
-	return Note{}
-}
-
 type NoteWithTodos struct {
 	*Note
 	Todos []Todo
