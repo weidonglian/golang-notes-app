@@ -6,7 +6,7 @@ services:
     image: "postgres:12.3"
     container_name: notes-app-postgres
     volumes:
-      - notes-app-postgres-data:/var/lib/postgresql/data
+      - postgres-notes-app:/var/lib/postgresql/data
     ports:
       - 5440:5432
     environment:
@@ -37,4 +37,4 @@ services:
       - notes-app-postgres
 
 volumes:
-  notes-app-postgres-data:
+  postgres-notes-app:
