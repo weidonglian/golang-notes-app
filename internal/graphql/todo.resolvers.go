@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
-	"github.com/weidonglian/notes-app/pkg/util"
 )
 
 func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInput) (*gmodel.Todo, error) {
@@ -24,34 +24,34 @@ func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInpu
 	})
 
 	if err != nil {
-		return nil, util.ErrorUnprocessableEntity
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	return NewGTodo(todo), nil
 }
 
 func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTodoInput) (*gmodel.Todo, error) {
-	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
-		return nil, util.ErrorUnprocessableEntity
+	if r.store.Notes.FindByID(input.NoteID, lib.GetUserId(ctx)) == nil {
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	todo, err := r.store.Todos.Update(input.ID, input.Name, input.Done)
 
 	if err != nil {
-		return nil, util.ErrorUnprocessableEntity
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	return NewGTodo(todo), nil
 }
 
 func (r *mutationResolver) DeleteTodo(ctx context.Context, input gmodel.DeleteTodoInput) (*gmodel.DeleteTodoPayload, error) {
-	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
-		return nil, util.ErrorUnprocessableEntity
+	if r.store.Notes.FindByID(input.NoteID, lib.GetUserId(ctx)) == nil {
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	id, err := r.store.Todos.Delete(input.ID, input.NoteID)
 	if err != nil {
-		return nil, util.ErrorUnprocessableEntity
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	return &gmodel.DeleteTodoPayload{
@@ -61,22 +61,22 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, input gmodel.DeleteTo
 }
 
 func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTodoInput) (*gmodel.Todo, error) {
-	if r.store.Notes.FindByID(input.NoteID, util.GetUserId(ctx)) == nil {
-		return nil, util.ErrorUnprocessableEntity
+	if r.store.Notes.FindByID(input.NoteID, lib.GetUserId(ctx)) == nil {
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	todo, err := r.store.Todos.Toggle(input.ID)
 
 	if err != nil {
-		return nil, util.ErrorUnprocessableEntity
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	return NewGTodo(todo), nil
 }
 
 func (r *queryResolver) Todos(ctx context.Context, noteID int) ([]*gmodel.Todo, error) {
-	if r.store.Notes.FindByID(noteID, util.GetUserId(ctx)) == nil {
-		return nil, util.ErrorUnprocessableEntity
+	if r.store.Notes.FindByID(noteID, lib.GetUserId(ctx)) == nil {
+		return nil, lib.ErrorUnprocessableEntity
 	}
 
 	todos := r.store.Todos.FindByNoteID(noteID)

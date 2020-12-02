@@ -6,9 +6,9 @@ import (
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/app"
 	"github.com/weidonglian/notes-app/internal/db"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
-	"github.com/weidonglian/notes-app/pkg/logging"
 	"net/http/httptest"
 
 	"github.com/gavv/httpexpect/v2"
@@ -24,7 +24,7 @@ type MockApp struct {
 
 // Each new test app will fork a new db session and will be cleanup after suite test.
 func NewMockApp() MockApp {
-	logger := logging.NewLogger()
+	logger := lib.NewLogger()
 	logger.SetLevel(logrus.WarnLevel)
 	cfg := config.DefaultTestConfig()
 

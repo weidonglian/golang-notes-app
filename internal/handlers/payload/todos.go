@@ -1,8 +1,8 @@
 package payload
 
 import (
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
-	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 )
 
@@ -15,7 +15,7 @@ type ReqTodo struct {
 
 func (req *ReqTodo) Bind(r *http.Request) error {
 	if req.Name == "" {
-		return util.ErrorMissingRequiredFields
+		return lib.ErrorMissingRequiredFields
 	}
 	return nil
 }

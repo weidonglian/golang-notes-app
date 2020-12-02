@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/weidonglian/notes-app/internal/handlers/payload"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
-	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 	"strconv"
 )
@@ -32,26 +32,26 @@ func (h TodosHandler) CtxID(next http.Handler) http.Handler {
 
 		// extract noteId from the URLParam
 		if idValue := chi.URLParam(r, "id"); idValue == "" {
-			util.SendErrorBadRequest(w, r, util.ErrorMissingRequiredParams)
+			lib.SendErrorBadRequest(w, r, lib.ErrorMissingRequiredParams)
 			return
 		} else {
 			if id, err := strconv.Atoi(idValue); err != nil {
-				util.SendErrorBadRequest(w, r, err)
+				lib.SendErrorBadRequest(w, r, err)
 				return
 			} else {
 				todoId = id
 			}
 		}
 
-		userId := util.GetUserIDFromRequest(r)
+		userId := lib.GetUserIDFromRequest(r)
 		if todo = h.todosStore.FindByID(todoId); todo == nil {
-			util.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find todo"))
+			lib.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find todo"))
 			return
 		}
 
 		// restrict access for current user only.
 		if h.notesStore.FindByID(todo.NoteID, userId) == nil {
-			util.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find todo for current user"))
+			lib.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find todo for current user"))
 			return
 		}
 
@@ -62,62 +62,62 @@ func (h TodosHandler) CtxID(next http.Handler) http.Handler {
 
 func (h TodosHandler) Create(w http.ResponseWriter, r *http.Request) {
 	data := &payload.ReqTodo{}
-	if err := util.ReceiveJson(r, data); err != nil {
-		util.SendErrorBadRequest(w, r, err)
+	if err := lib.ReceiveJson(r, data); err != nil {
+		lib.SendErrorBadRequest(w, r, err)
 		return
 	}
 
 	if data.NoteID == nil {
-		util.SendErrorBadRequest(w, r, util.ErrorMissingRequiredFields)
+		lib.SendErrorBadRequest(w, r, lib.ErrorMissingRequiredFields)
 		return
 	}
 
-	if h.notesStore.FindByID(*data.NoteID, util.GetUserIDFromRequest(r)) == nil {
-		util.SendErrorUnprocessableEntity(w, r, errors.New("provide note with id does not exist for current user"))
+	if h.notesStore.FindByID(*data.NoteID, lib.GetUserIDFromRequest(r)) == nil {
+		lib.SendErrorUnprocessableEntity(w, r, errors.New("provide note with id does not exist for current user"))
 		return
 	}
 
 	if todo, err := h.todosStore.Create(payload.NewTodoFromReq(data)); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+		lib.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendJson(w, r, todo)
+		lib.SendJson(w, r, todo)
 	}
 }
 
 func (h TodosHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	ctxTodo := r.Context().Value("CtxID").(*model.Todo)
-	util.SendJson(w, r, ctxTodo)
+	lib.SendJson(w, r, ctxTodo)
 }
 
 func (h TodosHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	data := &payload.ReqTodo{}
-	if err := util.ReceiveJson(r, data); err != nil {
-		util.SendErrorBadRequest(w, r, err)
+	if err := lib.ReceiveJson(r, data); err != nil {
+		lib.SendErrorBadRequest(w, r, err)
 		return
 	}
 	ctxTodo := r.Context().Value("CtxID").(*model.Todo)
 
 	if updatedTodo, err := h.todosStore.Update(ctxTodo.ID, data.Name, data.Done); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+		lib.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendJson(w, r, updatedTodo)
+		lib.SendJson(w, r, updatedTodo)
 	}
 }
 
 func (h TodosHandler) ToggleByID(w http.ResponseWriter, r *http.Request) {
 	ctxTodo := r.Context().Value("CtxID").(*model.Todo)
 	if todo, err := h.todosStore.Toggle(ctxTodo.ID); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+		lib.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendJson(w, r, todo)
+		lib.SendJson(w, r, todo)
 	}
 }
 
 func (h TodosHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	todo := r.Context().Value("CtxID").(*model.Todo)
 	if _, err := h.todosStore.Delete(todo.ID, todo.NoteID); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+		lib.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendStatus(w, r, http.StatusOK)
+		lib.SendStatus(w, r, http.StatusOK)
 	}
 }

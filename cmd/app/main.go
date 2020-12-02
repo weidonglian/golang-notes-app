@@ -3,13 +3,13 @@ package main
 import (
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/app"
-	"github.com/weidonglian/notes-app/pkg/logging"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"log"
 )
 
 func main() {
 
-	logger := logging.NewLogger()
+	logger := lib.NewLogger()
 	cfg := config.DefaultConfig()
 	config.MustParseFromEnv(cfg)
 

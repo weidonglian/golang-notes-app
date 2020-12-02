@@ -1,4 +1,4 @@
-package logging
+package middleware
 
 import (
 	"bytes"
@@ -11,19 +11,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// StructuredLogger is a simple, but powerful implementation of a custom structured
+// structuredLogger is a simple, but powerful implementation of a custom structured
 // logger backed on logrus. I encourage users to copy it, adapt it and make it their
 // own. Also take a look at https://github.com/pressly/lg for a dedicated pkg based
 // on this work, designed for context-based http routers.
 func NewStructuredLogger(logger *logrus.Logger) func(next http.Handler) http.Handler {
-	return middleware.RequestLogger(&StructuredLogger{logger})
+	return middleware.RequestLogger(&structuredLogger{logger})
 }
 
-type StructuredLogger struct {
+type structuredLogger struct {
 	Logger *logrus.Logger
 }
 
-func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
+func (l *structuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	entry := &StructuredLoggerEntry{Logger: logrus.NewEntry(l.Logger)}
 	logFields := logrus.Fields{}
 

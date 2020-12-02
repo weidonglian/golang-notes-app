@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/weidonglian/notes-app/internal/handlers/payload"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
-	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 	"strconv"
 )
@@ -28,19 +28,19 @@ func (h NotesHandler) CtxID(next http.Handler) http.Handler {
 
 		// extract noteId from the URLParam
 		if idValue := chi.URLParam(r, "id"); idValue == "" {
-			util.SendErrorBadRequest(w, r, util.ErrorMissingRequiredParams)
+			lib.SendErrorBadRequest(w, r, lib.ErrorMissingRequiredParams)
 			return
 		} else {
 			if id, err := strconv.Atoi(idValue); err != nil {
-				util.SendErrorBadRequest(w, r, err)
+				lib.SendErrorBadRequest(w, r, err)
 				return
 			} else {
 				noteId = id
 			}
 		}
-		userId := util.GetUserIDFromRequest(r)
+		userId := lib.GetUserIDFromRequest(r)
 		if note = h.notesStore.FindByID(noteId, userId); note == nil {
-			util.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find note with given %d", noteId))
+			lib.SendErrorUnprocessableEntity(w, r, fmt.Errorf("unable to find note with given %d", noteId))
 			return
 		}
 
@@ -50,58 +50,58 @@ func (h NotesHandler) CtxID(next http.Handler) http.Handler {
 }
 
 func (h NotesHandler) List(w http.ResponseWriter, r *http.Request) {
-	notes := h.notesStore.FindByUserID(util.GetUserIDFromRequest(r))
-	util.SendJson(w, r, payload.NewRespNoteArray(notes, h.todosStore))
+	notes := h.notesStore.FindByUserID(lib.GetUserIDFromRequest(r))
+	lib.SendJson(w, r, payload.NewRespNoteArray(notes, h.todosStore))
 }
 
 func (h NotesHandler) Create(w http.ResponseWriter, r *http.Request) {
 	data := &payload.ReqNote{}
-	if err := util.ReceiveJson(r, data); err != nil {
-		util.SendErrorBadRequest(w, r, err)
+	if err := lib.ReceiveJson(r, data); err != nil {
+		lib.SendErrorBadRequest(w, r, err)
 		return
 	}
-	if note, err := h.notesStore.Create(model.Note{Name: data.Name, UserID: util.GetUserIDFromRequest(r)}); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+	if note, err := h.notesStore.Create(model.Note{Name: data.Name, UserID: lib.GetUserIDFromRequest(r)}); err != nil {
+		lib.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendJson(w, r, payload.NewRespNote(note, h.todosStore))
+		lib.SendJson(w, r, payload.NewRespNote(note, h.todosStore))
 	}
 }
 
 func (h NotesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	ctxNote := r.Context().Value("CtxID").(*model.Note)
-	util.SendJson(w, r, payload.NewRespNote(ctxNote, h.todosStore))
+	lib.SendJson(w, r, payload.NewRespNote(ctxNote, h.todosStore))
 }
 
 func (h NotesHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	data := &payload.ReqNote{}
-	if err := util.ReceiveJson(r, data); err != nil {
-		util.SendErrorBadRequest(w, r, err)
+	if err := lib.ReceiveJson(r, data); err != nil {
+		lib.SendErrorBadRequest(w, r, err)
 		return
 	}
 	ctxNote := r.Context().Value("CtxID").(*model.Note)
-	userId := util.GetUserIDFromRequest(r)
+	userId := lib.GetUserIDFromRequest(r)
 	if updatedNote, err := h.notesStore.Update(ctxNote.ID, data.Name, userId); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+		lib.SendErrorUnprocessableEntity(w, r, err)
 	} else {
-		util.SendJson(w, r, payload.NewRespNote(updatedNote, h.todosStore))
+		lib.SendJson(w, r, payload.NewRespNote(updatedNote, h.todosStore))
 	}
 }
 
 func (h NotesHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	if err := h.notesStore.DeleteAll(util.GetUserIDFromRequest(r)); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+	if err := h.notesStore.DeleteAll(lib.GetUserIDFromRequest(r)); err != nil {
+		lib.SendErrorUnprocessableEntity(w, r, err)
 		return
 	}
 
-	util.SendStatus(w, r, http.StatusOK)
+	lib.SendStatus(w, r, http.StatusOK)
 }
 
 func (h NotesHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	note := r.Context().Value("CtxID").(*model.Note)
-	if _, err := h.notesStore.Delete(note.ID, util.GetUserIDFromRequest(r)); err != nil {
-		util.SendErrorUnprocessableEntity(w, r, err)
+	if _, err := h.notesStore.Delete(note.ID, lib.GetUserIDFromRequest(r)); err != nil {
+		lib.SendErrorUnprocessableEntity(w, r, err)
 		return
 	}
 
-	util.SendJson(w, r, http.StatusOK)
+	lib.SendJson(w, r, http.StatusOK)
 }

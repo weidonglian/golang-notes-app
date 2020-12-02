@@ -1,17 +1,17 @@
 package payload
 
 import (
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
-	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 )
 
 // Payload of Response Note
 type RespNote struct {
 	*model.Note
-	UserId util.OmitField `json:"userId,omitempty"`
-	Todos  []model.Todo   `json:"todos"`
+	UserId lib.OmitField `json:"userId,omitempty"`
+	Todos  []model.Todo  `json:"todos"`
 }
 
 func NewRespNote(note *model.Note, todosStore store.TodosStore) RespNote {
@@ -33,7 +33,7 @@ type ReqNote struct {
 
 func (req *ReqNote) Bind(r *http.Request) error {
 	if req.Name == "" {
-		return util.ErrorMissingRequiredFields
+		return lib.ErrorMissingRequiredFields
 	}
 	return nil
 }

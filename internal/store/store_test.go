@@ -6,11 +6,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/notes-app/config"
 	"github.com/weidonglian/notes-app/internal/db"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
 	"github.com/weidonglian/notes-app/internal/test"
-	"github.com/weidonglian/notes-app/pkg/logging"
-	"github.com/weidonglian/notes-app/pkg/util"
 )
 
 var _ = Describe("Store", func() {
@@ -21,7 +20,7 @@ var _ = Describe("Store", func() {
 
 	// we need to set up a new db session for different stores
 	BeforeEach(func() {
-		logger := logging.NewLogger()
+		logger := lib.NewLogger()
 		logger.SetLevel(logrus.WarnLevel)
 		dbSession = db.NewForkedSession(logger, *config.DefaultTestConfig())
 		if s, err := store.NewStore(dbSession, logger); err != nil {
@@ -68,7 +67,7 @@ var _ = Describe("Store", func() {
 				Expect(err).NotTo(HaveOccurred())
 				foundUser := usersStore.FindByID(createdUser.ID)
 				Expect(foundUser.Username).To(Equal(user.Username))
-				Expect(util.CheckPassword(foundUser.Password, user.Password)).To(BeTrue())
+				Expect(lib.CheckPassword(foundUser.Password, user.Password)).To(BeTrue())
 				Expect(foundUser.Role).To(Equal(user.Role))
 			}
 

@@ -3,9 +3,9 @@ package handlers
 import (
 	"fmt"
 	"github.com/weidonglian/notes-app/internal/handlers/payload"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/store"
-	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 )
 
@@ -26,13 +26,13 @@ func (h UsersHandler) CtxID(next http.Handler) http.Handler {
 func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	data := &payload.ReqUser{}
 
-	if err := util.ReceiveJson(r, data); err != nil {
-		util.SendErrorBadRequest(w, r, err)
+	if err := lib.ReceiveJson(r, data); err != nil {
+		lib.SendErrorBadRequest(w, r, err)
 		return
 	}
 
 	if h.usersStore.FindByName(data.Username) != nil {
-		util.SendErrorBadRequest(w, r, fmt.Errorf("username '%s' already exists", data.Username))
+		lib.SendErrorBadRequest(w, r, fmt.Errorf("username '%s' already exists", data.Username))
 		return
 	}
 
@@ -43,10 +43,10 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user, err := h.usersStore.Create(newUser); err != nil {
-		util.SendErrorInternalServer(w, r, err)
+		lib.SendErrorInternalServer(w, r, err)
 		return
 	} else {
-		util.SendJson(w, r, payload.NewRespUser(user))
+		lib.SendJson(w, r, payload.NewRespUser(user))
 		return
 	}
 }

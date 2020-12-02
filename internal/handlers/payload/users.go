@@ -1,8 +1,8 @@
 package payload
 
 import (
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
-	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 )
 
@@ -14,7 +14,7 @@ type ReqUser struct {
 
 func (req ReqUser) Bind(r *http.Request) error {
 	if req.Username == "" || req.Password == "" {
-		return util.ErrorMissingRequiredFields
+		return lib.ErrorMissingRequiredFields
 	}
 	return nil
 }
@@ -22,7 +22,7 @@ func (req ReqUser) Bind(r *http.Request) error {
 // Payload of Response User
 type RespUser struct {
 	*model.User
-	Password util.OmitField `json:"password,omitempty"`
+	Password lib.OmitField `json:"password,omitempty"`
 }
 
 func NewRespUser(user *model.User) RespUser {

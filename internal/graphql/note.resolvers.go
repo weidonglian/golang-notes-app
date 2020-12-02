@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
-	"github.com/weidonglian/notes-app/pkg/util"
 )
 
 func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error) {
@@ -20,7 +20,7 @@ func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInpu
 
 	n, err := r.store.Notes.Create(model.Note{
 		Name:   input.Name,
-		UserID: util.GetUserId(ctx),
+		UserID: lib.GetUserId(ctx),
 	})
 
 	if err != nil {
@@ -34,7 +34,7 @@ func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNo
 	if input.Name == "" {
 		return nil, errors.New("'name' field can not be empty")
 	}
-	n, err := r.store.Notes.Update(input.ID, input.Name, util.GetUserId(ctx))
+	n, err := r.store.Notes.Update(input.ID, input.Name, lib.GetUserId(ctx))
 
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNo
 }
 
 func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.DeleteNotePayload, error) {
-	id, err := r.store.Notes.Delete(input.ID, util.GetUserId(ctx))
+	id, err := r.store.Notes.Delete(input.ID, lib.GetUserId(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("unprocessable entity with 'id' %d", input.ID)
 	}
@@ -55,7 +55,7 @@ func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteN
 }
 
 func (r *queryResolver) Notes(ctx context.Context) ([]*gmodel.Note, error) {
-	notes := r.store.Notes.FindByUserID(util.GetUserId(ctx))
+	notes := r.store.Notes.FindByUserID(lib.GetUserId(ctx))
 	gnotes := make([]*gmodel.Note, len(notes))
 	for i := range notes {
 		gnotes[i] = NewGNote(&notes[i], r.store.Todos.FindByNoteID(notes[i].ID))
@@ -64,7 +64,7 @@ func (r *queryResolver) Notes(ctx context.Context) ([]*gmodel.Note, error) {
 }
 
 func (r *queryResolver) Note(ctx context.Context, id int) (*gmodel.Note, error) {
-	n := r.store.Notes.FindByID(id, util.GetUserId(ctx))
+	n := r.store.Notes.FindByID(id, lib.GetUserId(ctx))
 	if n != nil {
 		return NewGNote(n, r.store.Todos.FindByNoteID(n.ID)), nil
 	} else {

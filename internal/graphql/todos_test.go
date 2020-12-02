@@ -4,9 +4,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/rs/xid"
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
 	"github.com/weidonglian/notes-app/internal/test"
-	"github.com/weidonglian/notes-app/pkg/util"
 )
 
 var _ = Describe("GraphQL Todos", func() {
@@ -39,7 +39,7 @@ var _ = Describe("GraphQL Todos", func() {
 			// testApp.API is authenticated for 'test' user should not get notes of 'dev' user even the note id is valid
 			for _, note := range devUserNotes {
 				testApp.GraphqlMustError(test.QueryTodos, map[string]interface{}{"noteId": note.ID}).
-					NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
+					NotEmpty().Element(0).Object().Value("message").String().Contains(lib.ErrorUnprocessableEntity.Error())
 			}
 		})
 	})
@@ -69,7 +69,7 @@ var _ = Describe("GraphQL Todos", func() {
 					testApp.GraphqlMustError(test.MutationAddTodo, test.GraphqlWithInput(gmodel.AddTodoInput{
 						Name:   todoName,
 						NoteID: noteID,
-					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
+					})).NotEmpty().Element(0).Object().Value("message").String().Contains(lib.ErrorUnprocessableEntity.Error())
 				}
 			}
 		})
@@ -116,7 +116,7 @@ var _ = Describe("GraphQL Todos", func() {
 					testApp.GraphqlMustError(test.MutationToggleTodo, test.GraphqlWithInput(gmodel.ToggleTodoInput{
 						ID:     devUserNotes[i].Todos[j].ID,
 						NoteID: devUserNotes[i].ID,
-					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
+					})).NotEmpty().Element(0).Object().Value("message").String().Contains(lib.ErrorUnprocessableEntity.Error())
 				}
 			}
 		})
@@ -136,7 +136,7 @@ var _ = Describe("GraphQL Todos", func() {
 					testApp.GraphqlMustError(test.MutationDeleteTodo, test.GraphqlWithInput(gmodel.DeleteTodoInput{
 						ID:     testUserNotes[i].Todos[j].ID,
 						NoteID: testUserNotes[i].ID,
-					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
+					})).NotEmpty().Element(0).Object().Value("message").String().Contains(lib.ErrorUnprocessableEntity.Error())
 				}
 			}
 		})
@@ -147,7 +147,7 @@ var _ = Describe("GraphQL Todos", func() {
 					testApp.GraphqlMustError(test.MutationDeleteTodo, test.GraphqlWithInput(gmodel.DeleteTodoInput{
 						ID:     devUserNotes[i].Todos[j].ID,
 						NoteID: devUserNotes[i].ID,
-					})).NotEmpty().Element(0).Object().Value("message").String().Contains(util.ErrorUnprocessableEntity.Error())
+					})).NotEmpty().Element(0).Object().Value("message").String().Contains(lib.ErrorUnprocessableEntity.Error())
 				}
 			}
 		})

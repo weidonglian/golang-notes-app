@@ -3,8 +3,8 @@ package store
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
+	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
-	"github.com/weidonglian/notes-app/pkg/util"
 )
 
 type UsersStore struct {
@@ -21,7 +21,7 @@ func NewUsersStore(ctx *Context) UsersStore {
 
 func (i UsersStore) Create(user model.User) (*model.User, error) {
 	var retUser model.User
-	if hashedPassword, err := util.HashPassword(user.Password); err != nil {
+	if hashedPassword, err := lib.HashPassword(user.Password); err != nil {
 		return nil, err
 	} else {
 		user.Password = hashedPassword
@@ -44,7 +44,7 @@ func (i UsersStore) Create(user model.User) (*model.User, error) {
 
 func (i UsersStore) UpdatePassword(user model.User) (int, error) {
 	var id int
-	if hashedPassword, err := util.HashPassword(user.Password); err != nil {
+	if hashedPassword, err := lib.HashPassword(user.Password); err != nil {
 		return id, err
 	} else {
 		user.Password = hashedPassword

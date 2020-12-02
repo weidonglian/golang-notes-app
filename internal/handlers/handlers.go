@@ -4,13 +4,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/notes-app/internal/auth"
 	"github.com/weidonglian/notes-app/internal/graphql"
+	mw "github.com/weidonglian/notes-app/internal/middleware"
 	"github.com/weidonglian/notes-app/internal/store"
-	"github.com/weidonglian/notes-app/pkg/logging"
-	"github.com/weidonglian/notes-app/pkg/util"
 	"net/http"
 	"time"
 )
@@ -26,10 +24,10 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(cors.Handler(util.CorsOptions))
+	r.Use(mw.Cors())
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(logging.NewStructuredLogger(logger))
+	r.Use(mw.NewStructuredLogger(logger))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
