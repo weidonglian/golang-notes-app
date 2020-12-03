@@ -23,6 +23,6 @@ func main() {
 	}
 
 	if err := app.Serve(); err != nil {
-		log.Printf("failed to serve:+%v\n", err)
+		log.Fatalf("failed to serve:+%v\n", err)
 	}
 }
