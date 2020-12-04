@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+
+  notes-app-test-postgres:
+    image: "postgres:12.3"
+    container_name: notes-app-test-postgres
+    volumes:
+      - notes-app-test-postgres:/var/lib/postgresql/data
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+  notes-app-test-nats:
+    image: "nats:latest"
+    container_name: notes-app-test-nats
+    ports:
+      - 4224:4222
+      - 6224:6222
+      - 8224:8222
+
+volumes:
+  notes-app-test-postgres:

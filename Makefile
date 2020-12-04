@@ -17,43 +17,48 @@ graphql:
 	@gqlgen generate
 
 # Development
-DOCKER_DEV=postgres-dev-notes-app
-DOCKER_DEV_PORT=5432
-db-start-dev:
-	@echo "starting the postgres docker dev"
-	@docker container inspect $(DOCKER_DEV) >/dev/null 2>&1 || docker run --rm --name $(DOCKER_DEV) -e POSTGRES_PASSWORD=postgres -d -p $(DOCKER_DEV_PORT):5432 --mount source=$(DOCKER_DEV),target=/var/lib/postgresql/data postgres:12.3 && ./scripts/wait-for-it.sh localhost:$(DOCKER_DEV_PORT) -- echo "docker dev is up"
+services-start:
+	@echo "starting dev services"
+	@docker-compose -p notes-app-dev -f docker-compose.dev.yml up -d
 
-db-stop-dev:
-	@echo "stopping the postgres docker dev"
-	@docker container stop $(DOCKER_DEV)
+services-stop:
+	@echo "stopping dev services"
+	@docker-compose -p notes-app-dev -f docker-compose.dev.yml down
 
-db-ssh-dev:
-	@echo "ssh login the $(DOCKER_DEV) container"
-	@docker exec -it $(DOCKER_DEV) psql -U postgres
+services-tail:
+	@echo "stopping dev services tail logs"
+	@docker-compose -p notes-app-dev -f docker-compose.dev.yml logs -f
 
 .PHONY: start
-start: db-start-dev
-	@echo "run start dev"
+start: services-start
+	@echo "run start app"
 	@go run ./cmd/app
 
+.PHONY: stop
+stop: services-stop
+	@echo "run stop dev"
+
 # Test
-DOCKER_TEST=postgres-test-notes-app
-DOCKER_TEST_PORT=5433
-db-start-test:
-	@echo "starting the postgres docker test"
-	@docker container inspect $(DOCKER_TEST) >/dev/null 2>&1 || docker run --rm --name $(DOCKER_TEST) -e POSTGRES_PASSWORD=postgres -d -p 5433:5432 postgres:12.3  && ./scripts/wait-for-it.sh localhost:$(DOCKER_TEST_PORT) -- echo "docker test is up"
+test-services-start:
+	@echo "starting test services"
+	@docker-compose -p notes-app-test -f docker-compose.test.yml up -d
 
-db-stop-test:
-	@echo "stopping the postgres docker test"
-	@docker container stop $(DOCKER_TEST)
+test-services-stop:
+	@echo "stopping test services"
+	@docker-compose -p notes-app-test -f docker-compose.test.yml down
 
-db-ssh-test:
-	@echo "ssh login the $(DOCKER_TEST) container"
-	@docker exec -it $(DOCKER_TEST) psql -U postgres
+test-services-tail:
+	@echo "stopping test services tail logs"
+	@docker-compose -p notes-app-test -f docker-compose.test.yml logs -f
 
-test: tools db-start-test
+.PHONY: test
+test: tools test-services-start
 	@echo "run test"
 	@ginkgo test -r internal/*
+
+.PHONY: stop-test
+stop-test: test-services-stop
+	@echo "run stop test"
 
 # Production
 build:
