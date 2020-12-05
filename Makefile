@@ -12,9 +12,14 @@ tools:
 	cat tools/tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
 
 # GraphQL
-graphql:
+graphql: tools
 	@echo Graphql Generator
 	@gqlgen generate
+
+# Proto
+proto: tools
+	@go get github.com/golang/protobuf/protoc-gen-go
+	@protoc -I ./lib/proto pubsub.proto --go_out=plugins=grpc,paths=source_relative:.
 
 # Development
 services-start:
