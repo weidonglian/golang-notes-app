@@ -2,6 +2,10 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
+package pubsub;
+
+option go_package = "github.com/weidonglian/notes-app/internal/pubsub";
+
 // Msg is a message that allows us to keep metadata and other
 // different and useful information across all providers
 message PubSubMessage {

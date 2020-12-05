@@ -18,8 +18,7 @@ graphql: tools
 
 # Proto
 proto: tools
-	@go get github.com/golang/protobuf/protoc-gen-go
-	@protoc -I ./lib/proto pubsub.proto --go_out=plugins=grpc,paths=source_relative:.
+	@protoc -I ./internal/pubsub --go_out=paths=source_relative:./internal/pubsub pubsub.proto
 
 # Development
 services-start:
