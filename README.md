@@ -23,6 +23,12 @@ In order to simplify the docker build in different CI env and make sure we do no
 
 After you have change the `go mod` dependencies, you could run `make sync-vendor` to keep in sync.
 
+If you want to regenerate the proto code, you need to install `protoc` compiler, i.e. Protobuf Compiler.
+Go to https://github.com/protocolbuffers/protobuf/releases.
+
+Once you've unzipped the compiler archive you will have two directories: bin and include.
+The contents of bin should be placed somewhere on your PATH. If you intend to use the included well known types then copy the contents of the include directory somewhere as well, for example into /usr/local/include/. Make sure that the contents of /usr/local/include and sub-directories are readable by your normal user.
+
 ## System
 
 The development could be done on `Linux/MAC` and run all the `Makefile` commands with no extra effort.
