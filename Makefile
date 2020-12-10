@@ -17,8 +17,8 @@ graphql: tools
 	@gqlgen generate
 
 # Proto
-proto: tools
-	@protoc -I ./internal/pubsub --go_out=paths=source_relative:./internal/pubsub pubsub.proto
+# proto: tools
+#	@protoc -I ./internal/pubsub --go_out=paths=source_relative:./internal/pubsub pubsub.proto
 
 # Development
 services-start:
