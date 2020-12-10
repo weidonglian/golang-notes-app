@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/weidonglian/notes-app/internal/pubsub"
 
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
 	"github.com/weidonglian/notes-app/internal/lib"
@@ -27,7 +28,9 @@ func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInpu
 		return nil, err
 	}
 
-	return NewGNote(n, make([]model.Todo, 0)), nil
+	gnote := NewGNote(n, make([]model.Todo, 0))
+	r.publisher.Publish(ctx, pubsub.EventNoteCreate, gnote)
+	return gnote, nil
 }
 
 func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNoteInput) (*gmodel.Note, error) {
@@ -39,8 +42,9 @@ func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNo
 	if err != nil {
 		return nil, err
 	}
-
-	return NewGNote(n, r.store.Todos.FindByNoteID(n.ID)), nil
+	gnote := NewGNote(n, r.store.Todos.FindByNoteID(n.ID))
+	r.publisher.Publish(ctx, pubsub.EventNoteUpdate, gnote)
+	return gnote, nil
 }
 
 func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.DeleteNotePayload, error) {
@@ -49,9 +53,11 @@ func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteN
 		return nil, fmt.Errorf("unprocessable entity with 'id' %d", input.ID)
 	}
 
-	return &gmodel.DeleteNotePayload{
+	payload := &gmodel.DeleteNotePayload{
 		ID: id,
-	}, nil
+	}
+	r.publisher.Publish(ctx, pubsub.EventNoteDelete, payload)
+	return payload, nil
 }
 
 func (r *queryResolver) Notes(ctx context.Context) ([]*gmodel.Note, error) {

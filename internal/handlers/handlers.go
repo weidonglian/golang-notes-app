@@ -8,6 +8,7 @@ import (
 	"github.com/weidonglian/notes-app/internal/auth"
 	"github.com/weidonglian/notes-app/internal/graphql"
 	mw "github.com/weidonglian/notes-app/internal/middleware"
+	"github.com/weidonglian/notes-app/internal/pubsub"
 	"github.com/weidonglian/notes-app/internal/store"
 	"net/http"
 	"time"
@@ -21,7 +22,7 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
 }
 
-func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.Mux {
+func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store, publisher pubsub.Publisher) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(mw.Cors())
@@ -54,7 +55,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		// playground for graphql api
 		r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 		// Graphql handler
-		r.Handle("/graphql", graphql.NewGraphQLHandler(logger, store))
+		r.Handle("/graphql", graphql.NewGraphQLHandler(logger, store, publisher))
 
 		// session handler
 		session := NewSessionHandler(store, auth)

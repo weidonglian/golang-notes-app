@@ -11,14 +11,14 @@ import (
 
 var ErrSubscribeEmptySubject = fmt.Errorf("won't subscribe an empty subject key")
 
-type SubClient interface {
+type Subscriber interface {
 	Subscribe(ctx context.Context, key SubjectKey, handler SubscriptionHandler) error
 	Close()
 }
 
-type SubscriptionHandler func(data []byte)
+type SubscriptionHandler func(msg *nats.Msg)
 
-var _ SubClient = &natsSubClient{}
+var _ Subscriber = &natsSubClient{}
 
 type natsSubClient struct {
 	conn   *nats.Conn
@@ -34,7 +34,7 @@ func (n *natsSubClient) Subscribe(ctx context.Context, key SubjectKey, handler S
 		panic("pubsub: handler can not be nil")
 	}
 	_, err := n.conn.Subscribe(key.String(), func(msg *nats.Msg) {
-		handler(msg.Data)
+		handler(msg)
 	})
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (n *natsSubClient) Subscribe(ctx context.Context, key SubjectKey, handler S
 	return n.conn.Flush()
 }
 
-func NewSubClient(logger *logrus.Logger, cfg *config.Config) (SubClient, error) {
+func NewSubClient(logger *logrus.Logger, cfg *config.Config) (Subscriber, error) {
 	opts := []nats.Option{nats.Name("Notes-App Nats Subscriber")}
 
 	totalWait := 10 * time.Minute

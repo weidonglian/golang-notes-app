@@ -11,12 +11,12 @@ import (
 
 var ErrPublishEmptySubject = fmt.Errorf("won't publish an empty subject key")
 
-type PubClient interface {
+type Publisher interface {
 	Publish(ctx context.Context, key SubjectKey, data interface{}) error
 	Close()
 }
 
-var _ PubClient = &natsPubClient{}
+var _ Publisher = &natsPubClient{}
 
 type natsPubClient struct {
 	conn   *nats.Conn
@@ -51,7 +51,7 @@ func (n *natsPubClient) Publish(ctx context.Context, key SubjectKey, data interf
 	return err
 }
 
-func NewPubClient(logger *logrus.Logger, cfg *config.Config) (PubClient, error) {
+func NewPubClient(logger *logrus.Logger, cfg *config.Config) (Publisher, error) {
 	opts := []nats.Option{nats.Name("Notes-App NATS Publisher")}
 	conn, err := nats.Connect(cfg.Nats.URL, opts...)
 

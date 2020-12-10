@@ -5,6 +5,7 @@ package graphql
 
 import (
 	"context"
+	"github.com/weidonglian/notes-app/internal/pubsub"
 
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
 	"github.com/weidonglian/notes-app/internal/lib"
@@ -27,7 +28,9 @@ func (r *mutationResolver) AddTodo(ctx context.Context, input gmodel.AddTodoInpu
 		return nil, lib.ErrorUnprocessableEntity
 	}
 
-	return NewGTodo(todo), nil
+	gtodo := NewGTodo(todo)
+	r.publisher.Publish(ctx, pubsub.EventTodoCreate, gtodo)
+	return gtodo, nil
 }
 
 func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTodoInput) (*gmodel.Todo, error) {
@@ -41,7 +44,9 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, input gmodel.UpdateTo
 		return nil, lib.ErrorUnprocessableEntity
 	}
 
-	return NewGTodo(todo), nil
+	gtodo := NewGTodo(todo)
+	r.publisher.Publish(ctx, pubsub.EventTodoUpdate, gtodo)
+	return gtodo, nil
 }
 
 func (r *mutationResolver) DeleteTodo(ctx context.Context, input gmodel.DeleteTodoInput) (*gmodel.DeleteTodoPayload, error) {
@@ -54,10 +59,12 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, input gmodel.DeleteTo
 		return nil, lib.ErrorUnprocessableEntity
 	}
 
-	return &gmodel.DeleteTodoPayload{
+	payload := &gmodel.DeleteTodoPayload{
 		ID:     id,
 		NoteID: input.NoteID,
-	}, nil
+	}
+	r.publisher.Publish(ctx, pubsub.EventTodoDelete, payload)
+	return payload, nil
 }
 
 func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTodoInput) (*gmodel.Todo, error) {
@@ -71,7 +78,9 @@ func (r *mutationResolver) ToggleTodo(ctx context.Context, input gmodel.ToggleTo
 		return nil, lib.ErrorUnprocessableEntity
 	}
 
-	return NewGTodo(todo), nil
+	gtodo := NewGTodo(todo)
+	r.publisher.Publish(ctx, pubsub.EventTodoUpdate, gtodo)
+	return gtodo, nil
 }
 
 func (r *queryResolver) Todos(ctx context.Context, noteID int) ([]*gmodel.Todo, error) {

@@ -5,12 +5,12 @@ const (
 	NoEvent SubjectKey = ""
 
 	// Notes
-	NoteCreateEvent SubjectKey = "app.entity.note.create"
-	NoteUpdateEvent SubjectKey = "app.entity.note.update"
-	NoteDeleteEvent SubjectKey = "app.entity.note.delete"
+	EventNoteCreate SubjectKey = "app.entity.note.create"
+	EventNoteUpdate SubjectKey = "app.entity.note.update"
+	EventNoteDelete SubjectKey = "app.entity.note.delete"
 
 	// Todos
-	TodoCreateEvent SubjectKey = "app.entity.todo.create"
-	TodoUpdateEvent SubjectKey = "app.entity.todo.update"
-	TodoDeleteEvent SubjectKey = "app.entity.todo.delete"
+	EventTodoCreate SubjectKey = "app.entity.todo.create"
+	EventTodoUpdate SubjectKey = "app.entity.todo.update"
+	EventTodoDelete SubjectKey = "app.entity.todo.delete"
 )
