@@ -44,6 +44,8 @@ func (n *natsPubClient) Publish(ctx context.Context, key SubjectKey, data interf
 
 	err = n.conn.Publish(key.String(), b)
 
+	n.logger.Infof("send event: [%s] payload: %s", key.String(), string(b))
+
 	if err != nil {
 		n.logger.Error(fmt.Errorf("couldn't publish to nats: %s", err.Error()))
 	}

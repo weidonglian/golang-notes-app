@@ -118,9 +118,9 @@ func NewAppWith(logger *logrus.Logger, cfg config.Config, db db.Session) (*App, 
 	}
 
 	counter := 1
-	subscriber.Subscribe(context.Background(), "app.entity.*", func(msg *nats.Msg) {
-		counter += 1
+	subscriber.Subscribe(context.Background(), "app.entity.>", func(msg *nats.Msg) {
 		logger.Printf("[#%d] Received on [%s]: '%s'", counter, msg.Subject, string(msg.Data))
+		counter += 1
 	})
 
 	return &App{

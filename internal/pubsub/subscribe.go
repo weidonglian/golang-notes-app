@@ -34,6 +34,7 @@ func (n *natsSubClient) Subscribe(ctx context.Context, key SubjectKey, handler S
 		panic("pubsub: handler can not be nil")
 	}
 	_, err := n.conn.Subscribe(key.String(), func(msg *nats.Msg) {
+		n.logger.Infof("receive event: [%s] payload: %s", msg.Subject, string(msg.Data))
 		handler(msg)
 	})
 	if err != nil {
