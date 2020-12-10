@@ -11,7 +11,6 @@ require (
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/golang-migrate/migrate/v4 v4.13.0
-	github.com/golang/protobuf v1.4.2
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.8.0
@@ -24,6 +23,5 @@ require (
 	github.com/vektah/gqlparser/v2 v2.1.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/sys v0.0.0-20200826173525-f9321e4c35a6 // indirect
-	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
