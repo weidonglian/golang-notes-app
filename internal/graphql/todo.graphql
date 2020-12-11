@@ -45,3 +45,8 @@ extend type Mutation {
     toggleTodo(input: ToggleTodoInput!): Todo
 }
 
+extend type Subscription {
+    todoAdded: Todo
+    todoUpdated: Todo
+    todoDeleted: DeleteTodoPayload
+}

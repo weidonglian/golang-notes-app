@@ -5,13 +5,14 @@ package graphql
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/weidonglian/notes-app/internal/pubsub"
-
+	"github.com/nats-io/nats.go"
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
 	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
+	"github.com/weidonglian/notes-app/internal/pubsub"
 )
 
 func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInput) (*gmodel.Note, error) {
@@ -76,4 +77,55 @@ func (r *queryResolver) Note(ctx context.Context, id int) (*gmodel.Note, error) 
 	} else {
 		return nil, fmt.Errorf("failed to find a note with id '%d'", id)
 	}
+}
+
+func (r *subscriptionResolver) NoteAdded(ctx context.Context) (<-chan *gmodel.Note, error) {
+	chanNote := make(chan *gmodel.Note, 1)
+
+	err := r.subscriber.Subscribe(ctx, pubsub.EventNoteCreate, func(msg *nats.Msg) {
+		var gnote gmodel.Note
+		if err := json.Unmarshal(msg.Data, &gnote); err != nil {
+			r.logger.Errorf("unable to unmarshal pubsub event data: %s with type %T", msg.Subject, gnote)
+		}
+		chanNote <- &gnote
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return chanNote, nil
+}
+
+func (r *subscriptionResolver) NoteUpdated(ctx context.Context) (<-chan *gmodel.Note, error) {
+	chanNote := make(chan *gmodel.Note, 1)
+
+	err := r.subscriber.Subscribe(ctx, pubsub.EventNoteUpdate, func(msg *nats.Msg) {
+		var gnote gmodel.Note
+		if err := json.Unmarshal(msg.Data, &gnote); err != nil {
+			r.logger.Errorf("unable to unmarshal pubsub event data: %s type %T", msg.Subject, gnote)
+		}
+		chanNote <- &gnote
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return chanNote, nil
+}
+
+func (r *subscriptionResolver) NoteDeleted(ctx context.Context) (<-chan *gmodel.DeleteNotePayload, error) {
+	chanDeletePayload := make(chan *gmodel.DeleteNotePayload, 1)
+
+	err := r.subscriber.Subscribe(ctx, pubsub.EventNoteDelete, func(msg *nats.Msg) {
+		var payload gmodel.DeleteNotePayload
+		if err := json.Unmarshal(msg.Data, &payload); err != nil {
+			r.logger.Errorf("unable to unmarshal pubsub event data: %s type %T", msg.Subject, payload)
+		}
+		chanDeletePayload <- &payload
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return chanDeletePayload, nil
 }

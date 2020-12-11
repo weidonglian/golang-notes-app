@@ -31,3 +31,9 @@ extend type Mutation {
     updateNote(input: UpdateNoteInput!): Note
     deleteNote(input: DeleteNoteInput): DeleteNotePayload
 }
+
+extend type Subscription {
+    noteAdded: Note
+    noteUpdated: Note
+    noteDeleted: DeleteNotePayload
+}

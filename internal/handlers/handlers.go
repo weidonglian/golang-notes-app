@@ -22,7 +22,7 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
 }
 
-func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store, publisher pubsub.Publisher) *chi.Mux {
+func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store, publisher pubsub.Publisher, subscriber pubsub.Subscriber) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(mw.Cors())
@@ -55,7 +55,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store, publi
 		// playground for graphql api
 		r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 		// Graphql handler
-		r.Handle("/graphql", graphql.NewGraphQLHandler(logger, store, publisher))
+		r.Handle("/graphql", graphql.NewGraphQLHandler(logger, store, publisher, subscriber))
 
 		// session handler
 		session := NewSessionHandler(store, auth)

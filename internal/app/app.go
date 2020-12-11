@@ -33,7 +33,7 @@ type App struct {
 }
 
 func (a *App) Router() *chi.Mux {
-	return handlers.NewRouter(a.logger, a.auth, a.store, a.publisher)
+	return handlers.NewRouter(a.logger, a.auth, a.store, a.publisher, a.subscriber)
 }
 
 func (a *App) GetStore() *store.Store {

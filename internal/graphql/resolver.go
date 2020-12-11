@@ -14,17 +14,19 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	logger    *logrus.Logger
-	store     *store.Store
-	publisher pubsub.Publisher
+	logger     *logrus.Logger
+	store      *store.Store
+	publisher  pubsub.Publisher
+	subscriber pubsub.Subscriber
 }
 
-func NewGraphQLHandler(logger *logrus.Logger, store *store.Store, publisher pubsub.Publisher) http.Handler {
+func NewGraphQLHandler(logger *logrus.Logger, store *store.Store, publisher pubsub.Publisher, subscriber pubsub.Subscriber) http.Handler {
 	return handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &Resolver{
-			logger:    logger,
-			store:     store,
-			publisher: publisher,
+			logger:     logger,
+			store:      store,
+			publisher:  publisher,
+			subscriber: subscriber,
 		},
 	}))
 }
