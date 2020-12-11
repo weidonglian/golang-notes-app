@@ -24,7 +24,9 @@ type natsPubClient struct {
 }
 
 func (n *natsPubClient) Close() {
+	n.logger.Infof("start closing the nats publisher client")
 	n.conn.Close()
+	n.logger.Infof("finish closing the nats publisher client")
 }
 
 func (n *natsPubClient) Publish(ctx context.Context, key SubjectKey, data interface{}) error {
