@@ -6,6 +6,10 @@ import (
 )
 
 func allowOriginFunc(r *http.Request, origin string) bool {
+	return CheckOriginFunc(r)
+}
+
+func CheckOriginFunc(r *http.Request) bool {
 	return true
 }
 

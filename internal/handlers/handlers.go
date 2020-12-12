@@ -11,7 +11,6 @@ import (
 	"github.com/weidonglian/notes-app/internal/pubsub"
 	"github.com/weidonglian/notes-app/internal/store"
 	"net/http"
-	"time"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +29,7 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store, publi
 	r.Use(middleware.RealIP)
 	r.Use(mw.NewStructuredLogger(logger))
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	// r.Use(middleware.Timeout(60 * time.Second))
 
 	// public routes and no auth required
 	r.Group(func(r chi.Router) {

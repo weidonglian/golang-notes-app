@@ -5,8 +5,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/weidonglian/notes-app/internal/graphql/generated"
 )
 
@@ -21,7 +19,7 @@ func (r *queryResolver) PlaceHolder(ctx context.Context) (*bool, error) {
 }
 
 func (r *subscriptionResolver) PlaceHolder(ctx context.Context) (<-chan *bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	return nil, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
