@@ -5,6 +5,7 @@ package graphql
 
 import (
 	"context"
+
 	"github.com/weidonglian/notes-app/internal/graphql/generated"
 )
 

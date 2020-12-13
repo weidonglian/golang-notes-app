@@ -6,8 +6,8 @@ package graphql
 import (
 	"context"
 	"encoding/json"
-	"github.com/nats-io/nats.go"
 
+	nats "github.com/nats-io/nats.go"
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
 	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"

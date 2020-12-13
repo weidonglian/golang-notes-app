@@ -8,7 +8,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/nats-io/nats.go"
+
+	nats "github.com/nats-io/nats.go"
 	"github.com/weidonglian/notes-app/internal/graphql/gmodel"
 	"github.com/weidonglian/notes-app/internal/lib"
 	"github.com/weidonglian/notes-app/internal/model"
@@ -20,9 +21,10 @@ func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInpu
 		return nil, errors.New(`'name' field can not be empty`)
 	}
 
+	userId := lib.GetUserId(ctx)
 	n, err := r.store.Notes.Create(model.Note{
 		Name:   input.Name,
-		UserID: lib.GetUserId(ctx),
+		UserID: userId,
 	})
 
 	if err != nil {
@@ -30,7 +32,7 @@ func (r *mutationResolver) AddNote(ctx context.Context, input gmodel.AddNoteInpu
 	}
 
 	gnote := NewGNote(n, make([]model.Todo, 0))
-	r.publisher.Publish(ctx, pubsub.EventNoteCreate, gnote)
+	r.publisher.Publish(ctx, pubsub.WithUser(pubsub.EventNoteCreate, userId), gnote)
 	return gnote, nil
 }
 
@@ -38,18 +40,20 @@ func (r *mutationResolver) UpdateNote(ctx context.Context, input gmodel.UpdateNo
 	if input.Name == "" {
 		return nil, errors.New("'name' field can not be empty")
 	}
-	n, err := r.store.Notes.Update(input.ID, input.Name, lib.GetUserId(ctx))
+	userId := lib.GetUserId(ctx)
+	n, err := r.store.Notes.Update(input.ID, input.Name, userId)
 
 	if err != nil {
 		return nil, err
 	}
 	gnote := NewGNote(n, r.store.Todos.FindByNoteID(n.ID))
-	r.publisher.Publish(ctx, pubsub.EventNoteUpdate, gnote)
+	r.publisher.Publish(ctx, pubsub.WithUser(pubsub.EventNoteUpdate, userId), gnote)
 	return gnote, nil
 }
 
 func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteNoteInput) (*gmodel.DeleteNotePayload, error) {
-	id, err := r.store.Notes.Delete(input.ID, lib.GetUserId(ctx))
+	userId := lib.GetUserId(ctx)
+	id, err := r.store.Notes.Delete(input.ID, userId)
 	if err != nil {
 		return nil, fmt.Errorf("unprocessable entity with 'id' %d", input.ID)
 	}
@@ -57,7 +61,7 @@ func (r *mutationResolver) DeleteNote(ctx context.Context, input *gmodel.DeleteN
 	payload := &gmodel.DeleteNotePayload{
 		ID: id,
 	}
-	r.publisher.Publish(ctx, pubsub.EventNoteDelete, payload)
+	r.publisher.Publish(ctx, pubsub.WithUser(pubsub.EventNoteDelete, userId), payload)
 	return payload, nil
 }
 
@@ -82,7 +86,8 @@ func (r *queryResolver) Note(ctx context.Context, id int) (*gmodel.Note, error) 
 func (r *subscriptionResolver) NoteAdded(ctx context.Context) (<-chan *gmodel.Note, error) {
 	chanNote := make(chan *gmodel.Note, 1)
 
-	err := r.subscriber.Subscribe(ctx, pubsub.EventNoteCreate, func(msg *nats.Msg) {
+	userId := lib.GetUserId(ctx)
+	err := r.subscriber.Subscribe(ctx, pubsub.WithUser(pubsub.EventNoteCreate, userId), func(msg *nats.Msg) {
 		var gnote gmodel.Note
 		if err := json.Unmarshal(msg.Data, &gnote); err != nil {
 			r.logger.Errorf("unable to unmarshal pubsub event data: %s with type %T", msg.Subject, gnote)
@@ -98,8 +103,8 @@ func (r *subscriptionResolver) NoteAdded(ctx context.Context) (<-chan *gmodel.No
 
 func (r *subscriptionResolver) NoteUpdated(ctx context.Context) (<-chan *gmodel.Note, error) {
 	chanNote := make(chan *gmodel.Note, 1)
-
-	err := r.subscriber.Subscribe(ctx, pubsub.EventNoteUpdate, func(msg *nats.Msg) {
+	userId := lib.GetUserId(ctx)
+	err := r.subscriber.Subscribe(ctx, pubsub.WithUser(pubsub.EventNoteUpdate, userId), func(msg *nats.Msg) {
 		var gnote gmodel.Note
 		if err := json.Unmarshal(msg.Data, &gnote); err != nil {
 			r.logger.Errorf("unable to unmarshal pubsub event data: %s type %T", msg.Subject, gnote)
@@ -115,8 +120,8 @@ func (r *subscriptionResolver) NoteUpdated(ctx context.Context) (<-chan *gmodel.
 
 func (r *subscriptionResolver) NoteDeleted(ctx context.Context) (<-chan *gmodel.DeleteNotePayload, error) {
 	chanDeletePayload := make(chan *gmodel.DeleteNotePayload, 1)
-
-	err := r.subscriber.Subscribe(ctx, pubsub.EventNoteDelete, func(msg *nats.Msg) {
+	userId := lib.GetUserId(ctx)
+	err := r.subscriber.Subscribe(ctx, pubsub.WithUser(pubsub.EventNoteDelete, userId), func(msg *nats.Msg) {
 		var payload gmodel.DeleteNotePayload
 		if err := json.Unmarshal(msg.Data, &payload); err != nil {
 			r.logger.Errorf("unable to unmarshal pubsub event data: %s type %T", msg.Subject, payload)
