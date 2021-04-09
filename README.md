@@ -1,5 +1,7 @@
 # notes-app
 
+This is a complete back-end app to demonstrate how to write REST API and GraphQL Server API. This app is production ready. There is another branch `nats-pubsub` that supports pubsub via nats to easily decouple and simplify the services.
+
 notes-app backend in golang. The app can run in three APP_MODE: [Dev, Test, Prod].
 As default, it will run in `dev` mode. When you run test, it will switch to run in `test` mode.
 `Prod` is a bit strict running environment, you need to define the required environment variables before running the main app.
