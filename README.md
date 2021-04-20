@@ -10,6 +10,7 @@ See `./config/config.go` to see how to define those environments.
 
 It is easy to extend the APP_MODE and add your preferred config, e.g. [Staging].
 
+You can access the [website](https://notes.biosave.org/)
 
 ## Requirements
 
