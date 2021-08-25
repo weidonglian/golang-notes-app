@@ -69,7 +69,7 @@ Otherwise, `go mod tidy` will remove all of `tools` dependencies from the `go mo
 
 - `access_token` will be used to access resources and has a short expired time duration. Once it is expired, the client
 side need to periodically fetch an access token using the `refresh_token` before the `access_token`'s expiration time.
-`access_token` will be stateless, we need to query the database to check the existence and validity.
+`access_token` will be stateless, we do not need to query the database to check the existence and validity.
 - `refresh_token` will be used to access the `auth` end point to generate a new `access_token` and has a long expiration.
 The `refresh_token` will not be state-less. It needs to query the database if the `refresh_token` is still valid,
 when logout we need to set the `refresh_token` invalid or blacklisted.
