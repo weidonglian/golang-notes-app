@@ -8,6 +8,7 @@ import (
 	"github.com/weidonglian/notes-app/internal/auth"
 	"github.com/weidonglian/notes-app/internal/graphql"
 	mw "github.com/weidonglian/notes-app/internal/middleware"
+	"github.com/weidonglian/notes-app/internal/pubsub"
 	"github.com/weidonglian/notes-app/internal/store"
 	"net/http"
 	"time"
@@ -21,7 +22,7 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
 }
 
-func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.Mux {
+func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store, publisher pubsub.Publisher, subscriber pubsub.Subscriber) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(mw.Cors())
@@ -29,10 +30,11 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 	r.Use(middleware.RealIP)
 	r.Use(mw.NewStructuredLogger(logger))
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	// r.Use(middleware.Timeout(60 * time.Second))
 
 	// public routes and no auth required
 	r.Group(func(r chi.Router) {
+		r.Use(middleware.Timeout(time.Minute))
 		// root index
 		r.Get("/", rootHandler)
 		// ping vs pong
@@ -45,16 +47,28 @@ func NewRouter(logger *logrus.Logger, auth *auth.Auth, store *store.Store) *chi.
 		r.Post("/users/new", users.Create)
 	})
 
+	// Graphql
+	r.Group(func(r chi.Router) {
+		graphqlHandler := graphql.NewGraphQLHandler(logger, auth, store, publisher, subscriber)
+		r.Get("/graphql", graphqlHandler.ServeHTTP)
+		r.Group(func(r chi.Router) {
+			// graphql playground query and mutate
+			r.Use(middleware.Timeout(time.Minute))
+			r.Use(auth.Verifier())
+			r.Use(auth.Authenticator())
+			graphqlPlayground := playground.Handler("GraphQL playground", "/graphql")
+			r.Handle("/playground", graphqlPlayground)
+			r.Options("/graphql", graphqlHandler.ServeHTTP)
+			r.Post("/graphql", graphqlHandler.ServeHTTP)
+		})
+	})
+
 	// Protected routes and auth required
 	r.Group(func(r chi.Router) {
+		r.Use(middleware.Timeout(time.Minute))
 		// middlewares for protected routes
 		r.Use(auth.Verifier())
 		r.Use(auth.Authenticator())
-
-		// playground for graphql api
-		r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
-		// Graphql handler
-		r.Handle("/graphql", graphql.NewGraphQLHandler(logger, store))
 
 		// session handler
 		session := NewSessionHandler(store, auth)

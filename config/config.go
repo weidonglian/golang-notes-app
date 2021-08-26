@@ -17,6 +17,10 @@ type PostgresConfig struct {
 	DataBaseURL string `default:"" envconfig:"DATABASE_URL"`
 }
 
+type NatsConfig struct {
+	URL string `default:"" envconfig:"NATS_URL"`
+}
+
 func (c PostgresConfig) GetDataSourceName() string {
 	if c.DataBaseURL != "" {
 		return c.DataBaseURL
@@ -28,6 +32,7 @@ func (c PostgresConfig) GetDataSourceName() string {
 
 type Config struct {
 	Postgres       PostgresConfig
+	Nats           NatsConfig
 	ServerPort     int    `default:"4000" envconfig:"PORT"`
 	JWTSecret      string `default:"MaPoDouFu" envconfig:"JWT_SECRET"`
 	MigrationsPath string `default:"./internal/db/migrations" envconfig:"MIGRATIONS_PATH"`
@@ -43,11 +48,14 @@ func DefaultTestConfig() *Config {
 	return &Config{
 		Postgres: PostgresConfig{
 			Host:        "localhost",
-			Port:        5433,
+			Port:        5434,
 			Username:    "postgres",
 			Password:    "postgres",
 			DBName:      "postgres",
 			DataBaseURL: "",
+		},
+		Nats: NatsConfig{
+			URL: "nats://127.0.0.1:4224",
 		},
 		ServerPort:     4040,
 		JWTSecret:      "@Test@NoteApp",
@@ -59,11 +67,14 @@ func DefaultConfig() *Config {
 	return &Config{
 		Postgres: PostgresConfig{
 			Host:        "localhost",
-			Port:        5432,
+			Port:        5433,
 			Username:    "postgres",
 			Password:    "postgres",
 			DBName:      "postgres",
 			DataBaseURL: "",
+		},
+		Nats: NatsConfig{
+			URL: "nats://127.0.0.1:4223",
 		},
 		ServerPort:     4000,
 		JWTSecret:      "@Dev@NoteApp",

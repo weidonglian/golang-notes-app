@@ -36,6 +36,12 @@ func (auth Auth) Authenticator() func(http.Handler) http.Handler {
 	return jwtauth.Authenticator
 }
 
+func (auth Auth) VerifyToken(tokenStr string) (*jwt.Token, error) {
+	return jwtauth.VerifyRequest(auth.tokenAuth, nil, func(r *http.Request) string {
+		return tokenStr
+	})
+}
+
 func NewAuth(cfg config.Config) *Auth {
 	tokenAuth := jwtauth.New("HS256", []byte(cfg.JWTSecret), nil)
 	return &Auth{tokenAuth}

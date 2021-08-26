@@ -19,11 +19,19 @@ func (r *queryResolver) PlaceHolder(ctx context.Context) (*bool, error) {
 	return &dummy, nil
 }
 
+func (r *subscriptionResolver) PlaceHolder(ctx context.Context) (<-chan *bool, error) {
+	return nil, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }

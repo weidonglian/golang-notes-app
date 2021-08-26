@@ -11,6 +11,10 @@ type Mutation {
     placeHolder : Boolean
 }
 
+type Subscription {
+  placeHolder : Boolean
+}
+
 interface Node {
     id: Int!
 }

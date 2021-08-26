@@ -3,8 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/weidonglian/notes-app/internal/db"
+	"github.com/weidonglian/notes-app/internal/pubsub"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,15 +23,17 @@ import (
 
 // App is the main application.
 type App struct {
-	logger *logrus.Logger
-	config config.Config
-	db     db.Session
-	store  *store.Store
-	auth   *auth.Auth
+	logger     *logrus.Logger
+	config     config.Config
+	db         db.Session
+	store      *store.Store
+	auth       *auth.Auth
+	publisher  pubsub.Publisher
+	subscriber pubsub.Subscriber
 }
 
 func (a *App) Router() *chi.Mux {
-	return handlers.NewRouter(a.logger, a.auth, a.store)
+	return handlers.NewRouter(a.logger, a.auth, a.store, a.publisher, a.subscriber)
 }
 
 func (a *App) GetStore() *store.Store {
@@ -79,6 +83,8 @@ func (a *App) Serve() error {
 }
 
 func (a *App) Close() {
+	a.publisher.Close()
+	a.subscriber.Close()
 	a.db.Close()
 }
 
@@ -92,16 +98,38 @@ func NewApp(logger *logrus.Logger, cfg config.Config) (*App, error) {
 }
 
 func NewAppWith(logger *logrus.Logger, cfg config.Config, db db.Session) (*App, error) {
-	if sto, err := store.NewStore(db, logger); err != nil {
+	var (
+		sto        *store.Store
+		publisher  pubsub.Publisher
+		subscriber pubsub.Subscriber
+		err        error
+	)
+
+	if publisher, err = pubsub.NewPubClient(logger, &cfg); err != nil {
 		return nil, err
-	} else {
-		return &App{
-			logger: logger,
-			config: cfg,
-			db:     db,
-			auth:   auth.NewAuth(cfg),
-			store:  sto,
-		}, nil
 	}
 
+	if subscriber, err = pubsub.NewSubClient(logger, &cfg); err != nil {
+		return nil, err
+	}
+
+	if sto, err = store.NewStore(db, logger); err != nil {
+		return nil, err
+	}
+
+	counter := 1
+	subscriber.Subscribe(context.Background(), "app.entity.>", func(msg *nats.Msg) {
+		logger.Printf("[#%d] Received on [%s]: '%s'", counter, msg.Subject, string(msg.Data))
+		counter += 1
+	})
+
+	return &App{
+		logger:     logger,
+		config:     cfg,
+		db:         db,
+		auth:       auth.NewAuth(cfg),
+		store:      sto,
+		publisher:  publisher,
+		subscriber: subscriber,
+	}, nil
 }

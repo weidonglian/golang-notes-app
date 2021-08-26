@@ -25,7 +25,7 @@ type MockApp struct {
 // Each new test app will fork a new db session and will be cleanup after suite test.
 func NewMockApp() MockApp {
 	logger := lib.NewLogger()
-	logger.SetLevel(logrus.WarnLevel)
+	logger.SetLevel(logrus.InfoLevel)
 	cfg := config.DefaultTestConfig()
 
 	logger.Infof("Creating a new test app")

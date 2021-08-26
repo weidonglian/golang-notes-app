@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"sync"
 
@@ -37,6 +38,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -76,6 +78,16 @@ type ComplexityRoot struct {
 		Todos       func(childComplexity int, noteID int) int
 	}
 
+	Subscription struct {
+		NoteAdded   func(childComplexity int) int
+		NoteDeleted func(childComplexity int) int
+		NoteUpdated func(childComplexity int) int
+		PlaceHolder func(childComplexity int) int
+		TodoAdded   func(childComplexity int) int
+		TodoDeleted func(childComplexity int) int
+		TodoUpdated func(childComplexity int) int
+	}
+
 	Todo struct {
 		Done   func(childComplexity int) int
 		ID     func(childComplexity int) int
@@ -99,6 +111,15 @@ type QueryResolver interface {
 	Notes(ctx context.Context) ([]*gmodel.Note, error)
 	Note(ctx context.Context, id int) (*gmodel.Note, error)
 	Todos(ctx context.Context, noteID int) ([]*gmodel.Todo, error)
+}
+type SubscriptionResolver interface {
+	PlaceHolder(ctx context.Context) (<-chan *bool, error)
+	NoteAdded(ctx context.Context) (<-chan *gmodel.Note, error)
+	NoteUpdated(ctx context.Context) (<-chan *gmodel.Note, error)
+	NoteDeleted(ctx context.Context) (<-chan *gmodel.DeleteNotePayload, error)
+	TodoAdded(ctx context.Context) (<-chan *gmodel.Todo, error)
+	TodoUpdated(ctx context.Context) (<-chan *gmodel.Todo, error)
+	TodoDeleted(ctx context.Context) (<-chan *gmodel.DeleteTodoPayload, error)
 }
 
 type executableSchema struct {
@@ -287,6 +308,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Todos(childComplexity, args["noteId"].(int)), true
 
+	case "Subscription.noteAdded":
+		if e.complexity.Subscription.NoteAdded == nil {
+			break
+		}
+
+		return e.complexity.Subscription.NoteAdded(childComplexity), true
+
+	case "Subscription.noteDeleted":
+		if e.complexity.Subscription.NoteDeleted == nil {
+			break
+		}
+
+		return e.complexity.Subscription.NoteDeleted(childComplexity), true
+
+	case "Subscription.noteUpdated":
+		if e.complexity.Subscription.NoteUpdated == nil {
+			break
+		}
+
+		return e.complexity.Subscription.NoteUpdated(childComplexity), true
+
+	case "Subscription.placeHolder":
+		if e.complexity.Subscription.PlaceHolder == nil {
+			break
+		}
+
+		return e.complexity.Subscription.PlaceHolder(childComplexity), true
+
+	case "Subscription.todoAdded":
+		if e.complexity.Subscription.TodoAdded == nil {
+			break
+		}
+
+		return e.complexity.Subscription.TodoAdded(childComplexity), true
+
+	case "Subscription.todoDeleted":
+		if e.complexity.Subscription.TodoDeleted == nil {
+			break
+		}
+
+		return e.complexity.Subscription.TodoDeleted(childComplexity), true
+
+	case "Subscription.todoUpdated":
+		if e.complexity.Subscription.TodoUpdated == nil {
+			break
+		}
+
+		return e.complexity.Subscription.TodoUpdated(childComplexity), true
+
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
 			break
@@ -353,6 +423,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -412,7 +499,12 @@ extend type Mutation {
     updateNote(input: UpdateNoteInput!): Note
     deleteNote(input: DeleteNoteInput): DeleteNotePayload
 }
-`, BuiltIn: false},
+
+extend type Subscription {
+    noteAdded: Note
+    noteUpdated: Note
+    noteDeleted: DeleteNotePayload
+}`, BuiltIn: false},
 	{Name: "internal/graphql/schema.graphql", Input: `schema {
   query: Query,
   mutation: Mutation
@@ -424,6 +516,10 @@ type Query {
 
 type Mutation {
     placeHolder : Boolean
+}
+
+type Subscription {
+  placeHolder : Boolean
 }
 
 interface Node {
@@ -476,7 +572,11 @@ extend type Mutation {
     toggleTodo(input: ToggleTodoInput!): Todo
 }
 
-`, BuiltIn: false},
+extend type Subscription {
+    todoAdded: Todo
+    todoUpdated: Todo
+    todoDeleted: DeleteTodoPayload
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -1395,6 +1495,300 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscription_placeHolder(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().PlaceHolder(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *bool)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_noteAdded(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().NoteAdded(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *gmodel.Note)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋnotesᚑappᚋinternalᚋgraphqlᚋgmodelᚐNote(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_noteUpdated(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().NoteUpdated(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *gmodel.Note)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalONote2ᚖgithubᚗcomᚋweidonglianᚋnotesᚑappᚋinternalᚋgraphqlᚋgmodelᚐNote(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_noteDeleted(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().NoteDeleted(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *gmodel.DeleteNotePayload)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalODeleteNotePayload2ᚖgithubᚗcomᚋweidonglianᚋnotesᚑappᚋinternalᚋgraphqlᚋgmodelᚐDeleteNotePayload(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_todoAdded(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().TodoAdded(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *gmodel.Todo)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋnotesᚑappᚋinternalᚋgraphqlᚋgmodelᚐTodo(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_todoUpdated(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().TodoUpdated(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *gmodel.Todo)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalOTodo2ᚖgithubᚗcomᚋweidonglianᚋnotesᚑappᚋinternalᚋgraphqlᚋgmodelᚐTodo(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_todoDeleted(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().TodoDeleted(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *gmodel.DeleteTodoPayload)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalODeleteTodoPayload2ᚖgithubᚗcomᚋweidonglianᚋnotesᚑappᚋinternalᚋgraphqlᚋgmodelᚐDeleteTodoPayload(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
 }
 
 func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.Todo) (ret graphql.Marshaler) {
@@ -3066,6 +3460,38 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "placeHolder":
+		return ec._Subscription_placeHolder(ctx, fields[0])
+	case "noteAdded":
+		return ec._Subscription_noteAdded(ctx, fields[0])
+	case "noteUpdated":
+		return ec._Subscription_noteUpdated(ctx, fields[0])
+	case "noteDeleted":
+		return ec._Subscription_noteDeleted(ctx, fields[0])
+	case "todoAdded":
+		return ec._Subscription_todoAdded(ctx, fields[0])
+	case "todoUpdated":
+		return ec._Subscription_todoUpdated(ctx, fields[0])
+	case "todoDeleted":
+		return ec._Subscription_todoDeleted(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var todoImplementors = []string{"Todo", "Node"}
